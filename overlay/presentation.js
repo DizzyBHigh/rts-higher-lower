@@ -1,17 +1,15 @@
 (() => {
-  const positions = {
-    Center: { x: 0, y: 0, scale: 100 },
-    OffLeft: { x: -45, y: 0, scale: 100 },
-    OffRight: { x: 45, y: 0, scale: 100 }
-  };
-
   function getPanel(extension) {
     if (extension.state.panel) return extension.state.panel;
+    const board = extension.state.layout.board;
     extension.state.panel = RTS.core.panels.create(
       'higher-lower-board',
-      { positions }
+      { positions: { Center: board } }
     );
     RTSHigherLowerBoard.build(extension.state.panel);
+    RTSHigherLowerBoard.applyLayout(
+      extension.state.panel, extension.state.layout
+    );
     return extension.state.panel;
   }
 
@@ -47,11 +45,10 @@
   }
 
   function place(cardNode, target) {
-    const root = target.closest('.hl-board');
-    const rr = root.getBoundingClientRect();
-    const tr = target.getBoundingClientRect();
-    cardNode.style.left = (tr.left - rr.left) + 'px';
-    cardNode.style.top = (tr.top - rr.top) + 'px';
+    cardNode.style.left = target.offsetLeft + 'px';
+    cardNode.style.top = target.offsetTop + 'px';
+    cardNode.style.width = target.offsetWidth + 'px';
+    cardNode.style.height = target.offsetHeight + 'px';
   }
 
   function flip(cardNode) {
@@ -74,7 +71,7 @@
     root.appendChild(node);
     place(node, target);
     node.style.transform = 'rotateY(180deg)';
-    panel.show(panel.runner.getActive() || positions.Center);
+    panel.show(extension.state.layout.board);
     extension.state.currentCardElement = node;
     return Promise.resolve(panel);
   }
@@ -101,7 +98,7 @@
     const node = cardElement(extension, result.card);
     root.appendChild(node);
     place(node, deckTarget);
-    panel.show(panel.runner.getActive() || positions.Center);
+    panel.show(extension.state.layout.board);
 
     await node.animate(
       {
