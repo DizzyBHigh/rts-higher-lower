@@ -11,6 +11,12 @@
       extension.state.panel = null;
       extension.api.showCard = card => showCard(extension, card);
       extension.api.flipCard = card => flipCard(extension, card);
+      extension.api.moveCard = position => moveCard(extension, position);
+
+      RTS.core.events?.on(
+        'RTS - Overlay - Extension Command',
+        message => handleCommand(extension, message)
+      );
     }
   };
 
@@ -72,9 +78,7 @@
     const cardElement = setCard(extension, panel, card);
     cardElement.style.transform = 'rotateY(0deg)';
     panel.show(panel.runner.getActive() || {
-      x: 0,
-      y: 0,
-      scale: 100
+      x: 0, y: 0, scale: 100
     });
 
     cardElement.animate(
@@ -90,6 +94,24 @@
     );
 
     return panel;
+  }
+
+  function moveCard(extension, position) {
+    const panel = getPanel(extension);
+    const target = panel.runner.resolve(position, position);
+    panel.show(panel.runner.getActive() || target);
+    return panel;
+  }
+
+  function handleCommand(extension, message) {
+    const args = message?.data?.args || message?.args || {};
+    const command = args.rtsOverlayCommand || args.command;
+    const rawData = args.rtsOverlayData || args.data;
+    const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+
+    if (command === 'show') showCard(extension, data);
+    if (command === 'flip') flipCard(extension, data);
+    if (command === 'move') moveCard(extension, data?.position || data);
   }
 
   RTS.core.extensions.registerSource(manifest.id, source);
