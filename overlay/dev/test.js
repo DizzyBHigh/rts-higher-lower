@@ -55,7 +55,7 @@
       : next.elements[target.value];
     Object.assign(item, patch);
     layout = extension.api.setLayout(next);
-    saveLayout();
+    saveConfiguration();
   };
 
   const render = () => {
@@ -81,10 +81,21 @@
     editor.appendChild(fields);
   };
 
-  const saveLayout = () => localStorage.setItem(
-    'rts-higher-lower-layout',
-    JSON.stringify(layout)
-  );
+  const saveConfiguration = () => {
+    const configuration = JSON.parse(
+      JSON.stringify(RTSOverlayConfiguration.current || {
+        version: 1,
+        overlay: {},
+        extensions: {}
+      })
+    );
+    configuration.extensions = configuration.extensions || {};
+    const value = configuration.extensions['rts-higher-lower'] || {};
+    value.version = 1;
+    value.layout = layout;
+    configuration.extensions['rts-higher-lower'] = value;
+    RTSOverlayConfiguration.saveConfiguration(configuration);
+  };
 
   target.addEventListener('change', render);
 
@@ -98,22 +109,13 @@
       if (action === 'reset') {
         layout = RTSHigherLowerLayout.create();
         layout = extension.api.setLayout(layout);
-        localStorage.removeItem('rts-higher-lower-layout');
+        saveConfiguration();
         render();
       }
     } catch (error) {
       document.getElementById('log').textContent = error.message;
     }
   });
-
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem('rts-higher-lower-layout') || 'null'
-    );
-    if (saved) layout = extension.api.setLayout(saved);
-  } catch (error) {
-    document.getElementById('log').textContent = error.message;
-  }
 
   render();
 })();
