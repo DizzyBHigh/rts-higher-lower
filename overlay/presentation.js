@@ -117,6 +117,13 @@
     return panel;
   }
 
+  function resetCards(extension) {
+    removeNode(extension.state.previousCardElement);
+    removeNode(extension.state.currentCardElement);
+    extension.state.previousCardElement = null;
+    extension.state.currentCardElement = null;
+  }
+
   function moveCard(extension, position) {
     const panel = getPanel(extension);
     const target = panel.runner.resolve(position, position);
@@ -134,6 +141,7 @@
     getPanel,
     showCard: show,
     presentDraw,
+    resetCards,
     flipCard: (extension, card) =>
       show(extension, card).then(() => flip(extension.state.currentCardElement)),
     moveCard
