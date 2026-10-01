@@ -18,7 +18,7 @@
 }
 
 .hl-board__round,
-.hl-board__side,
+.hl-board__players-panel,
 .hl-board__cards,
 .hl-board__totals {
   position: absolute;
@@ -32,7 +32,7 @@
   letter-spacing: 2px;
 }
 
-.hl-board__side {
+.hl-board__players-panel {
   overflow: hidden;
 }
 
@@ -49,10 +49,14 @@
 }
 
 .hl-board__player {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  font-size: 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(48, 41, 31, 0.08);
+  font-size: 20px;
   line-height: 1.25;
 }
 
@@ -140,4 +144,32 @@
 
 .hl-layout-editor select {
   min-width: 150px;
+}
+
+.hl-board__player-vote {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.hl-board__player-vote--higher {
+  color: #0384CB;
+}
+
+.hl-board__player-vote--lower {
+  color: #b44;
+}
+
+.hl-board__player-vote--waiting {
+  color: #777;
+}
+
+.hl-board__player-bet {
+  min-width: 70px;
+  text-align: right;
 }
