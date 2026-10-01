@@ -7,11 +7,20 @@
 
   const source = {
     init(extension) {
+      extension.state.game = RTS.core.higherLowerGame.create();
       extension.state.card = null;
       extension.state.panel = null;
-      extension.api.showCard = card => showCard(extension, card);
-      extension.api.flipCard = card => flipCard(extension, card);
-      extension.api.moveCard = position => moveCard(extension, position);
+
+      extension.api.startGame = rounds =>
+        extension.state.game.start(rounds);
+
+      extension.api.drawCard = () => drawCard(extension);
+      extension.api.showCard = card =>
+        RTSHigherLowerPresentation.showCard(extension, card);
+      extension.api.flipCard = card =>
+        RTSHigherLowerPresentation.flipCard(extension, card);
+      extension.api.moveCard = position =>
+        RTSHigherLowerPresentation.moveCard(extension, position);
 
       RTS.core.events?.on(
         'RTS - Overlay - Extension Command',
@@ -20,89 +29,31 @@
     }
   };
 
-  function getPanel(extension) {
-    if (extension.state.panel) return extension.state.panel;
+  async function drawCard(extension) {
+    const result = extension.state.game.draw();
+    extension.state.card = result.card || null;
 
-    const panel = RTS.core.panels.create('higher-lower-card', {
-      positions: {
-        Center: { x: 0, y: 0, scale: 100 },
-        OffLeft: { x: -45, y: 0, scale: 100 },
-        OffRight: { x: 45, y: 0, scale: 100 }
-      }
-    });
+    if (!result.card)
+      return result;
 
-    extension.state.panel = panel;
-    return panel;
-  }
-
-  function cardCode(card) {
-    const ranks = { Jack: 'J', Queen: 'Q', King: 'K', Ace: 'A' };
-    const suits = { Clubs: 'C', Diamonds: 'D', Hearts: 'H', Spades: 'S' };
-    return (ranks[card?.rank] || card?.rank || '') +
-      (suits[card?.suit] || card?.suit || '');
-  }
-
-  function assetPath(extension, deck, file) {
-    return new URL('../assets/images/card Images/' + deck + '/' + file,
-      extension.options.baseUrl + '/').href;
-  }
-
-  function setCard(extension, panel, card) {
-    const face = assetPath(extension, 'Deck2', cardCode(card) + '.png');
-    const back = assetPath(extension, 'Deck1', 'green_back.png');
-
-    panel.setContent(
-      '<div class="hl-card">' +
-      '<img class="hl-card__face" src="' + face + '" alt="">' +
-      '<img class="hl-card__back" src="' + back + '" alt="">' +
-      '</div>'
+    await RTSHigherLowerPresentation.flipCard(
+      extension,
+      result.card
     );
 
-    return panel.element.querySelector('.hl-card');
+    reportResult(result);
+    return result;
   }
 
-  function showCard(extension, card) {
-    const panel = getPanel(extension);
-    extension.state.card = card;
-    const cardElement = setCard(extension, panel, card);
-
-    cardElement.style.transform = 'rotateY(180deg)';
-    panel.show({ x: 0, y: 0, scale: 100 });
-    return panel;
-  }
-
-  function flipCard(extension, card) {
-    const panel = getPanel(extension);
-    extension.state.card = card;
-
-    const cardElement = setCard(extension, panel, card);
-    cardElement.style.transform = 'rotateY(0deg)';
-    panel.show(panel.runner.getActive() || {
-      x: 0, y: 0, scale: 100
-    });
-
-    cardElement.animate(
-      [
-        { transform: 'rotateY(0deg)' },
-        { transform: 'rotateY(180deg)' }
-      ],
+  function reportResult(result) {
+    RTSOverlaySocket.requestAction(
+      'RTS - Overlay - Extension Result',
       {
-        duration: 600,
-        easing: 'ease-in-out',
-        fill: 'forwards'
+        rtsOverlayExtension: manifest.id,
+        rtsOverlayEvent: 'higher-lower-result',
+        rtsOverlayData: JSON.stringify(result)
       }
     );
-
-    return panel;
-  }
-
-  function moveCard(extension, position) {
-    const panel = getPanel(extension);
-    const target = panel.runner.resolve(position, position);
-    const from = panel.runner.getActive() || target;
-    panel.show(from);
-    panel.runner.transition(from, target, 500, 'ease-in-out');
-    return panel;
   }
 
   function handleCommand(extension, message) {
@@ -111,11 +62,24 @@
 
     const command = args.rtsOverlayCommand || args.command;
     const rawData = args.rtsOverlayData || args.data;
-    const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+    const data = typeof rawData === 'string'
+      ? JSON.parse(rawData)
+      : rawData;
 
-    if (command === 'show') showCard(extension, data);
-    if (command === 'flip') flipCard(extension, data);
-    if (command === 'move') moveCard(extension, data?.position || data);
+    if (command === 'start')
+      extension.api.startGame(data?.rounds ?? data ?? 10);
+
+    if (command === 'draw')
+      extension.api.drawCard();
+
+    if (command === 'show')
+      extension.api.showCard(data);
+
+    if (command === 'flip')
+      extension.api.flipCard(data);
+
+    if (command === 'move')
+      extension.api.moveCard(data?.position || data);
   }
 
   RTS.core.extensions.registerSource(manifest.id, source);
