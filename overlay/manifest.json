@@ -12,6 +12,7 @@
       "presentation.js",
       "configuration.js",
       "persistence.js",
+      "recovery.js",
       "settings.js",
       "extension.js"
     ],
