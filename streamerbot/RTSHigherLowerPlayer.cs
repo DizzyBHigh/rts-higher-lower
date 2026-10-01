@@ -132,31 +132,27 @@ public class CPHInline
         return null;
     }
 
-    private void Increment(string id, Platform platform, string name, int amount)\n    {\n        int value = GetUserVar(id, platform, name);\n        SetUserVar(id, platform, name, value + amount);\n    }\n\n    private int GetUserVar(string id, Platform platform, string name)\n    {\n        switch (platform)\n        {\n            case Platform.YouTube:\n                return CPH.GetYouTubeUserVarById<int?>(id, name, true) ?? 0;\n            case Platform.Kick:\n                return CPH.GetKickUserVarById<int?>(id, name, true) ?? 0;\n            default:\n                return CPH.GetTwitchUserVarById<int?>(id, name, true) ?? 0;\n        }\n    }\n\n    private void SetUserVar(string id, Platform platform, string name, int value)\n    {\n        switch (platform)\n        {\n            case Platform.YouTube:\n                CPH.SetYouTubeUserVarById(id, name, value, true);\n                break;\n            case Platform.Kick:\n                CPH.SetKickUserVarById(id, name, value, true);\n                break;\n            default:\n                CPH.SetTwitchUserVarById(id, name, value, true);\n                break;\n        }\n    }\n\n    private int GetPoints(string id, Platform platform)
+    private void Increment(string id, Platform platform, string name, int amount)
     {
         switch (platform)
         {
             case Platform.YouTube:
-                return CPH.GetYouTubeUserVarById<int?>(id, "points", true) ?? 0;
-            case Platform.Kick:
-                return CPH.GetKickUserVarById<int?>(id, "points", true) ?? 0;
-            default:
-                return CPH.GetTwitchUserVarById<int?>(id, "points", true) ?? 0;
-        }
-    }
-
-    private void SetPoints(string id, Platform platform, int value)
-    {
-        switch (platform)
-        {
-            case Platform.YouTube:
-                CPH.SetYouTubeUserVarById(id, "points", value, true);
+                CPH.SetYouTubeUserVarById(
+                    id, name,
+                    (CPH.GetYouTubeUserVarById<int?>(id, name, true) ?? 0) + amount,
+                    true);
                 break;
             case Platform.Kick:
-                CPH.SetKickUserVarById(id, "points", value, true);
+                CPH.SetKickUserVarById(
+                    id, name,
+                    (CPH.GetKickUserVarById<int?>(id, name, true) ?? 0) + amount,
+                    true);
                 break;
             default:
-                CPH.SetTwitchUserVarById(id, "points", value, true);
+                CPH.SetTwitchUserVarById(
+                    id, name,
+                    (CPH.GetTwitchUserVarById<int?>(id, name, true) ?? 0) + amount,
+                    true);
                 break;
         }
     }
