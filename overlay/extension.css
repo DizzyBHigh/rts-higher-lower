@@ -1,6 +1,6 @@
-.rts-panel[data-panel-id="higher-lower-card"] {
-  width: 320px;
-  height: 448px;
+.rts-panel[data-panel-id="higher-lower-board"] {
+  width: 1200px;
+  height: 680px;
   min-height: 0;
   padding: 0;
   border: 0;
@@ -8,11 +8,98 @@
   overflow: visible;
 }
 
-.hl-card {
+.hl-board {
   position: relative;
-  width: 320px;
-  height: 448px;
+  width: 1200px;
+  height: 680px;
+  box-sizing: border-box;
+  padding: 42px 55px;
+  border: 10px solid #6f5a3c;
+  border-radius: 28px;
+  background: #d8c79e;
+  color: #30291f;
+  font-family: sans-serif;
+  overflow: hidden;
+}
+
+.hl-board__round {
+  text-align: center;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.hl-board__side {
+  position: absolute;
+  top: 125px;
+  width: 260px;
+}
+
+.hl-board__lower { left: 55px; }
+.hl-board__higher { right: 55px; }
+
+.hl-board__heading {
+  margin-bottom: 16px;
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.hl-board__players {
+  display: grid;
+  gap: 8px;
+}
+
+.hl-board__player {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+.hl-board__player-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hl-board__player-bet {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.hl-board__cards {
+  position: absolute;
+  left: 355px;
+  top: 170px;
+  width: 490px;
+  height: 290px;
+}
+
+.hl-board__deck,
+.hl-board__previous,
+.hl-board__current {
+  position: absolute;
+  width: 150px;
+  height: 210px;
+}
+
+.hl-board__deck { left: 0; top: 40px; }
+.hl-board__previous { left: 170px; top: 40px; }
+.hl-board__current { left: 340px; top: 40px; }
+
+.hl-board__deck {
+  border-radius: 14px;
+  background: url("../assets/images/card Images/Deck1/green_back.png") center / contain no-repeat;
+}
+
+.hl-card {
+  position: absolute;
+  width: 150px;
+  height: 210px;
   transform-style: preserve-3d;
+  z-index: 2;
 }
 
 .hl-card__face,
@@ -22,10 +109,25 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 20px;
+  border-radius: 14px;
   backface-visibility: hidden;
 }
 
-.hl-card__face {
-  transform: rotateY(180deg);
+.hl-card__face { transform: rotateY(180deg); }
+
+.hl-board__totals {
+  position: absolute;
+  right: 55px;
+  bottom: 42px;
+  display: grid;
+  gap: 8px;
+  text-align: right;
+  font-size: 24px;
+}
+
+.hl-board__totals strong {
+  display: inline-block;
+  min-width: 130px;
+  margin-left: 14px;
+  font-size: 26px;
 }
