@@ -9,6 +9,7 @@
         rounds: Number(options.rounds) || 10,
         players: [],
         roundHistory: [],
+        bonusPot: 0,
         started: false
       };
 
@@ -19,12 +20,14 @@
         state.round = 0;
         state.players = [];
         state.roundHistory = [];
+        state.bonusPot = 0;
         state.started = false;
       };
 
-      const start = (rounds, players = []) => {
+      const start = (rounds, players = [], bonusPot = 0) => {
         reset();
         state.rounds = Math.max(1, Number(rounds) || 10);
+        state.bonusPot = Math.max(0, Number(bonusPot) || 0);
         state.players = Array.isArray(players)
           ? players.map(player => ({ ...player, vote: null, bet: 0 }))
           : [];
@@ -45,6 +48,7 @@
         state.currentCard = saved.currentCard || null;
         state.round = Number(saved.round) || 0;
         state.rounds = Math.max(1, Number(saved.rounds) || 10);
+        state.bonusPot = Math.max(0, Number(saved.bonusPot) || 0);
         state.players = Array.isArray(saved.players)
           ? saved.players.slice()
           : [];
@@ -115,6 +119,7 @@
         deck: state.deck.slice(),
         currentCard: state.currentCard,
         players: state.players.slice(),
+        bonusPot: state.bonusPot,
         roundHistory: state.roundHistory.slice()
       });
 
