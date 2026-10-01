@@ -105,6 +105,8 @@
 
   function handleCommand(extension, message) {
     const args = message?.data?.args || message?.args || {};
+    if (args.rtsOverlayExtension !== manifest.id) return;
+
     const command = args.rtsOverlayCommand || args.command;
     const rawData = args.rtsOverlayData || args.data;
     const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
