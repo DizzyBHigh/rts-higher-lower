@@ -73,7 +73,10 @@
         const next = Number(input.value);
         if (!Number.isFinite(next)) return;
         const nextLayout = RTSHigherLowerLayout.create(layout);
-        nextLayout[target.value === 'board' ? 'board' : 'elements'][target.value === 'board' ? key : target.value][key] = next;
+        if (target.value === 'board')
+          nextLayout.board[key] = next;
+        else
+          nextLayout.elements[target.value][key] = next;
         layout = extension.api.setLayout(nextLayout);
       });
       label.appendChild(input);
