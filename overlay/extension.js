@@ -95,8 +95,10 @@
         rtsOverlayExtension: manifest.id,
         rtsOverlayEvent: 'higher-lower-result',
         rtsOverlayData: JSON.stringify({
-          ...result,
-          board: extension.state.board
+          round: result.round,
+          previousCard: result.previous,
+          currentCard: result.card,
+          result: result.result
         })
       }
     );
