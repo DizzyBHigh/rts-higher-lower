@@ -15,8 +15,10 @@ public class CPHInline
         switch (operation.ToLowerInvariant())
         {
             case "join": return Join();
+            case "start": return Start();
             case "vote": return Vote();
             case "bank": return Bank();
+            case "draw": return Draw();
             case "savegame": return SaveGame();
             case "result": return Result();
             default: return false;
@@ -53,6 +55,46 @@ public class CPHInline
         game["players"] = players;
         Save(configuration);
         return true;
+    }
+
+    private bool Start()
+    {
+        var configuration = ReadConfiguration();
+        var game = GetGame(configuration);
+
+        if (game.Value<bool?>("active") == true)
+            return false;
+
+        if (GetPlayers(game).Count == 0)
+            return false;
+
+        int rounds = configuration["settings"]?.Value<int?>("defaultRounds") ?? 10;
+
+        if (CPH.TryGetArg("rtsHigherLowerRounds", out int requestedRounds))
+            rounds = requestedRounds;
+
+        if (rounds < 1)
+            return false;
+
+        CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
+        CPH.SetArgument("rtsOverlayCommand", "start");
+        CPH.SetArgument("rtsOverlayData", rounds);
+
+        return CPH.RunAction("RTS - Overlay - Extension Command", true);
+    }
+
+    private bool Draw()
+    {
+        var configuration = ReadConfiguration();
+        var game = GetGame(configuration);
+
+        if (game.Value<bool?>("active") != true)
+            return false;
+
+        CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
+        CPH.SetArgument("rtsOverlayCommand", "draw");
+
+        return CPH.RunAction("RTS - Overlay - Extension Command", true);
     }
 
     private bool Vote()
