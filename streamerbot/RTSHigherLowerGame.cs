@@ -168,11 +168,15 @@ public class CPHInline
 
             if (string.IsNullOrWhiteSpace(vote))
             {
-                int pot = player.Value<int?>("pot") ?? 0;
+                int forfeitedPot = player.Value<int?>("pot") ?? 0;
                 var identity = Identity(player);
-                bonusDelta += pot;
-                if (pot > 0)
-                    Increment(identity.id, identity.platform, "pointsLost", pot);
+                bonusDelta += forfeitedPot;
+                if (forfeitedPot > 0)
+                    Increment(
+                        identity.id,
+                        identity.platform,
+                        "pointsLost",
+                        forfeitedPot);
                 players.RemoveAt(i);
                 continue;
             }
