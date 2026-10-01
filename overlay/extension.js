@@ -25,6 +25,7 @@
         const state = extension.state.game.start(rounds);
         RTSHigherLowerPresentation.resetCards(extension);
         updateBoard(extension, { round: 0 });
+        RTSHigherLowerPersistence.save(extension.state.game);
         return state;
       };
 
@@ -68,6 +69,7 @@
 
     updateBoard(extension, { round: result.round });
     await RTSHigherLowerPresentation.presentDraw(extension, result);
+    RTSHigherLowerPersistence.save(extension.state.game);
     reportResult(extension, result);
     return result;
   }
