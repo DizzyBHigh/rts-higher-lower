@@ -1,13 +1,18 @@
 (() => {
-  const Settings = {
-    defaults: { noOfRounds: 10, roundLength: 60000 },
+  const defaults = {
+    settings: {
+      defaultRounds: 10,
+      roundLength: 60000
+    }
+  };
 
+  const Settings = {
     render(host) {
       if (!host || !RTS.core.ui) return null;
 
       const section = RTS.core.ui.section('Game Settings');
       const rounds = RTS.core.ui.number({
-        value: Settings.defaults.noOfRounds,
+        value: defaults.settings.defaultRounds,
         min: 1,
         step: 1
       });
@@ -19,18 +24,41 @@
         className: 'hl-settings-status'
       });
 
+      const apply = configuration => {
+        const value = configuration?.extensions?.['rts-higher-lower'] ||
+          defaults;
+        const gameSettings = value.settings || defaults.settings;
+        rounds.value = Number(gameSettings.defaultRounds) || 10;
+        length.value = Number(gameSettings.roundLength) === 30000
+          ? '30 Seconds'
+          : '1 Minute';
+      };
+
       const save = RTS.core.ui.button('Save Settings', {
         variant: 'blue',
         onClick: () => {
-          const data = {
-            noOfRounds: Math.max(1, Number(rounds.value) || 10),
+          const configuration = JSON.parse(
+            JSON.stringify(RTSOverlayConfiguration.current || {
+              version: 1,
+              overlay: {},
+              extensions: {}
+            })
+          );
+
+          configuration.version = 1;
+          configuration.extensions =
+            configuration.extensions || {};
+          const extension = configuration.extensions['rts-higher-lower'] || {};
+
+          extension.version = 1;
+          extension.settings = {
+            defaultRounds: Math.max(1, Number(rounds.value) || 10),
             roundLength: length.value === '30 Seconds' ? 30000 : 60000
           };
-          RTSOverlaySocket.requestAction('RTS - Higher Lower - Settings', {
-            rtsHigherLowerSettingsOperation: 'save',
-            rtsHigherLowerSettings: JSON.stringify(data)
-          });
+
+          configuration.extensions['rts-higher-lower'] = extension;
           status.textContent = 'Saving...';
+          RTSOverlayConfiguration.saveConfiguration(configuration);
         }
       });
 
@@ -42,21 +70,16 @@
       );
       host.append(section);
 
-      const apply = data => {
-        const value = data || Settings.defaults;
-        rounds.value = Number(value.noOfRounds) || 10;
-        length.value = Number(value.roundLength) === 30000
-          ? '30 Seconds'
-          : '1 Minute';
-      };
-
       RTSOverlaySocket.onEvent(message => {
-        const args = message?.data?.args || message?.args || {};
-        if (args.rtsOverlayExtension !== 'rts-higher-lower') return;
-        if ((args.rtsOverlayCommand || args.command) !== 'settings') return;
+        const eventName =
+          message?.data?.eventName ?? message?.eventName;
+        if (eventName !== 'RTS - Overlay - Configuration') return;
+
+        const raw =
+          message?.data?.args?.rtsOverlayConfiguration ??
+          message?.args?.rtsOverlayConfiguration;
 
         try {
-          const raw = args.rtsOverlayData || args.data;
           apply(typeof raw === 'string' ? JSON.parse(raw) : raw);
           status.textContent = 'Saved.';
         } catch (error) {
@@ -64,11 +87,7 @@
         }
       });
 
-      RTSOverlaySocket.requestAction(
-        'RTS - Higher Lower - Settings',
-        { rtsHigherLowerSettingsOperation: 'get' }
-      );
-
+      apply(RTSOverlayConfiguration.current);
       return { apply };
     }
   };
