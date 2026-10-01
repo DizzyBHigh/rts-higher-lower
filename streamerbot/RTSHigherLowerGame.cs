@@ -83,7 +83,7 @@ public class CPHInline
         return CPH.RunAction("RTS - Overlay - Extension Command", true);
     }
 
-    public bool Draw()
+    private bool Draw()
     {
         var configuration = ReadConfiguration();
         var game = GetGame(configuration);
@@ -164,7 +164,7 @@ public class CPHInline
         return true;
     }
 
-    public bool SaveGame()
+    private bool SaveGame()
     {
         if (!CPH.TryGetArg("rtsHigherLowerGame", out string raw) ||
             string.IsNullOrWhiteSpace(raw))
@@ -188,7 +188,7 @@ public class CPHInline
         }
     }
 
-    public bool Result()
+    private bool Result()
     {
         if (!CPH.TryGetArg("rtsOverlayData", out string raw))
             return false;
