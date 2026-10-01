@@ -16,7 +16,11 @@ public class CPHInline
         {
             var game = JObject.Parse(raw);
             var configuration = ReadConfiguration();
-            configuration["game"] = game;
+
+            configuration["game"] =
+                game.Value<bool?>("active") == true
+                    ? game
+                    : new JObject();
 
             CPH.SetGlobalVar(
                 ConfigurationKey,
