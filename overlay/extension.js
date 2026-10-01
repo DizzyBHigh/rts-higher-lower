@@ -18,6 +18,9 @@
         potTotal: 0
       };
 
+      extension.configure = configuration =>
+        configure(extension, configuration);
+
       extension.api.startGame = rounds => {
         const state = extension.state.game.start(rounds);
         RTSHigherLowerPresentation.resetCards(extension);
@@ -42,6 +45,19 @@
       );
     }
   };
+
+  function configure(extension, configuration) {
+    const value = configuration || {};
+    extension.state.configuration = value;
+    extension.state.layout = RTSHigherLowerLayout.create(value.layout);
+    const panel = RTSHigherLowerPresentation.getPanel(extension);
+    RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+    panel.runner.configure({
+      Center: extension.state.layout.board
+    });
+    panel.show(extension.state.layout.board);
+    RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+  }
 
   async function drawCard(extension) {
     const result = extension.state.game.draw();
