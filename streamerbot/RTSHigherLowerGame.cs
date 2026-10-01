@@ -9,7 +9,20 @@ public class CPHInline
 
     public bool Execute()
     {
-        return true;
+        if (!CPH.TryGetArg("rtsHigherLowerOperation", out string operation))
+            return true;
+
+        switch (operation.ToLowerInvariant())
+        {
+            case "join": return Join();
+            case "start": return StartGame();
+            case "vote": return Vote();
+            case "bank": return Bank();
+            case "draw": return Draw();
+            case "savegame": return SaveGame();
+            case "result": return Result();
+            default: return false;
+        }
     }
 
     public bool Join()
