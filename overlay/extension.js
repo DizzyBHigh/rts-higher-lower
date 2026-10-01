@@ -51,7 +51,7 @@
     const value = configuration || {};
     extension.state.configuration = value;
     extension.state.layout = RTSHigherLowerLayout.create(value.layout);
-    const gameState = RTSHigherLowerRecovery.apply(extension, value);
+    RTSHigherLowerRecovery.apply(extension, value);
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     panel.runner.configure({
