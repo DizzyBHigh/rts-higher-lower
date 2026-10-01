@@ -133,16 +133,14 @@ public class CPHInline
     private JObject Find(JArray players, string id)
     {
         foreach (JObject player in players)
-            if (player.Value<string>("id") == id)
-                return player;
+            if (player.Value<string>("id") == id) return player;
         return null;
     }
 
     private JObject ReadConfiguration()
     {
         var raw = CPH.GetGlobalVar<string>(Key, true);
-        if (string.IsNullOrWhiteSpace(raw))
-            return new JObject();
+        if (string.IsNullOrWhiteSpace(raw)) return new JObject();
         try { return JObject.Parse(raw); }
         catch { return new JObject(); }
     }
@@ -150,8 +148,7 @@ public class CPHInline
     private void Save(JObject configuration)
     {
         CPH.SetArgument("rtsHigherLowerOperation", "save");
-        CPH.SetArgument(
-            "rtsHigherLowerConfiguration",
+        CPH.SetArgument("rtsHigherLowerConfiguration",
             configuration.ToString(Newtonsoft.Json.Formatting.None));
         CPH.RunAction("RTS - Higher Lower - Sync", true);
     }
