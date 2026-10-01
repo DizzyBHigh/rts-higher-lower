@@ -83,18 +83,14 @@
 
   const saveConfiguration = () => {
     const configuration = JSON.parse(
-      JSON.stringify(RTSOverlayConfiguration.current || {
-        version: 1,
-        overlay: {},
-        extensions: {}
+      JSON.stringify(RTSHigherLowerConfiguration.current || {
+        settings: {},
+        layout: {},
+        game: {}
       })
     );
-    configuration.extensions = configuration.extensions || {};
-    const value = configuration.extensions['rts-higher-lower'] || {};
-    value.version = 1;
-    value.layout = layout;
-    configuration.extensions['rts-higher-lower'] = value;
-    RTSOverlayConfiguration.saveConfiguration(configuration);
+    configuration.layout = layout;
+    RTSHigherLowerConfiguration.save(configuration);
   };
 
   target.addEventListener('change', render);
