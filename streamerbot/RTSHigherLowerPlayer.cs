@@ -4,46 +4,46 @@ using Newtonsoft.Json.Linq;
 public class CPHInline
 {
     private const string Key = "rts-higher-lower";
-    private const string Players = "HLG Players";
-    private const string Voted = "HLG Voted";
-    private const string Higher = "HLG Higher";
-    private const string Lower = "HLG Lower";
-    private const string NoVote = "HLG NoVote";
-    private const string Banked = "HLG Banked";
 
     public bool Execute()
     {
         if (!CPH.TryGetArg("rtsHigherLowerOperation", out string operation) ||
-            !CPH.TryGetArg("userId", out string userId))
+            !CPH.TryGetArg("userId", out string id) ||
+            !CPH.TryGetArg("userType", out string type) ||
+            !Enum.TryParse(type, true, out Platform platform))
             return false;
 
         var configuration = ReadConfiguration();
         var game = configuration["game"] as JObject ?? new JObject();
 
         if (operation == "join")
-            return Join(configuration, game, userId);
+            return Join(configuration, game, id, platform);
         if (operation == "vote")
-            return Vote(configuration, game, userId);
+            return Vote(configuration, game, id, platform);
         if (operation == "bank")
-            return Bank(configuration, game, userId);
+            return Bank(configuration, game, id, platform);
 
         return false;
     }
 
-    private bool Join(JObject configuration, JObject game, string id)
+    private bool Join(JObject configuration, JObject game, string id, Platform platform)
     {
         if (game.Value<bool?>("active") == true)
             return false;
 
         var players = game["players"] as JArray ?? new JArray();
-        if (Find(players, id) != null)
+        if (Find(players, id, platform) != null)
             return true;
 
-        var user = CPH.TwitchGetUserInfoById(id);
+        string name = CPH.TryGetArg("userName", out string userName)
+            ? userName
+            : id;
+
         players.Add(new JObject
         {
             ["id"] = id,
-            ["name"] = user.UserName,
+            ["platform"] = platform.ToString().ToLowerInvariant(),
+            ["name"] = name,
             ["vote"] = null,
             ["bet"] = 0,
             ["pot"] = 0
@@ -51,25 +51,20 @@ public class CPHInline
 
         game["players"] = players;
         Save(configuration);
-        CPH.AddUserIdToGroup(id, Platform.Twitch, Players);
-        CPH.SetTwitchUserVarById(id, "hlgPotAmount", 0, true);
-        CPH.SetTwitchUserVarById(id, "hlgBetAmount", 0, true);
-        CPH.RemoveUserIdFromGroup(id, Platform.Twitch, Banked);
         return true;
     }
 
-    private bool Vote(JObject configuration, JObject game, string id)
+    private bool Vote(JObject configuration, JObject game, string id, Platform platform)
     {
         if (game.Value<bool?>("active") != true)
             return false;
 
         var players = game["players"] as JArray ?? new JArray();
-        var player = Find(players, id);
-        if (player == null ||
-            CPH.UserIdInGroup(id, Platform.Twitch, Voted))
+        var player = Find(players, id, platform);
+        if (player == null || player["vote"]?.Type != JTokenType.Null)
             return false;
 
-        int points = CPH.GetTwitchUserVarById<int?>(id, "points", true) ?? 0;
+        int points = GetPoints(id, platform);
         string raw = CPH.TryGetArg("rawInput", out string input)
             ? input.Trim()
             : "";
@@ -84,7 +79,7 @@ public class CPHInline
         {
             if (!int.TryParse(raw, out amount) || amount <= 0 || amount > points)
                 return false;
-            CPH.SetTwitchUserVarById(id, "points", points - amount, true);
+            SetPoints(id, platform, points - amount);
         }
         else if (!string.IsNullOrWhiteSpace(raw) &&
                  (!int.TryParse(raw, out amount) || amount != 0))
@@ -94,47 +89,65 @@ public class CPHInline
 
         player["vote"] = direction;
         player["bet"] = amount;
-        CPH.SetTwitchUserVarById(id, "hlgBetAmount", amount, true);
-        CPH.AddUserIdToGroup(id, Platform.Twitch, Voted);
-        CPH.AddUserIdToGroup(
-            id,
-            Platform.Twitch,
-            direction == "Higher" ? Higher : Lower);
-        CPH.RemoveUserIdFromGroup(id, Platform.Twitch, NoVote);
         Save(configuration);
         return true;
     }
 
-    private bool Bank(JObject configuration, JObject game, string id)
+    private bool Bank(JObject configuration, JObject game, string id, Platform platform)
     {
-        if (game.Value<bool?>("active") != true ||
-            CPH.UserIdInGroup(id, Platform.Twitch, Voted))
+        if (game.Value<bool?>("active") != true)
             return false;
 
         var players = game["players"] as JArray ?? new JArray();
-        var player = Find(players, id);
-        if (player == null)
+        var player = Find(players, id, platform);
+        if (player == null || player["vote"]?.Type != JTokenType.Null)
             return false;
 
-        int pot = CPH.GetTwitchUserVarById<int>(id, "hlgPotAmount", true);
-        int points = CPH.GetTwitchUserVarById<int?>(id, "points", true) ?? 0;
-
-        CPH.SetTwitchUserVarById(id, "points", points + pot, true);
-        CPH.SetTwitchUserVarById(id, "hlgPotAmount", 0, true);
-        CPH.SetTwitchUserVarById(id, "hlgBetAmount", 0, true);
+        int pot = player.Value<int?>("pot") ?? 0;
+        SetPoints(id, platform, GetPoints(id, platform) + pot);
         players.Remove(player);
+        game["players"] = players;
         Save(configuration);
-        CPH.RemoveUserIdFromGroup(id, Platform.Twitch, Players);
-        CPH.RemoveUserIdFromGroup(id, Platform.Twitch, NoVote);
-        CPH.AddUserIdToGroup(id, Platform.Twitch, Banked);
         return true;
     }
 
-    private JObject Find(JArray players, string id)
+    private JObject Find(JArray players, string id, Platform platform)
     {
+        string platformName = platform.ToString().ToLowerInvariant();
         foreach (JObject player in players)
-            if (player.Value<string>("id") == id) return player;
+            if (player.Value<string>("id") == id &&
+                player.Value<string>("platform") == platformName)
+                return player;
         return null;
+    }
+
+    private int GetPoints(string id, Platform platform)
+    {
+        switch (platform)
+        {
+            case Platform.YouTube:
+                return CPH.GetYouTubeUserVarById<int?>(id, "points", true) ?? 0;
+            case Platform.Kick:
+                return CPH.GetKickUserVarById<int?>(id, "points", true) ?? 0;
+            default:
+                return CPH.GetTwitchUserVarById<int?>(id, "points", true) ?? 0;
+        }
+    }
+
+    private void SetPoints(string id, Platform platform, int value)
+    {
+        switch (platform)
+        {
+            case Platform.YouTube:
+                CPH.SetYouTubeUserVarById(id, "points", value, true);
+                break;
+            case Platform.Kick:
+                CPH.SetKickUserVarById(id, "points", value, true);
+                break;
+            default:
+                CPH.SetTwitchUserVarById(id, "points", value, true);
+                break;
+        }
     }
 
     private JObject ReadConfiguration()
@@ -147,6 +160,9 @@ public class CPHInline
     private void Save(JObject configuration)
     {
         CPH.SetArgument("rtsHigherLowerOperation", "save");
-        CPH.SetArgument("rtsHigherLowerConfiguration", configuration.ToString(Newtonsoft.Json.Formatting.None)); CPH.RunAction("RTS - Higher Lower - Sync", true);
+        CPH.SetArgument(
+            "rtsHigherLowerConfiguration",
+            configuration.ToString(Newtonsoft.Json.Formatting.None));
+        CPH.RunAction("RTS - Higher Lower - Sync", true);
     }
 }
