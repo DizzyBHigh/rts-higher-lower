@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "rts-higher-lower",
+  "name": "RTS Higher Lower",
+  "version": "0.1.0",
+  "resources": {
+    "js": [
+      "extension.js"
+    ],
+    "css": [
+      "extension.css"
+    ]
+  }
+}
