@@ -41,14 +41,14 @@
     return rank + suit;
   }
 
-  function assetPath(deck, file) {
-    return '../assets/images/card%20Images/' + deck + '/' +
-      encodeURIComponent(file);
+  function assetPath(extension, deck, file) {
+    return extension.options.baseUrl + '/../assets/images/card%20Images/' +
+      deck + '/' + encodeURIComponent(file);
   }
 
-  function setCard(panel, card) {
-    const face = assetPath('Deck2', cardCode(card) + '.png');
-    const back = assetPath('Deck1', 'green_back.png');
+  function setCard(extension, panel, card) {
+    const face = assetPath(extension, 'Deck2', cardCode(card) + '.png');
+    const back = assetPath(extension, 'Deck1', 'green_back.png');
     panel.setContent(
       '<div class="hl-card">' +
       '<img class="hl-card__face" src="' + face + '" alt="">' +
@@ -60,7 +60,7 @@
   function showCard(extension, card) {
     const panel = getPanel();
     extension.state.card = card;
-    setCard(panel, card);
+    setCard(extension, panel, card);
     panel.show({ x: 0, y: 0, scale: 100, rotateY: 180 });
     return panel;
   }
@@ -73,7 +73,7 @@
     const edge = { x: 0, y: 0, scale: 100, rotateY: 90 };
     const front = { x: 0, y: 0, scale: 100, rotateY: 180 };
 
-    setCard(panel, card);
+    setCard(extension, panel, card);
     panel.show(back);
     runner.transition(back, edge, 300, 'ease-in', () => {
       runner.transition(edge, front, 300, 'ease-out');
