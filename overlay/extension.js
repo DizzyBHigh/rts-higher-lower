@@ -19,7 +19,8 @@
       extension.configure = configuration =>
         configure(extension, configuration);
       extension.api.startGame = rounds => {
-        const state = extension.state.game.start(rounds);
+        const players = extension.state.configuration?.game?.players || [];
+        const state = extension.state.game.start(rounds, players);
         RTSHigherLowerPresentation.resetCards(extension);
         updateBoard(extension, { round: 0 });
         RTSHigherLowerPersistence.save(extension.state.game);
