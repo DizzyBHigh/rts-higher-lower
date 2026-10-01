@@ -36,6 +36,7 @@
   const target = section.querySelector('#hl-layout-target');
   const fields = section.querySelector('.hl-layout-fields');
   let layout = extension.api.getLayout();
+  let locked = false;
 
   const targets = [
     ['board', 'Board'],
@@ -61,6 +62,7 @@
     const keys = target.value === 'board'
       ? ['x', 'y', 'width', 'height', 'scale']
       : ['x', 'y', 'width', 'height'];
+    let ratio = value.width / value.height;
 
     keys.forEach(key => {
       const label = document.createElement('label');
@@ -73,13 +75,42 @@
         const next = Number(input.value);
         if (!Number.isFinite(next)) return;
         const nextLayout = RTSHigherLowerLayout.create(layout);
-        if (target.value === 'board')
-          nextLayout.board[key] = next;
-        else
-          nextLayout.elements[target.value][key] = next;
+        const item = target.value === 'board'
+          ? nextLayout.board
+          : nextLayout.elements[target.value];
+
+        if (key === 'width' || key === 'height') {
+          if (locked && ratio > 0) {
+            if (key === 'width')
+              item.height = Math.round(next / ratio);
+            else
+              item.width = Math.round(next * ratio);
+          }
+          item[key] = next;
+        } else {
+          item[key] = next;
+        }
+
         layout = extension.api.setLayout(nextLayout);
+        if (locked) renderFields();
       });
       label.appendChild(input);
+
+      if (key === 'width' || key === 'height') {
+        const lock = document.createElement('input');
+        lock.type = 'checkbox';
+        lock.title = 'Lock aspect ratio';
+        lock.className = 'hl-layout-lock';
+        lock.checked = locked;
+        lock.addEventListener('change', () => {
+          locked = lock.checked;
+          const item = current();
+          if (item.width > 0 && item.height > 0)
+            ratio = item.width / item.height;
+        });
+        label.appendChild(lock);
+      }
+
       fields.appendChild(label);
     });
   }
