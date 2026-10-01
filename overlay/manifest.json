@@ -4,7 +4,7 @@
   "name": "RTS Higher Lower",
   "version": "0.1.0",
   "resources": {
-    "js": ["deck.js", "game.js", "extension.js"],
+    "js": ["deck.js", "game.js", "presentation.js", "extension.js"],
     "css": ["extension.css"]
   }
 }
