@@ -1,0 +1,63 @@
+(() => {
+  const Configuration = {
+    current: null,
+    listeners: [],
+
+    apply(configuration) {
+      if (!configuration || typeof configuration !== 'object') return false;
+
+      Configuration.current = configuration;
+      const extension = RTS.getExtension('rts-higher-lower');
+
+      if (extension?.configure)
+        extension.configure(configuration);
+
+      Configuration.listeners.forEach(listener => listener(configuration));
+      return true;
+    },
+
+    onChange(listener) {
+      if (typeof listener === 'function')
+        Configuration.listeners.push(listener);
+    },
+
+    request() {
+      return RTSOverlaySocket.requestAction(
+        'RTS - Higher Lower - Sync',
+        { rtsHigherLowerOperation: 'get' }
+      );
+    },
+
+    save(configuration) {
+      Configuration.current = configuration;
+      return RTSOverlaySocket.requestAction(
+        'RTS - Higher Lower - Sync',
+        {
+          rtsHigherLowerOperation: 'save',
+          rtsHigherLowerConfiguration: JSON.stringify(configuration)
+        }
+      );
+    }
+  };
+
+  RTSOverlaySocket.onEvent(message => {
+    const eventName =
+      message?.data?.eventName ?? message?.eventName;
+
+    if (eventName !== 'RTS - Higher Lower - Configuration') return;
+
+    const raw =
+      message?.data?.args?.rtsHigherLowerConfiguration ??
+      message?.args?.rtsHigherLowerConfiguration;
+
+    try {
+      Configuration.apply(
+        typeof raw === 'string' ? JSON.parse(raw) : raw
+      );
+    } catch (error) {
+      console.warn('RTS Higher Lower: configuration error', error);
+    }
+  });
+
+  window.RTSHigherLowerConfiguration = Configuration;
+})();
