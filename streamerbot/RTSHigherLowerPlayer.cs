@@ -105,6 +105,7 @@ public class CPHInline
 
         int pot = player.Value<int?>("pot") ?? 0;
         SetPoints(id, platform, GetPoints(id, platform) + pot);
+        Increment(id, platform, "pointsBanked", pot);
         players.Remove(player);
         game["players"] = players;
         Save(configuration);
@@ -131,7 +132,7 @@ public class CPHInline
         return null;
     }
 
-    private int GetPoints(string id, Platform platform)
+    private void Increment(string id, Platform platform, string name, int amount)\n    {\n        int value = GetUserVar(id, platform, name);\n        SetUserVar(id, platform, name, value + amount);\n    }\n\n    private int GetUserVar(string id, Platform platform, string name)\n    {\n        switch (platform)\n        {\n            case Platform.YouTube:\n                return CPH.GetYouTubeUserVarById<int?>(id, name, true) ?? 0;\n            case Platform.Kick:\n                return CPH.GetKickUserVarById<int?>(id, name, true) ?? 0;\n            default:\n                return CPH.GetTwitchUserVarById<int?>(id, name, true) ?? 0;\n        }\n    }\n\n    private void SetUserVar(string id, Platform platform, string name, int value)\n    {\n        switch (platform)\n        {\n            case Platform.YouTube:\n                CPH.SetYouTubeUserVarById(id, name, value, true);\n                break;\n            case Platform.Kick:\n                CPH.SetKickUserVarById(id, name, value, true);\n                break;\n            default:\n                CPH.SetTwitchUserVarById(id, name, value, true);\n                break;\n        }\n    }\n\n    private int GetPoints(string id, Platform platform)
     {
         switch (platform)
         {
