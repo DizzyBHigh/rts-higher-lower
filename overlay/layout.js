@@ -2,7 +2,7 @@
   const defaults = {
     board: {
       x: 0, y: 0, scale: 100,
-      width: 1200, height: 680
+      width: 1200, height: 675
     },
     elements: {
       round: { x: 0, y: 42, width: 1200, height: 48 },
