@@ -147,7 +147,6 @@ public class CPHInline
     private void Save(JObject configuration)
     {
         CPH.SetArgument("rtsHigherLowerOperation", "save");
-        CPH.SetArgument("rtsHigherLowerConfiguration", configuration.ToString(Newtonsoft.Json.Formatting.None));
-        CPH.RunAction("RTS - Higher Lower - Sync", true);
+        CPH.SetArgument("rtsHigherLowerConfiguration", configuration.ToString(Newtonsoft.Json.Formatting.None)); CPH.RunAction("RTS - Higher Lower - Sync", true);
     }
 }
