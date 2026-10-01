@@ -7,6 +7,7 @@
         currentCard: null,
         round: 0,
         rounds: Number(options.rounds) || 10,
+        roundHistory: [],
         started: false
       };
 
@@ -15,6 +16,7 @@
         state.previousCard = null;
         state.currentCard = null;
         state.round = 0;
+        state.roundHistory = [];
         state.started = false;
       };
 
@@ -24,6 +26,26 @@
         state.deck = RTS.core.higherLowerDeck.shuffle(
           RTS.core.higherLowerDeck.create()
         );
+        state.started = true;
+        return snapshot();
+      };
+
+      const restore = saved => {
+        reset();
+
+        if (!saved || typeof saved !== 'object' || !saved.active)
+          return snapshot();
+
+        state.deck = Array.isArray(saved.deck) ? saved.deck.slice() : [];
+        state.currentCard = saved.currentCard || null;
+        state.round = Number(saved.round) || 0;
+        state.rounds = Math.max(1, Number(saved.rounds) || 10);
+        state.roundHistory = Array.isArray(saved.roundHistory)
+          ? saved.roundHistory.slice()
+          : [];
+        state.previousCard = state.roundHistory.length
+          ? state.roundHistory[state.roundHistory.length - 1].card || null
+          : null;
         state.started = true;
         return snapshot();
       };
@@ -41,7 +63,12 @@
         state.currentCard = card;
 
         if (!previous)
-          return { type: 'first-card', round: state.round, card, state: snapshot() };
+          return {
+            type: 'first-card',
+            round: state.round,
+            card,
+            state: snapshot()
+          };
 
         const difference = card.value - previous.value;
         const result = difference > 0
@@ -49,6 +76,12 @@
           : difference < 0
             ? 'lower'
             : 'equal';
+
+        state.roundHistory.push({
+          round: state.round,
+          card,
+          result
+        });
 
         return {
           type: 'round-result',
@@ -61,15 +94,15 @@
       };
 
       const snapshot = () => ({
+        active: state.started,
         round: state.round,
         rounds: state.rounds,
-        started: state.started,
-        previousCard: state.previousCard,
+        deck: state.deck.slice(),
         currentCard: state.currentCard,
-        cardsRemaining: state.deck.length
+        roundHistory: state.roundHistory.slice()
       });
 
-      return { start, draw, reset, state: snapshot };
+      return { start, restore, draw, reset, state: snapshot };
     }
   };
 
