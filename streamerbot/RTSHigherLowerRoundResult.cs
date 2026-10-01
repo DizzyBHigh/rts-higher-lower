@@ -1,40 +1,32 @@
-using System;
 using Newtonsoft.Json.Linq;
 
 public class CPHInline
 {
-    private const string ConfigurationKey = "rts-higher-lower";
-    private const string Players = "HLG Players";
     private const string Higher = "HLG Higher";
     private const string Lower = "HLG Lower";
-    private const string Voted = "HLG Voted";
-    private const string NoVote = "HLG NoVote";
-    private const string OverlayCommand = "RTS - Overlay - Extension Command";
+    private const string Players = "HLG Players";
 
     public bool Execute()
     {
-        if (!CPH.TryGetArg("rtsOverlayData", out string raw) ||
-            string.IsNullOrWhiteSpace(raw))
+        if (!CPH.TryGetArg("rtsOverlayData", out string raw))
             return false;
 
         var result = JObject.Parse(raw);
         var outcome = result.Value<string>("result");
-
         if (outcome != "higher" && outcome != "lower" && outcome != "equal")
             return false;
 
-        var configuration = ReadConfiguration();
-        var game = configuration["game"] as JObject ?? new JObject();
+        int bonusDelta = 0;
 
         if (outcome == "higher")
         {
             SettleWinners(Higher);
-            SettleLosers(Lower, game);
+            SettleLosers(Lower, ref bonusDelta);
         }
         else if (outcome == "lower")
         {
             SettleWinners(Lower);
-            SettleLosers(Higher, game);
+            SettleLosers(Higher, ref bonusDelta);
         }
         else
         {
@@ -42,10 +34,9 @@ public class CPHInline
             SettleWinners(Lower);
         }
 
-        EliminateNoVoters();
-        UpdateGameState(game, result);
-        ClearRoundGroups();
-        SaveConfiguration(configuration);
+        CPH.SetArgument("rtsHigherLowerBonusPotDelta", bonusDelta);
+        CPH.SetArgument("rtsOverlayData", raw);
+        CPH.RunAction("RTS - Higher Lower - State", true);
         return true;
     }
 
@@ -62,14 +53,14 @@ public class CPHInline
         }
     }
 
-    private void SettleLosers(string group, JObject game)
+    private void SettleLosers(string group, ref int bonusDelta)
     {
         foreach (var user in CPH.UsersInGroup(group))
         {
             int bet = GetVar(user.Id, "hlgBetAmount");
             int pot = GetVar(user.Id, "hlgPotAmount");
 
-            AddBonusPot(game, bet + pot);
+            bonusDelta += bet + pot;
             SetVar(user.Id, "hlgPotAmount", 0);
             SetVar(user.Id, "hlgBetAmount", 0);
             Increment(user.Id, "wrong");
@@ -78,94 +69,18 @@ public class CPHInline
         }
     }
 
-    private void EliminateNoVoters()
+    private int GetVar(string id, string name)
     {
-        foreach (var user in CPH.UsersInGroup(NoVote))
-        {
-            CPH.RemoveUserIdFromGroup(user.Id, Platform.Twitch, NoVote);
-            CPH.RemoveUserIdFromGroup(user.Id, Platform.Twitch, Players);
-        }
+        return CPH.GetTwitchUserVarById<int>(id, name, true);
     }
 
-    private void UpdateGameState(JObject game, JObject result)
+    private void SetVar(string id, string name, int value)
     {
-        game["round"] = result.Value<int?>("round") ?? game.Value<int?>("round") ?? 0;
-        game["currentCard"] = result["currentCard"] ?? game["currentCard"];
-        game["players"] = ReadPlayers();
-        game["bonusPot"] = game.Value<int?>("bonusPot") ?? 0;
+        CPH.SetTwitchUserVarById(id, name, value, true);
     }
 
-    private JArray ReadPlayers()
+    private void Increment(string id, string name)
     {
-        var players = new JArray();
-
-        foreach (var user in CPH.UsersInGroup(Players))
-        {
-            string vote = CPH.UserIdInGroup(user.Id, Platform.Twitch, Higher)
-                ? "Higher"
-                : CPH.UserIdInGroup(user.Id, Platform.Twitch, Lower)
-                    ? "Lower"
-                    : null;
-
-            players.Add(new JObject
-            {
-                ["id"] = user.Id,
-                ["name"] = user.Username,
-                ["vote"] = vote,
-                ["bet"] = GetVar(user.Id, "hlgBetAmount"),
-                ["pot"] = GetVar(user.Id, "hlgPotAmount")
-            });
-        }
-
-        return players;
-    }
-
-    private void ClearRoundGroups()
-    {
-        foreach (var user in CPH.UsersInGroup(Voted))
-            CPH.RemoveUserIdFromGroup(user.Id, Platform.Twitch, Voted);
-        foreach (var user in CPH.UsersInGroup(Higher))
-            CPH.RemoveUserIdFromGroup(user.Id, Platform.Twitch, Higher);
-        foreach (var user in CPH.UsersInGroup(Lower))
-            CPH.RemoveUserIdFromGroup(user.Id, Platform.Twitch, Lower);
-    }
-
-    private void AddBonusPot(JObject game, int amount)
-    {
-        if (amount <= 0) return;
-        int current = game.Value<int?>("bonusPot") ?? 0;
-        game["bonusPot"] = current + amount;
-    }
-
-    private JObject ReadConfiguration()
-    {
-        var raw = CPH.GetGlobalVar<string>(ConfigurationKey, true);
-        if (string.IsNullOrWhiteSpace(raw)) return new JObject();
-        try { return JObject.Parse(raw); }
-        catch { return new JObject(); }
-    }
-
-    private void SaveConfiguration(JObject configuration)
-    {
-        CPH.SetArgument("rtsHigherLowerOperation", "save");
-        CPH.SetArgument(
-            "rtsHigherLowerConfiguration",
-            configuration.ToString(Newtonsoft.Json.Formatting.None));
-        CPH.RunAction("RTS - Higher Lower - Sync", true);
-    }
-
-    private int GetVar(string userId, string name)
-    {
-        return CPH.GetTwitchUserVarById<int>(userId, name, true);
-    }
-
-    private void SetVar(string userId, string name, int value)
-    {
-        CPH.SetTwitchUserVarById(userId, name, value, true);
-    }
-
-    private void Increment(string userId, string name)
-    {
-        SetVar(userId, name, GetVar(userId, name) + 1);
+        SetVar(id, name, GetVar(id, name) + 1);
     }
 }
