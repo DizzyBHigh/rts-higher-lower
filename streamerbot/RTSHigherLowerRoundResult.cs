@@ -4,7 +4,6 @@ using Newtonsoft.Json.Linq;
 public class CPHInline
 {
     private const string ConfigurationKey = "rts-higher-lower";
-    private const string ConfigurationEvent = "RTS - Higher Lower - Configuration";
     private const string Players = "HLG Players";
     private const string Higher = "HLG Higher";
     private const string Lower = "HLG Lower";
@@ -47,7 +46,6 @@ public class CPHInline
         UpdateGameState(game, result);
         ClearRoundGroups();
         SaveConfiguration(configuration);
-        PushBoard(game);
         return true;
     }
 
@@ -122,34 +120,6 @@ public class CPHInline
         return players;
     }
 
-    private void PushBoard(JObject game)
-    {
-        var players = game["players"] as JArray ?? new JArray();
-        int roundTotal = 0;
-        int potTotal = 0;
-
-        foreach (JObject player in players)
-        {
-            roundTotal += player.Value<int?>("bet") ?? 0;
-            potTotal += player.Value<int?>("pot") ?? 0;
-        }
-
-        var data = new JObject
-        {
-            ["round"] = game.Value<int?>("round") ?? 0,
-            ["players"] = players,
-            ["roundTotal"] = roundTotal,
-            ["potTotal"] = potTotal
-        };
-
-        CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
-        CPH.SetArgument("rtsOverlayCommand", "state");
-        CPH.SetArgument(
-            "rtsOverlayData",
-            data.ToString(Newtonsoft.Json.Formatting.None));
-        CPH.RunAction(OverlayCommand, true);
-    }
-
     private void ClearRoundGroups()
     {
         foreach (var user in CPH.UsersInGroup(Voted))
@@ -177,10 +147,11 @@ public class CPHInline
 
     private void SaveConfiguration(JObject configuration)
     {
-        string raw = configuration.ToString(Newtonsoft.Json.Formatting.None);
-        CPH.SetGlobalVar(ConfigurationKey, raw, true);
-        CPH.SetArgument("rtsHigherLowerConfiguration", raw);
-        CPH.TriggerEvent(ConfigurationEvent, true);
+        CPH.SetArgument("rtsHigherLowerOperation", "save");
+        CPH.SetArgument(
+            "rtsHigherLowerConfiguration",
+            configuration.ToString(Newtonsoft.Json.Formatting.None));
+        CPH.RunAction("RTS - Higher Lower - Sync", true);
     }
 
     private int GetVar(string userId, string name)
