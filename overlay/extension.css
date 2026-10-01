@@ -147,26 +147,50 @@
 }
 
 .hl-board__player-vote {
-  display: grid;
-  place-items: center;
+  position: relative;
+  display: block;
   width: 30px;
   height: 30px;
   border: 2px solid currentColor;
   border-radius: 50%;
-  font-size: 16px;
-  font-weight: 800;
+}
+
+.hl-board__player-vote::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform: translate(-50%, -50%);
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
 }
 
 .hl-board__player-vote--higher {
   color: #0384CB;
 }
 
+.hl-board__player-vote--higher::before {
+  border-bottom: 11px solid currentColor;
+}
+
 .hl-board__player-vote--lower {
   color: #b44;
 }
 
+.hl-board__player-vote--lower::before {
+  border-top: 11px solid currentColor;
+}
+
 .hl-board__player-vote--waiting {
   color: #777;
+}
+
+.hl-board__player-vote--waiting::before {
+  width: 10px;
+  height: 2px;
+  background: currentColor;
 }
 
 .hl-board__player-bet {
