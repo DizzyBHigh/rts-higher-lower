@@ -6,8 +6,7 @@
     },
     elements: {
       round: { x: 0, y: 42, width: 1200, height: 48 },
-      lower: { x: 55, y: 125, width: 260, height: 400 },
-      higher: { x: 885, y: 125, width: 260, height: 400 },
+      players: { x: 55, y: 125, width: 260, height: 400 },
       cards: { x: 355, y: 170, width: 490, height: 290 },
       deck: { x: 0, y: 40, width: 150, height: 210 },
       previous: { x: 170, y: 40, width: 150, height: 210 },
