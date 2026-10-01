@@ -7,6 +7,7 @@
         currentCard: null,
         round: 0,
         rounds: Number(options.rounds) || 10,
+        players: [],
         roundHistory: [],
         started: false
       };
@@ -16,13 +17,17 @@
         state.previousCard = null;
         state.currentCard = null;
         state.round = 0;
+        state.players = [];
         state.roundHistory = [];
         state.started = false;
       };
 
-      const start = rounds => {
+      const start = (rounds, players = []) => {
         reset();
         state.rounds = Math.max(1, Number(rounds) || 10);
+        state.players = Array.isArray(players)
+          ? players.map(player => ({ ...player, vote: null, bet: 0 }))
+          : [];
         state.deck = RTS.core.higherLowerDeck.shuffle(
           RTS.core.higherLowerDeck.create()
         );
@@ -40,6 +45,9 @@
         state.currentCard = saved.currentCard || null;
         state.round = Number(saved.round) || 0;
         state.rounds = Math.max(1, Number(saved.rounds) || 10);
+        state.players = Array.isArray(saved.players)
+          ? saved.players.slice()
+          : [];
         state.roundHistory = Array.isArray(saved.roundHistory)
           ? saved.roundHistory.slice()
           : [];
@@ -106,6 +114,7 @@
         rounds: state.rounds,
         deck: state.deck.slice(),
         currentCard: state.currentCard,
+        players: state.players.slice(),
         roundHistory: state.roundHistory.slice()
       });
 
