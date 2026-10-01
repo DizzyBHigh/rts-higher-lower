@@ -76,6 +76,11 @@ public class CPHInline
             ? input.Trim()
             : "";
         int amount = 0;
+        string direction = CPH.TryGetArg(
+            "rtsHigherLowerVote", out string vote) ? vote : "";
+
+        if (direction != "Higher" && direction != "Lower")
+            return false;
 
         if (points > 0)
         {
@@ -83,11 +88,11 @@ public class CPHInline
                 return false;
             CPH.SetTwitchUserVarById(id, "points", points - amount, true);
         }
-
-        string direction = CPH.TryGetArg(
-            "rtsHigherLowerVote", out string vote) ? vote : "";
-        if (direction != "Higher" && direction != "Lower")
+        else if (!string.IsNullOrWhiteSpace(raw) &&
+                 (!int.TryParse(raw, out amount) || amount != 0))
+        {
             return false;
+        }
 
         player["vote"] = direction;
         player["bet"] = amount;
