@@ -24,7 +24,7 @@
       '<button data-action="state">Show Test State</button>' +
       '<button data-action="start">Start Game</button>' +
       '<button data-action="draw">Draw Card</button>' +
-      '<button data-action="settings">Settings</button><button data-action="reset">Reset Layout</button>' +
+      '<button data-action="reset">Reset Layout</button>' +
     '</div>';
   host.appendChild(section);
 
