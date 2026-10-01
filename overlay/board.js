@@ -19,7 +19,11 @@
     const icon = document.createElement('span');
     icon.className = 'hl-board__player-vote hl-board__player-vote--' +
       (vote || 'waiting');
-    icon.textContent = vote === 'higher' ? 'H' : vote === 'lower' ? 'L' : '-';
+    icon.title = vote === 'higher'
+      ? 'Higher'
+      : vote === 'lower'
+        ? 'Lower'
+        : 'Waiting';
 
     const bet = document.createElement('span');
     bet.className = 'hl-board__player-bet';
