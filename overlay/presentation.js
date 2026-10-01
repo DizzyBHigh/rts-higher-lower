@@ -130,6 +130,7 @@
   }
 
   window.RTSHigherLowerPresentation = {
+    getPanel,
     showCard: show,
     presentDraw,
     flipCard: (extension, card) => show(extension, card).then(() =>
