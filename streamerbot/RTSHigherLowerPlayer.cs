@@ -4,7 +4,6 @@ using Newtonsoft.Json.Linq;
 public class CPHInline
 {
     private const string Key = "rts-higher-lower";
-    private const string EventName = "RTS - Higher Lower - Configuration";
     private const string Players = "HLG Players";
     private const string Voted = "HLG Voted";
     private const string Higher = "HLG Higher";
@@ -14,9 +13,8 @@ public class CPHInline
 
     public bool Execute()
     {
-        if (!CPH.TryGetArg("rtsHigherLowerOperation", out string operation))
-            return false;
-        if (!CPH.TryGetArg("userId", out string userId))
+        if (!CPH.TryGetArg("rtsHigherLowerOperation", out string operation) ||
+            !CPH.TryGetArg("userId", out string userId))
             return false;
 
         var configuration = ReadConfiguration();
@@ -41,10 +39,11 @@ public class CPHInline
         if (Find(players, id) != null)
             return true;
 
+        var user = CPH.TwitchGetUserInfoById(id);
         players.Add(new JObject
         {
             ["id"] = id,
-            ["name"] = name,
+            ["name"] = user.UserName,
             ["vote"] = null,
             ["bet"] = 0,
             ["pot"] = 0
@@ -74,13 +73,13 @@ public class CPHInline
         string raw = CPH.TryGetArg("rawInput", out string input)
             ? input.Trim()
             : "";
-        int amount = 0;
         string direction = CPH.TryGetArg(
             "rtsHigherLowerVote", out string vote) ? vote : "";
 
         if (direction != "Higher" && direction != "Lower")
             return false;
 
+        int amount = 0;
         if (points > 0)
         {
             if (!int.TryParse(raw, out amount) || amount <= 0 || amount > points)
@@ -103,15 +102,10 @@ public class CPHInline
             direction == "Higher" ? Higher : Lower);
         CPH.RemoveUserIdFromGroup(id, Platform.Twitch, NoVote);
         Save(configuration);
-        PushBoard(game);
         return true;
     }
 
-    private bool Bank(
-        JObject configuration,
-        JObject game,
-        string id,
-        string name)
+    private bool Bank(JObject configuration, JObject game, string id)
     {
         if (game.Value<bool?>("active") != true ||
             CPH.UserIdInGroup(id, Platform.Twitch, Voted))
@@ -133,7 +127,6 @@ public class CPHInline
         CPH.RemoveUserIdFromGroup(id, Platform.Twitch, Players);
         CPH.RemoveUserIdFromGroup(id, Platform.Twitch, NoVote);
         CPH.AddUserIdToGroup(id, Platform.Twitch, Banked);
-        PushBoard(game);
         return true;
     }
 
@@ -156,21 +149,10 @@ public class CPHInline
 
     private void Save(JObject configuration)
     {
-        string raw = configuration.ToString(Newtonsoft.Json.Formatting.None);
         CPH.SetArgument("rtsHigherLowerOperation", "save");
-        CPH.SetArgument("rtsHigherLowerConfiguration", raw);
-        CPH.RunAction("RTS - Higher Lower - Sync", true);
-    }
-
-};
-
-        CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
-        CPH.SetArgument("rtsOverlayCommand", "state");
         CPH.SetArgument(
-            "rtsOverlayData",
-            data.ToString(Newtonsoft.Json.Formatting.None));
-        CPH.RunAction(
-            "RTS - Overlay - Extension Command",
-            true);
+            "rtsHigherLowerConfiguration",
+            configuration.ToString(Newtonsoft.Json.Formatting.None));
+        CPH.RunAction("RTS - Higher Lower - Sync", true);
     }
 }
