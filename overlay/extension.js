@@ -65,6 +65,7 @@
       Center: extension.state.layout.board
     });
     panel.show(extension.state.layout.board);
+    RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     return extension.state.layout;
   }
 
