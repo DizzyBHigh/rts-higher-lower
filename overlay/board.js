@@ -15,13 +15,19 @@
     name.className = 'hl-board__player-name';
     name.textContent = player.name || '';
 
+    const vote = String(player.vote || '').toLowerCase();
+    const icon = document.createElement('span');
+    icon.className = 'hl-board__player-vote hl-board__player-vote--' +
+      (vote || 'waiting');
+    icon.textContent = vote === 'higher' ? 'H' : vote === 'lower' ? 'L' : '-';
+
     const bet = document.createElement('span');
     bet.className = 'hl-board__player-bet';
-    bet.textContent = String(player.status || '').toUpperCase() === 'BANK'
-      ? 'BANK'
-      : money(player.bet);
+    bet.textContent = vote
+      ? money(player.bet)
+      : 'Waiting';
 
-    row.append(name, bet);
+    row.append(name, icon, bet);
     return row;
   }
 
@@ -29,18 +35,14 @@
     panel.setContent(
       '<div class="hl-board">' +
         '<div class="hl-board__round"></div>' +
-        '<section class="hl-board__side hl-board__lower">' +
-          '<div class="hl-board__heading">Lower</div>' +
+        '<section class="hl-board__players-panel">' +
+          '<div class="hl-board__heading">Players</div>' +
           '<div class="hl-board__players"></div>' +
         '</section>' +
         '<section class="hl-board__cards">' +
           '<div class="hl-board__deck"></div>' +
           '<div class="hl-board__previous"></div>' +
           '<div class="hl-board__current"></div>' +
-        '</section>' +
-        '<section class="hl-board__side hl-board__higher">' +
-          '<div class="hl-board__heading">Higher</div>' +
-          '<div class="hl-board__players"></div>' +
         '</section>' +
         '<div class="hl-board__totals">' +
           '<div>Round Total <strong class="hl-board__round-total"></strong></div>' +
@@ -84,15 +86,11 @@
     root.querySelector('.hl-board__pot-total').textContent =
       money(data.potTotal);
 
-    const lower = root.querySelector('.hl-board__lower .hl-board__players');
-    const higher = root.querySelector('.hl-board__higher .hl-board__players');
-    lower.replaceChildren();
-    higher.replaceChildren();
+    const list = root.querySelector('.hl-board__players');
+    list.replaceChildren();
 
     players.forEach(player => {
-      const vote = String(player.vote || '').toLowerCase();
-      const target = vote === 'higher' ? higher : vote === 'lower' ? lower : null;
-      if (target) target.appendChild(playerRow(player));
+      list.appendChild(playerRow(player));
     });
 
     return root;
