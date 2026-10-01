@@ -3,12 +3,13 @@ using Newtonsoft.Json.Linq;
 
 public class CPHInline
 {
+    private const string ConfigurationKey = "rts-higher-lower";
+    private const string ConfigurationEvent = "RTS - Higher Lower - Configuration";
     private const string Players = "HLG Players";
     private const string Higher = "HLG Higher";
     private const string Lower = "HLG Lower";
     private const string Voted = "HLG Voted";
     private const string NoVote = "HLG NoVote";
-    private const string BonusPot = "hlgBonusPot";
 
     public bool Execute()
     {
@@ -22,15 +23,18 @@ public class CPHInline
         if (outcome != "higher" && outcome != "lower" && outcome != "equal")
             return false;
 
+        var configuration = ReadConfiguration();
+        var game = configuration["game"] as JObject ?? new JObject();
+
         if (outcome == "higher")
         {
             SettleWinners(Higher);
-            SettleLosers(Lower);
+            SettleLosers(Lower, game);
         }
         else if (outcome == "lower")
         {
             SettleWinners(Lower);
-            SettleLosers(Higher);
+            SettleLosers(Higher, game);
         }
         else
         {
@@ -39,7 +43,9 @@ public class CPHInline
         }
 
         EliminateNoVoters();
+        UpdateGameState(game, result);
         ClearRoundGroups();
+        SaveConfiguration(configuration);
         return true;
     }
 
@@ -56,14 +62,14 @@ public class CPHInline
         }
     }
 
-    private void SettleLosers(string group)
+    private void SettleLosers(string group, JObject game)
     {
         foreach (var user in CPH.UsersInGroup(group))
         {
             int bet = GetVar(user.Id, "hlgBetAmount");
             int pot = GetVar(user.Id, "hlgPotAmount");
 
-            AddBonusPot(bet + pot);
+            AddBonusPot(game, bet + pot);
             SetVar(user.Id, "hlgPotAmount", 0);
             SetVar(user.Id, "hlgBetAmount", 0);
             Increment(user.Id, "wrong");
@@ -82,6 +88,43 @@ public class CPHInline
         }
     }
 
+    private void UpdateGameState(JObject game, JObject result)
+    {
+        game["round"] = result.Value<int?>("round") ?? game.Value<int?>("round") ?? 0;
+        game["currentCard"] = result["currentCard"] ?? game["currentCard"];
+        game["players"] = ReadPlayers();
+        game["bonusPot"] = game.Value<int?>("bonusPot") ?? 0;
+    }
+
+    private JArray ReadPlayers()
+    {
+        var players = new JArray();
+
+        foreach (var user in CPH.UsersInGroup(Players))
+        {
+            string vote = CPH.UserIdInGroup(
+                user.Id, Platform.Twitch, Higher)
+                ? "Higher"
+                : CPH.UserIdInGroup(user.Id, Platform.Twitch, Lower)
+                    ? "Lower"
+                    : null;
+
+            int bet = GetVar(user.Id, "hlgBetAmount");
+            int pot = GetVar(user.Id, "hlgPotAmount");
+
+            players.Add(new JObject
+            {
+                ["id"] = user.Id,
+                ["name"] = user.Username,
+                ["vote"] = vote,
+                ["bet"] = bet,
+                ["pot"] = pot
+            });
+        }
+
+        return players;
+    }
+
     private void ClearRoundGroups()
     {
         foreach (var user in CPH.UsersInGroup(Voted))
@@ -94,13 +137,31 @@ public class CPHInline
             CPH.RemoveUserIdFromGroup(user.Id, Platform.Twitch, Lower);
     }
 
-    private void AddBonusPot(int amount)
+    private void AddBonusPot(JObject game, int amount)
     {
         if (amount <= 0)
             return;
 
-        int current = CPH.GetGlobalVar<int>(BonusPot);
-        CPH.SetGlobalVar(BonusPot, current + amount, true);
+        int current = game.Value<int?>("bonusPot") ?? 0;
+        game["bonusPot"] = current + amount;
+    }
+
+    private JObject ReadConfiguration()
+    {
+        var raw = CPH.GetGlobalVar<string>(ConfigurationKey, true);
+        if (string.IsNullOrWhiteSpace(raw))
+            return new JObject();
+
+        try { return JObject.Parse(raw); }
+        catch { return new JObject(); }
+    }
+
+    private void SaveConfiguration(JObject configuration)
+    {
+        string raw = configuration.ToString(Newtonsoft.Json.Formatting.None);
+        CPH.SetGlobalVar(ConfigurationKey, raw, true);
+        CPH.SetArgument("rtsHigherLowerConfiguration", raw);
+        CPH.TriggerEvent(ConfigurationEvent, true);
     }
 
     private int GetVar(string userId, string name)
