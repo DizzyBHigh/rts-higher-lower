@@ -141,3 +141,20 @@
 .hl-layout-editor select {
   min-width: 150px;
 }
+
+.hl-settings-editor {
+  margin-top: 12px;
+}
+
+.hl-settings-editor .rts-ui-section {
+  margin: 0;
+}
+
+.hl-settings-editor .rts-ui-field {
+  margin-bottom: 8px;
+}
+
+.hl-settings-status {
+  display: block;
+  margin-top: 8px;
+}
