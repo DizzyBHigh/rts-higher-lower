@@ -140,16 +140,14 @@ public class CPHInline
     private JObject ReadConfiguration()
     {
         var raw = CPH.GetGlobalVar<string>(Key, true);
-        if (string.IsNullOrWhiteSpace(raw)) return new JObject();
-        try { return JObject.Parse(raw); }
+        try { return string.IsNullOrWhiteSpace(raw) ? new JObject() : JObject.Parse(raw); }
         catch { return new JObject(); }
     }
 
     private void Save(JObject configuration)
     {
         CPH.SetArgument("rtsHigherLowerOperation", "save");
-        CPH.SetArgument("rtsHigherLowerConfiguration",
-            configuration.ToString(Newtonsoft.Json.Formatting.None));
+        CPH.SetArgument("rtsHigherLowerConfiguration", configuration.ToString(Newtonsoft.Json.Formatting.None));
         CPH.RunAction("RTS - Higher Lower - Sync", true);
     }
 }
