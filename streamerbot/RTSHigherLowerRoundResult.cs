@@ -26,6 +26,14 @@ public class CPHInline
 
             if (string.IsNullOrWhiteSpace(vote))
             {
+                int pot = player.Value<int?>("pot") ?? 0;
+                string id = player.Value<string>("id");
+                Platform platform = ParsePlatform(
+                    player.Value<string>("platform") ?? "twitch");
+
+                bonusDelta += pot;
+                if (pot > 0)
+                    Increment(id, platform, "pointsLost", pot);
                 players.RemoveAt(i);
                 continue;
             }
@@ -59,6 +67,34 @@ public class CPHInline
         game["round"] = result.Value<int?>("round") ?? game.Value<int?>("round") ?? 0;
         game["currentCard"] = result["currentCard"] ?? game["currentCard"];
 
+        int rounds = game.Value<int?>("rounds") ?? 10;
+        if (game.Value<int?>("round") >= rounds)
+        {
+            int bonusPot = game.Value<int?>("bonusPot") ?? 0;
+            int share = players.Count > 0 ? bonusPot / players.Count : 0;
+
+            foreach (JObject player in players)
+            {
+                int pot = player.Value<int?>("pot") ?? 0;
+                string id = player.Value<string>("id");
+                Platform platform = ParsePlatform(
+                    player.Value<string>("platform") ?? "twitch");
+                int payout = pot + share;
+
+                if (payout > 0)
+                    AddPoints(id, platform, payout);
+
+                if (share > 0)
+                    Increment(id, platform, "pointsWon", share);
+
+                Increment(id, platform, "fullSweeps");
+            }
+
+            game["bonusPot"] = players.Count > 0 ? bonusPot % players.Count : bonusPot;
+            game["active"] = false;
+            game["players"] = new JArray();
+        }
+
         CPH.SetArgument("rtsHigherLowerBonusPotDelta", bonusDelta);
         CPH.SetArgument("rtsOverlayData", raw);
         CPH.SetArgument("rtsHigherLowerOperation", "save");
@@ -79,6 +115,12 @@ public class CPHInline
     private void Increment(string id, Platform platform, string name, int amount = 1)
     {
         SetVar(id, platform, name, GetVar(id, platform, name) + amount);
+    }
+
+    private void AddPoints(string id, Platform platform, int amount)
+    {
+        int points = GetVar(id, platform, "points");
+        SetVar(id, platform, "points", points + amount);
     }
 
     private int GetVar(string id, Platform platform, string name)
