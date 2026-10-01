@@ -15,7 +15,14 @@
     const cards = [];
 
     suits.forEach(suit => ranks.forEach(rank => {
-      const code = rank.length > 1 ? rank[0] : rank;
+      const faceRanks = {
+        Jack: 'J',
+        Queen: 'Q',
+        King: 'K',
+        Ace: 'A'
+      };
+      const code = faceRanks[rank] || rank;
+
       cards.push({
         rank,
         suit: suit.name,
@@ -36,8 +43,5 @@
     return cards;
   }
 
-  RTS.core.higherLowerDeck = {
-    create,
-    shuffle
-  };
+  RTS.core.higherLowerDeck = { create, shuffle };
 })();
