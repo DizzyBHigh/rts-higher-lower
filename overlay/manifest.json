@@ -14,7 +14,8 @@
       "extension.js"
     ],
     "css": [
-      "extension.css"
+      "extension.css",
+      "settings.css"
     ],
     "dev": {
       "js": [
