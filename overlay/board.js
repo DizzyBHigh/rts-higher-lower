@@ -51,6 +51,27 @@
     return panel.element.querySelector('.hl-board');
   }
 
+  function applyLayout(panel, layout) {
+    const root = panel.element.querySelector('.hl-board') || build(panel);
+    const board = layout.board;
+    panel.element.style.width = board.width + 'px';
+    panel.element.style.height = board.height + 'px';
+    root.style.width = board.width + 'px';
+    root.style.height = board.height + 'px';
+
+    Object.keys(layout.elements).forEach(name => {
+      const target = root.querySelector('.hl-board__' + name);
+      const value = layout.elements[name];
+      if (!target) return;
+      target.style.left = value.x + 'px';
+      target.style.top = value.y + 'px';
+      target.style.width = value.width + 'px';
+      target.style.height = value.height + 'px';
+    });
+
+    return root;
+  }
+
   function update(panel, state = {}) {
     const data = { ...defaults, ...state };
     const root = panel.element.querySelector('.hl-board') || build(panel);
@@ -58,8 +79,10 @@
 
     root.querySelector('.hl-board__round').textContent =
       'ROUND ' + String(data.round);
-    root.querySelector('.hl-board__round-total').textContent = money(data.roundTotal);
-    root.querySelector('.hl-board__pot-total').textContent = money(data.potTotal);
+    root.querySelector('.hl-board__round-total').textContent =
+      money(data.roundTotal);
+    root.querySelector('.hl-board__pot-total').textContent =
+      money(data.potTotal);
 
     const lower = root.querySelector('.hl-board__lower .hl-board__players');
     const higher = root.querySelector('.hl-board__higher .hl-board__players');
@@ -75,5 +98,5 @@
     return root;
   }
 
-  window.RTSHigherLowerBoard = { build, update };
+  window.RTSHigherLowerBoard = { build, update, applyLayout };
 })();
