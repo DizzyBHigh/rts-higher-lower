@@ -5,6 +5,9 @@
   "version": "0.1.0",
   "resources": {
     "js": ["deck.js", "game.js", "board.js", "presentation.js", "extension.js"],
-    "css": ["extension.css"]
+    "css": ["extension.css"],
+    "dev": {
+      "js": ["dev/test.js"]
+    }
   }
 }
