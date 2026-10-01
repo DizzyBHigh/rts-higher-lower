@@ -8,19 +8,25 @@
   const source = {
     init(extension) {
       extension.state.card = null;
+      extension.state.panel = null;
       extension.api.showCard = card => showCard(extension, card);
       extension.api.flipCard = card => flipCard(extension, card);
     }
   };
 
-  function getPanel() {
-    return RTS.core.panels.create('higher-lower-card', {
+  function getPanel(extension) {
+    if (extension.state.panel) return extension.state.panel;
+
+    const panel = RTS.core.panels.create('higher-lower-card', {
       positions: {
         Center: { x: 0, y: 0, scale: 100 },
         OffLeft: { x: -45, y: 0, scale: 100 },
         OffRight: { x: 45, y: 0, scale: 100 }
       }
     });
+
+    extension.state.panel = panel;
+    return panel;
   }
 
   function cardCode(card) {
@@ -35,38 +41,54 @@
       extension.options.baseUrl + '/').href;
   }
 
-  function setCard(extension, panel, card, back) {
-    const file = back ? 'green_back.png' : cardCode(card) + '.png';
+  function setCard(extension, panel, card) {
+    const face = assetPath(extension, 'Deck2', cardCode(card) + '.png');
+    const back = assetPath(extension, 'Deck1', 'green_back.png');
+
     panel.setContent(
       '<div class="hl-card">' +
-      '<img class="hl-card__image" src="' +
-      assetPath(extension, back ? 'Deck1' : 'Deck2', file) +
-      '" alt="">' +
+      '<img class="hl-card__face" src="' + face + '" alt="">' +
+      '<img class="hl-card__back" src="' + back + '" alt="">' +
       '</div>'
     );
+
+    return panel.element.querySelector('.hl-card');
   }
 
   function showCard(extension, card) {
-    const panel = getPanel();
+    const panel = getPanel(extension);
     extension.state.card = card;
-    setCard(extension, panel, card, false);
-    panel.show({ x: 0, y: 0, scale: 100, rotateY: 180 });
+    const cardElement = setCard(extension, panel, card);
+
+    cardElement.style.transform = 'rotateY(180deg)';
+    panel.show({ x: 0, y: 0, scale: 100 });
     return panel;
   }
 
   function flipCard(extension, card) {
-    const panel = getPanel();
+    const panel = getPanel(extension);
     extension.state.card = card;
-    const back = { x: 0, y: 0, scale: 100, rotateY: 0 };
-    const edge = { x: 0, y: 0, scale: 100, rotateY: 90 };
-    const front = { x: 0, y: 0, scale: 100, rotateY: 180 };
 
-    setCard(extension, panel, card, true);
-    panel.show(back);
-    panel.runner.transition(back, edge, 300, 'ease-in', () => {
-      setCard(extension, panel, card, false);
-      panel.runner.transition(edge, front, 300, 'ease-out');
+    const cardElement = setCard(extension, panel, card);
+    cardElement.style.transform = 'rotateY(0deg)';
+    panel.show(panel.runner.getActive() || {
+      x: 0,
+      y: 0,
+      scale: 100
     });
+
+    cardElement.animate(
+      [
+        { transform: 'rotateY(0deg)' },
+        { transform: 'rotateY(180deg)' }
+      ],
+      {
+        duration: 600,
+        easing: 'ease-in-out',
+        fill: 'forwards'
+      }
+    );
+
     return panel;
   }
 
