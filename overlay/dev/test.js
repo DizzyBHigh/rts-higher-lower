@@ -51,7 +51,6 @@
     Object.assign(item, patch);
     layout = extension.api.setLayout(next);
     saveLayout();
-    render();
   };
 
   const render = () => {
