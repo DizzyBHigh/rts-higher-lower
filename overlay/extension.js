@@ -10,6 +10,7 @@
       extension.state.game = RTS.core.higherLowerGame.create();
       extension.state.card = null;
       extension.state.panel = null;
+      extension.state.layout = RTSHigherLowerLayout.create();
       extension.state.board = {
         round: 0,
         players: [],
@@ -24,6 +25,8 @@
       };
 
       extension.api.updateState = data => updateBoard(extension, data);
+      extension.api.setLayout = layout => setLayout(extension, layout);
+      extension.api.getLayout = () => extension.state.layout;
       extension.api.drawCard = () => drawCard(extension);
       extension.api.showCard = card =>
         RTSHigherLowerPresentation.showCard(extension, card);
@@ -52,6 +55,19 @@
     return result;
   }
 
+  function setLayout(extension, value) {
+    extension.state.layout = RTSHigherLowerLayout.create(
+      RTSHigherLowerLayout.merge(extension.state.layout, value)
+    );
+    const panel = RTSHigherLowerPresentation.getPanel(extension);
+    RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+    panel.runner.configure({
+      Center: extension.state.layout.board
+    });
+    panel.show(extension.state.layout.board);
+    return extension.state.layout;
+  }
+
   function updateBoard(extension, data) {
     extension.state.board = {
       ...extension.state.board,
@@ -59,7 +75,8 @@
     };
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.update(panel, extension.state.board);
-    panel.show(panel.runner.getActive() || { x: 0, y: 0, scale: 100 });
+    RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+    panel.show(extension.state.layout.board);
   }
 
   function reportResult(extension, result) {
@@ -91,6 +108,9 @@
 
     if (command === 'state' || command === 'update')
       extension.api.updateState(data);
+
+    if (command === 'layout')
+      extension.api.setLayout(data);
 
     if (command === 'draw')
       extension.api.drawCard();
