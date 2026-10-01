@@ -99,7 +99,9 @@
   function moveCard(extension, position) {
     const panel = getPanel(extension);
     const target = panel.runner.resolve(position, position);
-    panel.show(panel.runner.getActive() || target);
+    const from = panel.runner.getActive() || target;
+    panel.show(from);
+    panel.runner.transition(from, target, 500, 'ease-in-out');
     return panel;
   }
 
