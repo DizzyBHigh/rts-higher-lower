@@ -5,10 +5,10 @@
   ];
 
   const suits = [
-    { name: 'Hearts', symbol: '♥', code: 'H' },
-    { name: 'Diamonds', symbol: '♦', code: 'D' },
-    { name: 'Clubs', symbol: '♣', code: 'C' },
-    { name: 'Spades', symbol: '♠', code: 'S' }
+    { name: 'Hearts', symbol: '\u2665', code: 'H' },
+    { name: 'Diamonds', symbol: '\u2666', code: 'D' },
+    { name: 'Clubs', symbol: '\u2663', code: 'C' },
+    { name: 'Spades', symbol: '\u2660', code: 'S' }
   ];
 
   function create() {
