@@ -43,8 +43,8 @@
         state.roundHistory = Array.isArray(saved.roundHistory)
           ? saved.roundHistory.slice()
           : [];
-        state.previousCard = state.roundHistory.length
-          ? state.roundHistory[state.roundHistory.length - 1].card || null
+        state.previousCard = state.roundHistory.length > 1
+          ? state.roundHistory[state.roundHistory.length - 2].card || null
           : null;
         state.started = true;
         return snapshot();
@@ -82,6 +82,7 @@
           card,
           result
         });
+        state.started = state.round < state.rounds;
 
         return {
           type: 'round-result',
