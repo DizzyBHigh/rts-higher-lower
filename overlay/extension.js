@@ -127,7 +127,6 @@
 
     if (command === 'start')
       extension.api.startGame(data?.rounds ?? data ?? 10);
-
     if (command === 'state' || command === 'update')
       extension.api.updateState(data);
 
