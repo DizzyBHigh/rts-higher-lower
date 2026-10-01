@@ -4,7 +4,7 @@ public class CPHInline
 {
     private const string Extension = "rts-higher-lower";
     private const string EventName = "higher-lower-result";
-    private const string SettlementAction = "RTS - Higher Lower - Round Result";
+    private const string SettlementAction = "RTS - Higher Lower - Game";
 
     public bool Execute()
     {
@@ -16,6 +16,7 @@ public class CPHInline
             eventName != EventName)
             return false;
 
+        CPH.SetArgument("rtsHigherLowerOperation", "result");
         return CPH.RunAction(SettlementAction, true);
     }
 }
