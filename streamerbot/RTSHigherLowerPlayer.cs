@@ -115,9 +115,19 @@ public class CPHInline
     {
         string platformName = platform.ToString().ToLowerInvariant();
         foreach (JObject player in players)
-            if (player.Value<string>("id") == id &&
-                player.Value<string>("platform") == platformName)
+        {
+            if (player.Value<string>("id") != id)
+                continue;
+
+            string storedPlatform = player.Value<string>("platform");
+            if (storedPlatform == platformName ||
+                (string.IsNullOrWhiteSpace(storedPlatform) &&
+                 platform == Platform.Twitch))
+            {
+                player["platform"] = platformName;
                 return player;
+            }
+        }
         return null;
     }
 
