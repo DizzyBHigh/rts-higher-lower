@@ -23,26 +23,45 @@
     });
   }
 
-  function cardText(card) {
-    return (card?.symbol || '') + (card?.rank || '') +
-      (card?.suit ? ' of ' + card.suit : '');
+  function cardCode(card) {
+    const ranks = {
+      Jack: 'J',
+      Queen: 'Q',
+      King: 'K',
+      Ace: 'A'
+    };
+    const suits = {
+      Clubs: 'C',
+      Diamonds: 'D',
+      Hearts: 'H',
+      Spades: 'S'
+    };
+    const rank = ranks[card?.rank] || card?.rank || '';
+    const suit = suits[card?.suit] || card?.suit || '';
+    return rank + suit;
   }
 
-  function setCard(panel, card, hidden) {
+  function assetPath(deck, file) {
+    return '../assets/images/card%20Images/' + deck + '/' +
+      encodeURIComponent(file);
+  }
+
+  function setCard(panel, card) {
+    const face = assetPath('Deck2', cardCode(card) + '.png');
+    const back = assetPath('Deck1', 'green_back.png');
     panel.setContent(
-      '<div class="hl-card ' + (hidden ? 'hl-card--back' : '') + '">' +
-      '<div class="hl-card__corner">' + (hidden ? '?' : cardText(card)) + '</div>' +
-      '<div class="hl-card__value">' +
-      (hidden ? '?' : (card?.symbol || '') + (card?.rank || '')) +
-      '</div></div>'
+      '<div class="hl-card">' +
+      '<img class="hl-card__face" src="' + face + '" alt="">' +
+      '<img class="hl-card__back" src="' + back + '" alt="">' +
+      '</div>'
     );
   }
 
   function showCard(extension, card) {
     const panel = getPanel();
     extension.state.card = card;
-    setCard(panel, card, false);
-    panel.show({ x: 0, y: 0, scale: 100 });
+    setCard(panel, card);
+    panel.show({ x: 0, y: 0, scale: 100, rotateY: 180 });
     return panel;
   }
 
@@ -50,11 +69,13 @@
     const panel = getPanel();
     extension.state.card = card;
     const runner = panel.runner;
-    const front = { x: 0, y: 0, scale: 100, rotateY: 0 };
+    const back = { x: 0, y: 0, scale: 100, rotateY: 0 };
     const edge = { x: 0, y: 0, scale: 100, rotateY: 90 };
-    panel.show(front);
-    runner.transition(front, edge, 300, 'ease-in', () => {
-      setCard(panel, card, false);
+    const front = { x: 0, y: 0, scale: 100, rotateY: 180 };
+
+    setCard(panel, card);
+    panel.show(back);
+    runner.transition(back, edge, 300, 'ease-in', () => {
       runner.transition(edge, front, 300, 'ease-out');
     });
     return panel;
