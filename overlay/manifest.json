@@ -10,6 +10,7 @@
       "layout.js",
       "board.js",
       "presentation.js",
+      "configuration.js",
       "settings.js",
       "extension.js"
     ],
