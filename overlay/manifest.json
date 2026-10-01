@@ -11,6 +11,7 @@
       "board.js",
       "presentation.js",
       "configuration.js",
+      "persistence.js",
       "settings.js",
       "extension.js"
     ],
