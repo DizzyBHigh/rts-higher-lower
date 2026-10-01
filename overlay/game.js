@@ -89,7 +89,6 @@
           card,
           result
         });
-        state.started = state.round < state.rounds;
 
         return {
           type: 'round-result',
