@@ -9,9 +9,9 @@
       lower: { x: 55, y: 125, width: 260, height: 400 },
       higher: { x: 885, y: 125, width: 260, height: 400 },
       cards: { x: 355, y: 170, width: 490, height: 290 },
-      deck: { x: 355, y: 210, width: 150, height: 210 },
-      previous: { x: 525, y: 210, width: 150, height: 210 },
-      current: { x: 695, y: 210, width: 150, height: 210 },
+      deck: { x: 0, y: 40, width: 150, height: 210 },
+      previous: { x: 170, y: 40, width: 150, height: 210 },
+      current: { x: 340, y: 40, width: 150, height: 210 },
       totals: { x: 845, y: 575, width: 300, height: 65 }
     }
   };
