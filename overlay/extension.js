@@ -51,8 +51,7 @@
     const value = configuration || {};
     extension.state.configuration = value;
     extension.state.layout = RTSHigherLowerLayout.create(value.layout);
-    const gameState = extension.state.game.restore(value.game);
-    extension.state.card = gameState.currentCard || null;
+    const gameState = RTSHigherLowerRecovery.apply(extension, value);
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     panel.runner.configure({
@@ -61,11 +60,6 @@
     panel.show(extension.state.layout.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
 
-    if (gameState.currentCard)
-      RTSHigherLowerPresentation.showCard(
-        extension,
-        gameState.currentCard
-      );
   }
 
   async function drawCard(extension) {
