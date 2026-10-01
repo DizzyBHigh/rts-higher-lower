@@ -1,12 +1,31 @@
+.rts-panel[data-panel-id="higher-lower-card"] {
+  width: 320px;
+  height: 448px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
 .hl-card {
+  position: relative;
   width: 320px;
   height: 448px;
   transform-style: preserve-3d;
 }
 
-.hl-card__image {
-  display: block;
+.hl-card__face,
+.hl-card__back {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
+  border-radius: 20px;
+  backface-visibility: hidden;
+}
+
+.hl-card__face {
+  transform: rotateY(180deg);
 }
