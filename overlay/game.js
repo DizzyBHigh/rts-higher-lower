@@ -62,13 +62,20 @@
         state.previousCard = previous;
         state.currentCard = card;
 
-        if (!previous)
+        if (!previous) {
+          state.roundHistory.push({
+            round: state.round,
+            card,
+            result: 'start'
+          });
+
           return {
             type: 'first-card',
             round: state.round,
             card,
             state: snapshot()
           };
+        }
 
         const difference = card.value - previous.value;
         const result = difference > 0
