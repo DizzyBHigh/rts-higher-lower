@@ -9,23 +9,10 @@ public class CPHInline
 
     public bool Execute()
     {
-        if (!CPH.TryGetArg("rtsHigherLowerOperation", out string operation))
-            return false;
-
-        switch (operation.ToLowerInvariant())
-        {
-            case "join": return Join();
-            case "start": return Start();
-            case "vote": return Vote();
-            case "bank": return Bank();
-            case "draw": return Draw();
-            case "savegame": return SaveGame();
-            case "result": return Result();
-            default: return false;
-        }
+        return true;
     }
 
-    private bool Join()
+    public bool Join()
     {
         if (!ReadUser(out string id, out Platform platform))
             return false;
@@ -57,7 +44,7 @@ public class CPHInline
         return true;
     }
 
-    private bool Start()
+    public bool StartGame()
     {
         var configuration = ReadConfiguration();
         var game = GetGame(configuration);
@@ -83,7 +70,7 @@ public class CPHInline
         return CPH.RunAction("RTS - Overlay - Extension Command", true);
     }
 
-    private bool Draw()
+    public bool Draw()
     {
         var configuration = ReadConfiguration();
         var game = GetGame(configuration);
@@ -97,7 +84,7 @@ public class CPHInline
         return CPH.RunAction("RTS - Overlay - Extension Command", true);
     }
 
-    private bool Vote()
+    public bool Vote()
     {
         if (!ReadUser(out string id, out Platform platform))
             return false;
@@ -140,7 +127,7 @@ public class CPHInline
         return true;
     }
 
-    private bool Bank()
+    public bool Bank()
     {
         if (!ReadUser(out string id, out Platform platform))
             return false;
@@ -164,7 +151,7 @@ public class CPHInline
         return true;
     }
 
-    private bool SaveGame()
+    public bool SaveGame()
     {
         if (!CPH.TryGetArg("rtsHigherLowerGame", out string raw) ||
             string.IsNullOrWhiteSpace(raw))
@@ -188,7 +175,7 @@ public class CPHInline
         }
     }
 
-    private bool Result()
+    public bool Result()
     {
         if (!CPH.TryGetArg("rtsOverlayData", out string raw))
             return false;
