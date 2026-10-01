@@ -16,24 +16,23 @@ public class CPHInline
     {
         if (!CPH.TryGetArg("rtsHigherLowerOperation", out string operation))
             return false;
-        if (!CPH.TryGetArg("userId", out string userId) ||
-            !CPH.TryGetArg("user", out string userName))
+        if (!CPH.TryGetArg("userId", out string userId))
             return false;
 
         var configuration = ReadConfiguration();
         var game = configuration["game"] as JObject ?? new JObject();
 
         if (operation == "join")
-            return Join(configuration, game, userId, userName);
+            return Join(configuration, game, userId);
         if (operation == "vote")
-            return Vote(configuration, game, userId, userName);
+            return Vote(configuration, game, userId);
         if (operation == "bank")
-            return Bank(configuration, game, userId, userName);
+            return Bank(configuration, game, userId);
 
         return false;
     }
 
-    private bool Join(JObject configuration, JObject game, string id, string name)
+    private bool Join(JObject configuration, JObject game, string id)
     {
         if (game.Value<bool?>("active") == true)
             return false;
@@ -60,7 +59,7 @@ public class CPHInline
         return true;
     }
 
-    private bool Vote(JObject configuration, JObject game, string id, string name)
+    private bool Vote(JObject configuration, JObject game, string id)
     {
         if (game.Value<bool?>("active") != true)
             return false;
@@ -158,18 +157,12 @@ public class CPHInline
     private void Save(JObject configuration)
     {
         string raw = configuration.ToString(Newtonsoft.Json.Formatting.None);
-        CPH.SetGlobalVar(Key, raw, true);
+        CPH.SetArgument("rtsHigherLowerOperation", "save");
         CPH.SetArgument("rtsHigherLowerConfiguration", raw);
-        CPH.TriggerEvent(EventName, true);
+        CPH.RunAction("RTS - Higher Lower - Sync", true);
     }
 
-    private void PushBoard(JObject game)
-    {
-        var data = new JObject
-        {
-            ["round"] = game.Value<int?>("round") ?? 0,
-            ["players"] = game["players"] ?? new JArray()
-        };
+};
 
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "state");
