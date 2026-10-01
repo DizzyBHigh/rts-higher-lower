@@ -10,10 +10,20 @@
       extension.state.game = RTS.core.higherLowerGame.create();
       extension.state.card = null;
       extension.state.panel = null;
+      extension.state.board = {
+        round: 0,
+        players: [],
+        roundTotal: 0,
+        potTotal: 0
+      };
 
-      extension.api.startGame = rounds =>
-        extension.state.game.start(rounds);
+      extension.api.startGame = rounds => {
+        const state = extension.state.game.start(rounds);
+        updateBoard(extension, { round: 0 });
+        return state;
+      };
 
+      extension.api.updateState = data => updateBoard(extension, data);
       extension.api.drawCard = () => drawCard(extension);
       extension.api.showCard = card =>
         RTSHigherLowerPresentation.showCard(extension, card);
@@ -36,22 +46,32 @@
     if (!result.card)
       return result;
 
-    await RTSHigherLowerPresentation.flipCard(
-      extension,
-      result.card
-    );
-
-    reportResult(result);
+    updateBoard(extension, { round: result.round });
+    await RTSHigherLowerPresentation.presentDraw(extension, result);
+    reportResult(extension, result);
     return result;
   }
 
-  function reportResult(result) {
+  function updateBoard(extension, data) {
+    extension.state.board = {
+      ...extension.state.board,
+      ...(data || {})
+    };
+    const panel = RTSHigherLowerPresentation.getPanel(extension);
+    RTSHigherLowerBoard.update(panel, extension.state.board);
+    panel.show(panel.runner.getActive() || { x: 0, y: 0, scale: 100 });
+  }
+
+  function reportResult(extension, result) {
     RTSOverlaySocket.requestAction(
       'RTS - Overlay - Extension Result',
       {
         rtsOverlayExtension: manifest.id,
         rtsOverlayEvent: 'higher-lower-result',
-        rtsOverlayData: JSON.stringify(result)
+        rtsOverlayData: JSON.stringify({
+          ...result,
+          board: extension.state.board
+        })
       }
     );
   }
@@ -68,6 +88,9 @@
 
     if (command === 'start')
       extension.api.startGame(data?.rounds ?? data ?? 10);
+
+    if (command === 'state' || command === 'update')
+      extension.api.updateState(data);
 
     if (command === 'draw')
       extension.api.drawCard();
