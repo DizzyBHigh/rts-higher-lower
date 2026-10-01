@@ -60,6 +60,5 @@
     return panel;
   }
 
-  RTS.core.extensions.registerManifest(manifest);
   RTS.core.extensions.registerSource(manifest.id, source);
 })();
