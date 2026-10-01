@@ -44,11 +44,23 @@
     return root.querySelector('.hl-board__' + name);
   }
 
+  function targetRect(root, target) {
+    const rr = root.getBoundingClientRect();
+    const tr = target.getBoundingClientRect();
+    return {
+      left: tr.left - rr.left,
+      top: tr.top - rr.top,
+      width: tr.width,
+      height: tr.height
+    };
+  }
+
   function place(cardNode, target) {
-    cardNode.style.left = target.offsetLeft + 'px';
-    cardNode.style.top = target.offsetTop + 'px';
-    cardNode.style.width = target.offsetWidth + 'px';
-    cardNode.style.height = target.offsetHeight + 'px';
+    const value = targetRect(target.closest('.hl-board'), target);
+    cardNode.style.left = value.left + 'px';
+    cardNode.style.top = value.top + 'px';
+    cardNode.style.width = value.width + 'px';
+    cardNode.style.height = value.height + 'px';
   }
 
   function flip(cardNode) {
@@ -86,10 +98,11 @@
 
     if (old) {
       place(old, currentTarget);
+      const previous = targetRect(root, previousTarget);
       await old.animate(
         {
-          left: previousTarget.offsetLeft + 'px',
-          top: previousTarget.offsetTop + 'px'
+          left: previous.left + 'px',
+          top: previous.top + 'px'
         },
         { duration: 500, easing: 'ease-in-out', fill: 'forwards' }
       ).finished;
@@ -100,10 +113,11 @@
     place(node, deckTarget);
     panel.show(extension.state.layout.board);
 
+    const current = targetRect(root, currentTarget);
     await node.animate(
       {
-        left: currentTarget.offsetLeft + 'px',
-        top: currentTarget.offsetTop + 'px'
+        left: current.left + 'px',
+        top: current.top + 'px'
       },
       { duration: 500, easing: 'ease-in-out', fill: 'forwards' }
     ).finished;
