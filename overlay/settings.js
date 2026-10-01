@@ -25,8 +25,7 @@
       });
 
       const apply = configuration => {
-        const value = configuration?.extensions?.['rts-higher-lower'] ||
-          defaults;
+        const value = configuration || defaults;
         const gameSettings = value.settings || defaults.settings;
         rounds.value = Number(gameSettings.defaultRounds) || 10;
         length.value = Number(gameSettings.roundLength) === 30000
@@ -38,27 +37,16 @@
         variant: 'blue',
         onClick: () => {
           const configuration = JSON.parse(
-            JSON.stringify(RTSOverlayConfiguration.current || {
-              version: 1,
-              overlay: {},
-              extensions: {}
-            })
+            JSON.stringify(RTSHigherLowerConfiguration.current || defaults)
           );
 
-          configuration.version = 1;
-          configuration.extensions =
-            configuration.extensions || {};
-          const extension = configuration.extensions['rts-higher-lower'] || {};
-
-          extension.version = 1;
-          extension.settings = {
+          configuration.settings = {
             defaultRounds: Math.max(1, Number(rounds.value) || 10),
             roundLength: length.value === '30 Seconds' ? 30000 : 60000
           };
 
-          configuration.extensions['rts-higher-lower'] = extension;
           status.textContent = 'Saving...';
-          RTSOverlayConfiguration.saveConfiguration(configuration);
+          RTSHigherLowerConfiguration.save(configuration);
         }
       });
 
@@ -70,24 +58,13 @@
       );
       host.append(section);
 
-      RTSOverlaySocket.onEvent(message => {
-        const eventName =
-          message?.data?.eventName ?? message?.eventName;
-        if (eventName !== 'RTS - Overlay - Configuration') return;
-
-        const raw =
-          message?.data?.args?.rtsOverlayConfiguration ??
-          message?.args?.rtsOverlayConfiguration;
-
-        try {
-          apply(typeof raw === 'string' ? JSON.parse(raw) : raw);
-          status.textContent = 'Saved.';
-        } catch (error) {
-          status.textContent = error.message;
-        }
+      RTSHigherLowerConfiguration.onChange(configuration => {
+        apply(configuration);
+        status.textContent = 'Saved.';
       });
 
-      apply(RTSOverlayConfiguration.current);
+      apply(RTSHigherLowerConfiguration.current || defaults);
+      RTSHigherLowerConfiguration.request();
       return { apply };
     }
   };
