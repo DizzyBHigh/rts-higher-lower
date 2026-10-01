@@ -20,6 +20,7 @@
 
       extension.api.startGame = rounds => {
         const state = extension.state.game.start(rounds);
+        RTSHigherLowerPresentation.resetCards(extension);
         updateBoard(extension, { round: 0 });
         return state;
       };
