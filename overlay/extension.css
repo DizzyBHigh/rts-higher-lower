@@ -1,31 +1,22 @@
 .hl-card {
+  position: relative;
   width: 320px;
   height: 448px;
-  box-sizing: border-box;
-  padding: 24px;
-  border: 6px solid #111;
   border-radius: 20px;
-  background: #fff;
-  color: #111;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  font-family: sans-serif;
-  font-weight: 700;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, .35);
+  transform-style: preserve-3d;
+}
+
+.hl-card__face,
+.hl-card__back {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
   backface-visibility: hidden;
 }
 
-.hl-card--back {
-  background: #0384CB;
-  color: #fff;
-}
-
-.hl-card__corner {
-  font-size: 24px;
-}
-
-.hl-card__value {
-  align-self: center;
-  font-size: 64px;
+.hl-card__face {
+  transform: rotateY(180deg);
 }
