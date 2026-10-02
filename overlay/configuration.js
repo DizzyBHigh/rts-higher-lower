@@ -93,6 +93,62 @@
       if (configuration.activeLayout === layoutName)
         configuration.activeLayout = Object.keys(configuration.layouts)[0];
       return Configuration.save(configuration);
+    },
+
+    getBrands() {
+      return { ...(Configuration.current?.brands || {}) };
+    },
+
+    getActiveBrandName() {
+      return Configuration.current?.activeBrand || 'default';
+    },
+
+    saveBrand(brand, name = Configuration.getActiveBrandName()) {
+      const configuration = JSON.parse(JSON.stringify(
+        Configuration.current || { settings: {}, game: {} }
+      ));
+      const brandName = String(name || '').trim();
+      if (!brandName) return false;
+
+      configuration.brands = {
+        ...(configuration.brands || {}),
+        [brandName]: JSON.parse(JSON.stringify(brand))
+      };
+      configuration.activeBrand = brandName;
+      delete configuration.appearance;
+      return Configuration.save(configuration);
+    },
+
+    createBrand(brand, name) {
+      const brandName = String(name || '').trim();
+      if (!brandName || Configuration.current?.brands?.[brandName])
+        return false;
+
+      return Configuration.saveBrand(brand, brandName);
+    },
+
+    activateBrand(name) {
+      const brandName = String(name || '').trim();
+      if (!brandName || !Configuration.current?.brands?.[brandName])
+        return false;
+
+      const configuration = JSON.parse(JSON.stringify(Configuration.current));
+      configuration.activeBrand = brandName;
+      return Configuration.save(configuration);
+    },
+
+    deleteBrand(name) {
+      const brandName = String(name || '').trim();
+      const brands = Configuration.current?.brands || {};
+      const names = Object.keys(brands);
+      if (!brandName || !brands[brandName] || names.length <= 1)
+        return false;
+
+      const configuration = JSON.parse(JSON.stringify(Configuration.current));
+      delete configuration.brands[brandName];
+      if (configuration.activeBrand === brandName)
+        configuration.activeBrand = Object.keys(configuration.brands)[0];
+      return Configuration.save(configuration);
     }
   };
 
