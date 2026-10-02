@@ -45,7 +45,10 @@
         value: 'ease-in-out'
       });
 
+      const fontSettings = RTS.core.ui.section('Font Settings');
       const font = RTS.core.ui.fontSelector({ options: fonts, value: 'Arial' });
+      fontSettings.append(RTS.core.ui.field('Font Selector', font));
+
       const board = RTS.core.ui.section('Background Board');
       const boardColor1 = RTS.core.ui.color({ value: '#d8c79e' });
       const boardColor2 = RTS.core.ui.color({ value: '#d8c79e' });
@@ -130,7 +133,6 @@
         RTS.core.ui.field('Card Easing', easing)
       );
       board.append(
-        RTS.core.ui.field('Font Selector', font),
         RTS.core.ui.field('Colour 1', boardColor1),
         RTS.core.ui.field('Colour 2', boardColor2),
         RTS.core.ui.field('Gradient Direction', gradientDirection),
@@ -157,7 +159,7 @@
         RTS.core.ui.field('Shadow Direction', potTotalShadowDirection)
       );
       overlay.append(save, status);
-      host.append(game, overlay, board, round, roundTotal, potTotal);
+      host.append(game, overlay, fontSettings, board, round, roundTotal, potTotal);
 
       const apply = configuration => {
         const value = configuration || defaults;
