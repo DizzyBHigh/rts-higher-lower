@@ -4,9 +4,12 @@
       x: 0, y: 0, scale: 100,
       width: 1200, height: 675
     },
+    players: {
+      x: 55, y: 125, scale: 100,
+      width: 260, height: 400
+    },
     elements: {
       round: { x: 0, y: 42, width: 1200, height: 48 },
-      players: { x: 55, y: 125, width: 260, height: 400 },
       cards: { x: 355, y: 170, width: 490, height: 290 },
       deck: { x: 0, y: 40, width: 150, height: 210 },
       previous: { x: 170, y: 40, width: 150, height: 210 },
@@ -34,6 +37,7 @@
   function create(value) {
     return {
       board: { ...defaults.board, ...(value?.board || {}) },
+      players: { ...defaults.players, ...(value?.players || {}) },
       elements: Object.keys(defaults.elements).reduce((result, key) => {
         result[key] = {
           ...defaults.elements[key],
