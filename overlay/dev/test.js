@@ -55,17 +55,18 @@
     id,
     label: id,
     get: () => getValue(current, id),
-    set: patch => {
+    set: (patch, options = {}) => {
       const next = RTSHigherLowerLayout.create(current);
       Object.assign(getValue(next, id), patch);
       current = extension.api.setLayout(next);
-      saveConfiguration();
+      if (!options.transient) saveConfiguration();
     }
   }));
 
   const editor = RTS.core.positionEditor.mount(section, {
     title: 'Overlay Layout',
-    targets
+    targets,
+    onCommit: saveConfiguration
   });
 
   section.addEventListener('click', async event => {
