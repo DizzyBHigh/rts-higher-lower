@@ -54,14 +54,28 @@
     const roundTotalShadow = shadowOffset(roundTotal.shadowDirection);
     const potTotalShadow = shadowOffset(potTotal.shadowDirection);
     const gradientAngle = ((Number(board.gradientDirection) || 0) + 90) % 360;
+    const color1 = board.color1 || '#d8c79e';
+    const color2 = board.color2 || '#d8c79e';
+    const borderWidth = Number(board.borderWidth) || 0;
+    const borderColor = board.borderColor || '#6f5a3c';
+    const radius = Number(board.cornerRadius) || 0;
+    const boardElement = stage.querySelector('.hl-board');
 
     stage.style.setProperty('--hl-font-family', appearance.fontFamily || 'Arial');
-    stage.style.setProperty('--hl-board-color-1', board.color1 || '#d8c79e');
-    stage.style.setProperty('--hl-board-color-2', board.color2 || '#d8c79e');
+    stage.style.setProperty('--hl-board-color-1', color1);
+    stage.style.setProperty('--hl-board-color-2', color2);
     stage.style.setProperty('--hl-board-gradient-direction', gradientAngle + 'deg');
-    stage.style.setProperty('--hl-board-border-width', (Number(board.borderWidth) || 0) + 'px');
-    stage.style.setProperty('--hl-board-border-color', board.borderColor || '#6f5a3c');
-    stage.style.setProperty('--hl-board-radius', (Number(board.cornerRadius) || 0) + 'px');
+    stage.style.setProperty('--hl-board-border-width', borderWidth + 'px');
+    stage.style.setProperty('--hl-board-border-color', borderColor);
+    stage.style.setProperty('--hl-board-radius', radius + 'px');
+
+    if (boardElement) {
+      boardElement.style.background = 'linear-gradient(' + gradientAngle + 'deg, ' + color1 + ', ' + color2 + ')';
+      boardElement.style.borderWidth = borderWidth + 'px';
+      boardElement.style.borderColor = borderColor;
+      boardElement.style.borderRadius = radius + 'px';
+    }
+
     stage.style.setProperty('--hl-round-size', (Number(round.fontSize) || 34) + 'px');
     stage.style.setProperty('--hl-round-color', round.color || '#30291f');
     stage.style.setProperty('--hl-round-shadow-color', round.shadowColor || '#000000');
