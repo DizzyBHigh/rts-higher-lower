@@ -41,33 +41,66 @@
       board: { ...defaults.board, ...(value?.board || {}) },
       players: { ...defaults.players, ...(value?.players || {}) },
       cards: Object.keys(defaults.cards).reduce((result, key) => {
-        result[key] = {
-          ...defaults.cards[key],
-          ...(value?.cards?.[key] || {})
-        };
+        result[key] = { ...defaults.cards[key], ...(value?.cards?.[key] || {}) };
         return result;
       }, {}),
       elements: Object.keys(defaults.elements).reduce((result, key) => {
-        result[key] = {
-          ...defaults.elements[key],
-          ...(value?.elements?.[key] || {})
-        };
+        result[key] = { ...defaults.elements[key], ...(value?.elements?.[key] || {}) };
         return result;
       }, {})
     };
+  }
+
+  function migrate(value) {
+    if (!value || value.coordinateSpace === 'overlay') return create(value);
+    const layout = create(value);
+    const board = layout.board;
+    const scale = Number(board.scale) / 100 || 1;
+    const offset = (item, width = true) => ({
+      ...item,
+      x: Number(board.x) + Number(item.x) * scale,
+      y: Number(board.y) + Number(item.y) * scale,
+      ...(width ? {
+        width: Number(item.width) * scale,
+        height: Number(item.height) * scale
+      } : {})
+    });
+
+    Object.keys(layout.cards).forEach(name => {
+      layout.cards[name] = offset(layout.cards[name]);
+    });
+    Object.keys(layout.elements).forEach(name => {
+      layout.elements[name] = offset(layout.elements[name]);
+    });
+
+    const players = layout.players;
+    const dx = (Number(players.x) + Number(players.width) / 2 - Number(board.width) / 2) * scale;
+    const dy = (Number(players.y) + Number(players.height) / 2 - Number(board.height) / 2) * scale;
+    layout.players = {
+      ...players,
+      x: Number(board.x) + dx,
+      y: Number(board.y) - dy,
+      scale: Number(players.scale) * scale,
+      width: Number(players.width) * scale,
+      height: Number(players.height) * scale
+    };
+
+    layout.coordinateSpace = 'overlay';
+    return layout;
   }
 
   function fromConfiguration(configuration) {
     const value = configuration || {};
     const name = value.activeLayout || 'default';
     const stored = value.layouts?.[name] || value.layout;
-    return create(stored);
+    return migrate(stored);
   }
 
   window.RTSHigherLowerLayout = {
     defaults,
     create,
     merge,
-    fromConfiguration
+    fromConfiguration,
+    migrate
   };
 })();
