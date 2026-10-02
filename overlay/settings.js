@@ -87,34 +87,34 @@
       const easing = RTS.core.ui.dropdown({ options: ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'], value: 'ease-in-out' });
 
       const fontSettings = RTS.core.ui.section('Font Settings');
-      const font = RTS.core.ui.fontPicker({ value: 'Arial', variant: '400' });
+      const font = RTS.core.ui.fontPicker({ value: 'Arial', variant: '400', onChange: () => previewBrand() });
       fontSettings.append(RTS.core.ui.field('Font Selector', font));
 
       const board = RTS.core.ui.section('Background Board');
-      const boardColor1 = RTS.core.ui.color({ value: '#d8c79e' });
-      const boardColor2 = RTS.core.ui.color({ value: '#d8c79e' });
-      const gradientDirection = RTS.core.ui.angle({ value: 90 });
-      const borderWidth = RTS.core.ui.number({ value: 10, min: 0, max: 100, step: 1 });
-      const borderColor = RTS.core.ui.color({ value: '#6f5a3c' });
-      const cornerRadius = RTS.core.ui.number({ value: 28, min: 0, max: 200, step: 1 });
+      const boardColor1 = RTS.core.ui.color({ value: '#d8c79e', onInput: () => previewBrand() });
+      const boardColor2 = RTS.core.ui.color({ value: '#d8c79e', onInput: () => previewBrand() });
+      const gradientDirection = RTS.core.ui.angle({ value: 90, onInput: () => previewBrand() });
+      const borderWidth = RTS.core.ui.number({ value: 10, min: 0, max: 100, step: 1, onInput: () => previewBrand() });
+      const borderColor = RTS.core.ui.color({ value: '#6f5a3c', onInput: () => previewBrand() });
+      const cornerRadius = RTS.core.ui.number({ value: 28, min: 0, max: 200, step: 1, onInput: () => previewBrand() });
 
       const round = RTS.core.ui.section('Round Information');
-      const roundSize = RTS.core.ui.number({ value: 34, min: 1, max: 200, step: 1 });
-      const roundColor = RTS.core.ui.color({ value: '#30291f' });
-      const roundShadow = RTS.core.ui.color({ value: '#000000' });
-      const roundShadowDirection = RTS.core.ui.angle({ value: 0 });
+      const roundSize = RTS.core.ui.number({ value: 34, min: 1, max: 200, step: 1, onInput: () => previewBrand() });
+      const roundColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
+      const roundShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
+      const roundShadowDirection = RTS.core.ui.angle({ value: 0, onInput: () => previewBrand() });
 
       const roundTotal = RTS.core.ui.section('Round Total');
-      const roundTotalSize = RTS.core.ui.number({ value: 24, min: 1, max: 200, step: 1 });
-      const roundTotalColor = RTS.core.ui.color({ value: '#30291f' });
-      const roundTotalShadow = RTS.core.ui.color({ value: '#000000' });
-      const roundTotalShadowDirection = RTS.core.ui.angle({ value: 0 });
+      const roundTotalSize = RTS.core.ui.number({ value: 24, min: 1, max: 200, step: 1, onInput: () => previewBrand() });
+      const roundTotalColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
+      const roundTotalShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
+      const roundTotalShadowDirection = RTS.core.ui.angle({ value: 0, onInput: () => previewBrand() });
 
       const potTotal = RTS.core.ui.section('Pot Total');
-      const potTotalSize = RTS.core.ui.number({ value: 24, min: 1, max: 200, step: 1 });
-      const potTotalColor = RTS.core.ui.color({ value: '#30291f' });
-      const potTotalShadow = RTS.core.ui.color({ value: '#000000' });
-      const potTotalDirection = RTS.core.ui.angle({ value: 0 });
+      const potTotalSize = RTS.core.ui.number({ value: 24, min: 1, max: 200, step: 1, onInput: () => previewBrand() });
+      const potTotalColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
+      const potTotalShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
+      const potTotalDirection = RTS.core.ui.angle({ value: 0, onInput: () => previewBrand() });
 
       const status = RTS.core.ui.el('small', { className: 'hl-settings-status' });
       const save = RTS.core.ui.button('Save Settings', {
@@ -165,6 +165,16 @@
           shadowDirection: potTotalDirection.getValue()
         }
       });
+
+      function previewBrand() {
+        const configuration = normaliseBrands(clone(RTSHigherLowerConfiguration.current || defaults));
+        const activeBrand = brand.value || 'default';
+        configuration.activeBrand = activeBrand;
+        configuration.brands[activeBrand] = collectBrand();
+        delete configuration.appearance;
+        RTSHigherLowerConfiguration.apply(configuration);
+        status.textContent = 'Preview';
+      }
 
       game.append(RTS.core.ui.field('Default Rounds', rounds), RTS.core.ui.field('Round Length', length));
       overlay.append(RTS.core.ui.field('Card Duration', duration), RTS.core.ui.field('Card Easing', easing), save, status);
