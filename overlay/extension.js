@@ -49,7 +49,7 @@
   function configure(extension, configuration) {
     const value = configuration || {};
     extension.state.configuration = value;
-    extension.state.layout = RTSHigherLowerLayout.create(value.layout);
+    extension.state.layout = RTSHigherLowerLayout.fromConfiguration(value);
     RTSHigherLowerRecovery.apply(extension, value);
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
