@@ -32,6 +32,7 @@
     target.style.top = value.y + 'px';
     target.style.width = value.width + 'px';
     target.style.height = value.height + 'px';
+    target.style.zIndex = String(value.z ?? 0);
   }
 
   function applyLayout(panel, layout) {
@@ -39,6 +40,7 @@
     const board = layout.board;
     panel.element.style.width = board.width + 'px';
     panel.element.style.height = board.height + 'px';
+    panel.element.style.zIndex = String(board.z ?? 0);
     root.style.width = board.width + 'px';
     root.style.height = board.height + 'px';
 
