@@ -10,6 +10,37 @@
     return extension.state.panel;
   }
 
+  function getPlayersPanel(extension) {
+    if (extension.state.playersPanel) return extension.state.playersPanel;
+    const panel = RTS.core.panels.create(
+      'higher-lower-players',
+      { positions: { Center: extension.state.layout.players } }
+    );
+    RTSHigherLowerPlayers.build(panel);
+    panel.element.style.width = extension.state.layout.players.width + 'px';
+    panel.element.style.height = extension.state.layout.players.height + 'px';
+    panel.runner.configure({ Center: extension.state.layout.players });
+    extension.state.playersPanel = panel;
+    return panel;
+  }
+
+  function applyPlayersLayout(extension) {
+    const panel = getPlayersPanel(extension);
+    const value = extension.state.layout.players;
+    panel.element.style.width = value.width + 'px';
+    panel.element.style.height = value.height + 'px';
+    panel.runner.configure({ Center: value });
+    panel.show(value);
+    return panel;
+  }
+
+  function updatePlayers(extension, state = {}) {
+    const panel = getPlayersPanel(extension);
+    RTSHigherLowerPlayers.update(panel, state);
+    applyPlayersLayout(extension);
+    return panel;
+  }
+
   function code(card) {
     const ranks = { Jack: 'J', Queen: 'Q', King: 'K', Ace: 'A' };
     const suits = { Clubs: 'C', Diamonds: 'D', Hearts: 'H', Spades: 'S' };
@@ -71,7 +102,6 @@
     const panel = getPanel(extension);
     const root = panel.element.querySelector('.hl-board');
     removeNode(extension.state.currentCardElement);
-
     const node = cardElement(extension, card);
     root.appendChild(node);
     place(node, slot(root, 'current'));
@@ -88,7 +118,6 @@
     const previousTarget = slot(root, 'previous');
     const deckTarget = slot(root, 'deck');
     const old = extension.state.currentCardElement;
-
     removeNode(extension.state.previousCardElement);
 
     if (old) {
@@ -105,13 +134,11 @@
     root.appendChild(node);
     place(node, deckTarget);
     panel.show(extension.state.layout.board);
-
     const current = targetRect(root, currentTarget);
     await node.animate(
       { left: current.left + 'px', top: current.top + 'px' },
       { duration: 500, easing: 'ease-in-out', fill: 'forwards' }
     ).finished;
-
     await flip(node);
     extension.state.currentCardElement = node;
     return panel;
@@ -129,7 +156,6 @@
     const target = panel.runner.resolve(position, position);
     const from = panel.runner.getActive() || target;
     panel.show(from);
-
     return new Promise(resolve => {
       panel.runner.transition(
         from, target, 500, 'ease-in-out', () => resolve(panel)
@@ -139,6 +165,9 @@
 
   window.RTSHigherLowerPresentation = {
     getPanel,
+    getPlayersPanel,
+    updatePlayers,
+    applyPlayersLayout,
     showCard: show,
     presentDraw,
     resetCards,
