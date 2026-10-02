@@ -4,7 +4,6 @@ using Newtonsoft.Json.Linq;
 public class CPHInline
 {
     private const string Key = "rts-higher-lower";
-    private const string SyncAction = "RTS - Higher Lower - Sync";
     private const string EventName = "RTS - Higher Lower - Configuration";
 
     public bool Execute()
@@ -21,6 +20,8 @@ public class CPHInline
             case "draw": return Draw();
             case "savegame": return SaveGame();
             case "result": return Result();
+            case "get": return GetConfiguration();
+            case "save": return SaveConfiguration();
             default: return false;
         }
     }
@@ -292,21 +293,83 @@ public class CPHInline
 
     private void Save(JObject configuration)
     {
-        CPH.SetArgument("rtsHigherLowerOperation", "save");
+        SaveConfiguration(configuration, false);
+    }
+
+    private bool GetConfiguration()
+    {
+        var configuration = ReadConfiguration();
         CPH.SetArgument(
             "rtsHigherLowerConfiguration",
             configuration.ToString(Newtonsoft.Json.Formatting.None));
-        CPH.RunAction(SyncAction, true);
+        CPH.TriggerEvent(EventName, true);
+        return true;
+    }
+
+    private bool SaveConfiguration()
+    {
+        if (!CPH.TryGetArg("rtsHigherLowerConfiguration", out string raw) ||
+            string.IsNullOrWhiteSpace(raw))
+            return false;
+
+        try
+        {
+            SaveConfiguration(JObject.Parse(raw), true);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            CPH.LogWarn(
+                "RTS Higher Lower: configuration save failed: " + ex.Message);
+            return false;
+        }
+    }
+
+    private void SaveConfiguration(JObject configuration, bool layoutSaved)
+    {
+        string raw = configuration.ToString(
+            Newtonsoft.Json.Formatting.None);
+
+        CPH.SetGlobalVar(Key, raw, true);
+        CPH.SetArgument("rtsHigherLowerConfiguration", raw);
+
+        if (layoutSaved)
+            CPH.SetArgument("rtsHigherLowerSaveStatus", "Layout saved");
+
+        CPH.TriggerEvent(EventName, true);
     }
 
     private JObject ReadConfiguration()
     {
         var raw = CPH.GetGlobalVar<string>(Key, true);
         if (string.IsNullOrWhiteSpace(raw))
-            return new JObject();
+            return CreateDefaults();
 
         try { return JObject.Parse(raw); }
-        catch { return new JObject(); }
+        catch
+        {
+            CPH.LogWarn(
+                "RTS Higher Lower: stored configuration was invalid; using defaults.");
+            return CreateDefaults();
+        }
+    }
+
+    private JObject CreateDefaults()
+    {
+        return new JObject
+        {
+            ["settings"] = new JObject
+            {
+                ["defaultRounds"] = 10,
+                ["roundLength"] = 60000
+            },
+            ["layouts"] = new JObject
+            {
+                ["default"] = new JObject()
+            },
+            ["activeLayout"] = "default",
+            ["game"] = new JObject()
+        };
     }
 
     private JObject GetGame(JObject configuration)
