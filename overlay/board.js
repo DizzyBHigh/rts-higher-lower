@@ -12,9 +12,10 @@
       '<div class="hl-board">' +
         '<div class="hl-board__round"></div>' +
         '<section class="hl-board__cards">' +
-          '<div class="hl-board__deck"></div>' +
-          '<div class="hl-board__previous"></div>' +
-          '<div class="hl-board__current"></div>' +
+          '<div class="hl-board__card-slot hl-board__previous"></div>' +
+          '<div class="hl-board__card-slot hl-board__lower"></div>' +
+          '<div class="hl-board__card-slot hl-board__deck"></div>' +
+          '<div class="hl-board__card-slot hl-board__higher"></div>' +
         '</section>' +
         '<div class="hl-board__totals">' +
           '<div>Round Total <strong class="hl-board__round-total"></strong></div>' +
@@ -23,6 +24,14 @@
       '</div>'
     );
     return panel.element.querySelector('.hl-board');
+  }
+
+  function applySlot(target, value) {
+    if (!target || !value) return;
+    target.style.left = value.x + 'px';
+    target.style.top = value.y + 'px';
+    target.style.width = value.width + 'px';
+    target.style.height = value.height + 'px';
   }
 
   function applyLayout(panel, layout) {
@@ -34,13 +43,11 @@
     root.style.height = board.height + 'px';
 
     Object.keys(layout.elements).forEach(name => {
-      const target = root.querySelector('.hl-board__' + name);
-      const value = layout.elements[name];
-      if (!target) return;
-      target.style.left = value.x + 'px';
-      target.style.top = value.y + 'px';
-      target.style.width = value.width + 'px';
-      target.style.height = value.height + 'px';
+      applySlot(root.querySelector('.hl-board__' + name), layout.elements[name]);
+    });
+
+    Object.keys(layout.cards).forEach(name => {
+      applySlot(root.querySelector('.hl-board__' + name), layout.cards[name]);
     });
 
     return root;
