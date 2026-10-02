@@ -14,13 +14,9 @@
       extension.state.playersPanel = null;
       extension.state.layout = RTSHigherLowerLayout.create();
       extension.state.board = {
-        round: 0,
-        players: [],
-        roundTotal: 0,
-        potTotal: 0
+        round: 0, players: [], roundTotal: 0, potTotal: 0
       };
-      extension.configure = configuration =>
-        configure(extension, configuration);
+      extension.configure = configuration => configure(extension, configuration);
       extension.api.startGame = rounds => {
         const players = extension.state.configuration?.game?.players || [];
         const bonusPot = extension.state.configuration?.game?.bonusPot || 0;
@@ -34,16 +30,11 @@
       extension.api.setLayout = layout => setLayout(extension, layout);
       extension.api.getLayout = () => extension.state.layout;
       extension.api.drawCard = () => drawCard(extension);
-      extension.api.showCard = card =>
-        RTSHigherLowerPresentation.showCard(extension, card);
-      extension.api.flipCard = () =>
-        RTSHigherLowerPresentation.flipCard(extension);
-      extension.api.moveCard = position =>
-        RTSHigherLowerPresentation.moveCard(extension, position);
-      RTS.core.events?.on(
-        'RTS - Overlay - Extension Command',
-        message => handleCommand(extension, message)
-      );
+      extension.api.showCard = card => RTSHigherLowerPresentation.showCard(extension, card);
+      extension.api.flipCard = () => RTSHigherLowerPresentation.flipCard(extension);
+      extension.api.moveCard = position => RTSHigherLowerPresentation.moveCard(extension, position);
+      RTS.core.events?.on('RTS - Overlay - Extension Command',
+        message => handleCommand(extension, message));
     }
   };
   function configure(extension, configuration) {
@@ -53,9 +44,7 @@
     RTSHigherLowerRecovery.apply(extension, value);
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
-    panel.runner.configure({ Center: extension.state.layout.board });
-    panel.show(extension.state.layout.board);
-    RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+    panel.show();
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerCardsPresentation.applyLayout(extension);
   }
@@ -75,38 +64,28 @@
     );
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
-    panel.runner.configure({ Center: extension.state.layout.board });
-    panel.show(extension.state.layout.board);
-    RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+    panel.show();
     RTSHigherLowerPlayersPresentation.applyLayout(extension);
     RTSHigherLowerCardsPresentation.applyLayout(extension);
     return extension.state.layout;
   }
   function updateBoard(extension, data) {
-    extension.state.board = {
-      ...extension.state.board,
-      ...(data || {})
-    };
+    extension.state.board = { ...extension.state.board, ...(data || {}) };
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.update(panel, extension.state.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
-    panel.show(extension.state.layout.board);
+    panel.show();
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
   }
   function reportResult(extension, result) {
-    RTSOverlaySocket.requestAction(
-      'RTS - Overlay - Extension Result',
-      {
-        rtsOverlayExtension: manifest.id,
-        rtsOverlayEvent: 'higher-lower-result',
-        rtsOverlayData: JSON.stringify({
-          round: result.round,
-          previousCard: result.previous,
-          currentCard: result.card,
-          result: result.result
-        })
-      }
-    );
+    RTSOverlaySocket.requestAction('RTS - Overlay - Extension Result', {
+      rtsOverlayExtension: manifest.id,
+      rtsOverlayEvent: 'higher-lower-result',
+      rtsOverlayData: JSON.stringify({
+        round: result.round, previousCard: result.previous,
+        currentCard: result.card, result: result.result
+      })
+    });
   }
   function handleCommand(extension, message) {
     const args = message?.data?.args || message?.args || {};
