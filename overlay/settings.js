@@ -145,7 +145,6 @@
       const roundColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
       const roundShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
       const roundShadowDirection = RTS.core.ui.angle({ value: 0, onInput: () => previewBrand() });
-      const roundTimer = textControls('Round Timer', defaultBrand.roundTimer);
 
       const textControls = (title, defaultsValue) => {
         const section = RTS.core.ui.section(title);
@@ -164,6 +163,7 @@
         return { section, size, color, shadow, direction, align };
       };
 
+      const roundTimer = textControls('Round Timer', defaultBrand.roundTimer);
       const roundTotalLabel = textControls('Round Total Label', defaultText);
       const roundTotalValue = textControls('Round Total Value', defaultText);
       const potTotalLabel = textControls('Pot Total Label', defaultText);
