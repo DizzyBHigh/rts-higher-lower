@@ -63,6 +63,14 @@
       return Configuration.save(configuration);
     },
 
+    createLayout(layout, name) {
+      const layoutName = String(name || '').trim();
+      if (!layoutName || Configuration.current?.layouts?.[layoutName])
+        return false;
+
+      return Configuration.saveLayout(layout, layoutName);
+    },
+
     activateLayout(name) {
       const layoutName = String(name || '').trim();
       if (!layoutName || !Configuration.current?.layouts?.[layoutName])
