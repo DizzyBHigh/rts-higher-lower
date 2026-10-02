@@ -8,7 +8,6 @@
     const stage = root(extension);
     const options = RTSHigherLowerCards.options(extension);
     const old = extension.state.resultCardElement;
-    RTSHigherLowerCards.remove(extension.state.previousCardElement);
 
     if (old) {
       await RTSHigherLowerCards.move(
