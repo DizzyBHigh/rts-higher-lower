@@ -18,6 +18,7 @@
       borderWidth: 4, borderColor: '#0384CB', cornerRadius: 12
     },
     round: { fontSize: 34, color: '#30291f', shadowColor: '#000000', shadowDirection: 0 },
+    roundTimer: { fontSize: 34, color: '#30291f', shadowColor: '#000000', shadowDirection: 0, textAlign: 'center' },
     roundTotal: { label: { ...defaultText }, value: { ...defaultText } },
     potTotal: { label: { ...defaultText }, value: { ...defaultText } }
   };
@@ -144,6 +145,7 @@
       const roundColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
       const roundShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
       const roundShadowDirection = RTS.core.ui.angle({ value: 0, onInput: () => previewBrand() });
+      const roundTimer = textControls('Round Timer', defaultBrand.roundTimer);
 
       const textControls = (title, defaultsValue) => {
         const section = RTS.core.ui.section(title);
@@ -219,6 +221,7 @@
           shadowColor: roundShadow.value,
           shadowDirection: roundShadowDirection.getValue()
         },
+        roundTimer: collectText(roundTimer),
         roundTotal: { label: collectText(roundTotalLabel), value: collectText(roundTotalValue) },
         potTotal: { label: collectText(potTotalLabel), value: collectText(potTotalValue) }
       });
@@ -265,7 +268,7 @@
       );
       host.append(
         game, overlay, brandSection, fontSettings, board, players, round,
-        roundTotalLabel.section, roundTotalValue.section,
+        roundTimer.section, roundTotalLabel.section, roundTotalValue.section,
         potTotalLabel.section, potTotalValue.section
       );
 
@@ -279,6 +282,7 @@
         const boardSettings = appearance.board || defaultBrand.board;
         const playersSettings = appearance.players || defaultBrand.players;
         const roundSettings = appearance.round || defaultBrand.round;
+        const roundTimerSettings = appearance.roundTimer || defaultBrand.roundTimer;
         const roundTotalSettings = getText(appearance, 'roundTotal');
         const potTotalSettings = getText(appearance, 'potTotal');
 
@@ -304,6 +308,11 @@
         roundColor.value = roundSettings.color || '#30291f';
         roundShadow.value = roundSettings.shadowColor || '#000000';
         roundShadowDirection.setValue(roundSettings.shadowDirection ?? 0);
+        roundTimer.size.value = number(roundTimerSettings.fontSize, 34, 1, 200);
+        roundTimer.color.value = roundTimerSettings.color || '#30291f';
+        roundTimer.shadow.value = roundTimerSettings.shadowColor || '#000000';
+        roundTimer.direction.setValue(roundTimerSettings.shadowDirection ?? 0);
+        roundTimer.align.setValue(roundTimerSettings.textAlign || 'center');
 
         const setText = (target, value) => {
           target.size.value = value.fontSize;
