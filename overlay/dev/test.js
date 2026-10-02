@@ -33,18 +33,69 @@
   RTSHigherLowerSettings.render(settings);
 
   let current = extension.api.getLayout();
+  let editor = null;
 
   const getValue = (layout, id) => {
     if (id === 'board' || id === 'players') return layout[id];
     return layout.cards[id] || layout.elements[id];
   };
 
+  const layoutControls = document.createElement('div');
+  layoutControls.className = 'hl-layout-controls';
+  layoutControls.innerHTML = '<span>Layout</span>';
+  const layoutSelect = document.createElement('select');
+  const saveLayoutButton = RTS.core.ui.button('Save Layout');
+  const saveAsButton = RTS.core.ui.button('Save As');
+  const deleteButton = RTS.core.ui.button('Delete');
+  layoutControls.append(layoutSelect, saveLayoutButton, saveAsButton, deleteButton);
+  section.appendChild(layoutControls);
+
+  const refreshLayoutList = () => {
+    const active = RTSHigherLowerConfiguration.getActiveLayoutName();
+    const layouts = RTSHigherLowerConfiguration.getLayouts();
+    layoutSelect.innerHTML = '';
+    Object.keys(layouts).sort().forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = name;
+      layoutSelect.appendChild(option);
+    });
+    layoutSelect.value = active;
+    deleteButton.disabled = layoutSelect.options.length <= 1;
+  };
+
   const saveLayout = () =>
     RTSHigherLowerConfiguration.saveLayout(extension.api.getLayout());
 
+  const saveAsLayout = () => {
+    const name = window.prompt('Layout name:',
+      RTSHigherLowerConfiguration.getActiveLayoutName());
+    if (!name?.trim()) return;
+    RTSHigherLowerConfiguration.saveLayout(
+      extension.api.getLayout(), name.trim()
+    );
+  };
+
+  const deleteLayout = () => {
+    const name = layoutSelect.value;
+    if (!name || !window.confirm('Delete layout "' + name + '"?')) return;
+    RTSHigherLowerConfiguration.deleteLayout(name);
+  };
+
+  layoutSelect.addEventListener('change', () => {
+    RTSHigherLowerConfiguration.activateLayout(layoutSelect.value);
+  });
+  saveLayoutButton.addEventListener('click', saveLayout);
+  saveAsButton.addEventListener('click', saveAsLayout);
+  deleteButton.addEventListener('click', deleteLayout);
+
   RTSHigherLowerConfiguration.onChange(() => {
     current = extension.api.getLayout();
+    refreshLayoutList();
+    editor?.refresh();
   });
+
+  refreshLayoutList();
 
   const targets = [
     'board', 'players', 'previous', 'lower', 'deck', 'higher', 'round', 'totals'
@@ -59,7 +110,7 @@
     }
   }));
 
-  const editor = RTS.core.positionEditor.mount(section, {
+  editor = RTS.core.positionEditor.mount(section, {
     title: 'Overlay Layout',
     targets,
     onSave: saveLayout
