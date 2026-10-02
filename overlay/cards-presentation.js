@@ -10,6 +10,7 @@
     const old = extension.state.resultCardElement;
 
     if (old) {
+      RTSHigherLowerCards.remove(extension.state.previousCardElement);
       await RTSHigherLowerCards.move(
         old, stage, extension.state.layout,
         old.dataset.slot || 'higher', 'previous', options
