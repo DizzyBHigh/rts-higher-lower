@@ -18,8 +18,8 @@
 }
 
 .hl-board__round,
-.hl-board__players-panel,
 .hl-board__cards,
+.hl-board__card-slot,
 .hl-board__totals {
   position: absolute;
   box-sizing: border-box;
@@ -32,43 +32,12 @@
   letter-spacing: 2px;
 }
 
-.hl-board__players-panel {
-  overflow: hidden;
+.hl-board__cards {
+  inset: 0;
 }
 
-.hl-board__heading {
-  margin-bottom: 16px;
-  font-size: 28px;
-  font-weight: 700;
-  text-align: center;
-}
-
-.hl-board__players {
-  display: grid;
-  gap: 8px;
-}
-
-.hl-board__player {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 34px auto;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: rgba(48, 41, 31, 0.08);
-  font-size: 20px;
-  line-height: 1.25;
-}
-
-.hl-board__player-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.hl-board__player-bet {
-  flex: 0 0 auto;
-  font-weight: 700;
+.hl-board__card-slot {
+  pointer-events: none;
 }
 
 .hl-board__deck {
@@ -82,6 +51,14 @@
   height: 210px;
   transform-style: preserve-3d;
   z-index: 2;
+  will-change: transform;
+}
+
+.hl-card__inner {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .hl-card__face,
