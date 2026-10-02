@@ -1,20 +1,23 @@
 (() => {
+  const defaultBrand = {
+    fontFamily: 'Arial',
+    board: {
+      color1: '#d8c79e', color2: '#d8c79e', gradientDirection: 90,
+      borderWidth: 10, borderColor: '#6f5a3c', cornerRadius: 28
+    },
+    round: { fontSize: 34, color: '#30291f', shadowColor: '#000000', shadowDirection: 0 },
+    roundTotal: { fontSize: 24, color: '#30291f', shadowColor: '#000000', shadowDirection: 0 },
+    potTotal: { fontSize: 24, color: '#30291f', shadowColor: '#000000', shadowDirection: 0 }
+  };
+
   const defaults = {
     settings: {
       defaultRounds: 10,
       roundLength: 60000,
       cardAnimation: { duration: 500, easing: 'ease-in-out' }
     },
-    appearance: {
-      fontFamily: 'Arial',
-      board: {
-        color1: '#d8c79e', color2: '#d8c79e', gradientDirection: 90,
-        borderWidth: 10, borderColor: '#6f5a3c', cornerRadius: 28
-      },
-      round: { fontSize: 34, color: '#30291f', shadowColor: '#000000', shadowDirection: 0 },
-      roundTotal: { fontSize: 24, color: '#30291f', shadowColor: '#000000', shadowDirection: 0 },
-      potTotal: { fontSize: 24, color: '#30291f', shadowColor: '#000000', shadowDirection: 0 }
-    }
+    brands: { default: defaultBrand },
+    activeBrand: 'default'
   };
 
   const fonts = [
@@ -28,9 +31,58 @@
     return Math.min(max, Math.max(min, next));
   };
 
+  const clone = value => JSON.parse(JSON.stringify(value));
+
+  const normaliseBrands = configuration => {
+    const value = configuration || {};
+    if (value.brands && Object.keys(value.brands).length)
+      return value;
+
+    const brand = value.appearance || clone(defaultBrand);
+    value.brands = { default: clone(brand) };
+    value.activeBrand = 'default';
+    delete value.appearance;
+    return value;
+  };
+
+  const setOptions = (select, options, value) => {
+    select.replaceChildren(...options.map(name =>
+      RTS.core.ui.el('option', { value: name, text: name })
+    ));
+    select.value = value || options[0] || '';
+  };
+
   const Settings = {
     render(host) {
       if (!host || !RTS.core.ui) return null;
+
+      const brandSection = RTS.core.ui.section('Brand Presets');
+      const brand = RTS.core.ui.dropdown({ options: ['default'], value: 'default' });
+      const newBrand = RTS.core.ui.button('New Brand', {
+        variant: 'blue',
+        onClick: () => {
+          const name = window.prompt('Brand name');
+          if (!name?.trim()) return;
+          const configuration = normaliseBrands(clone(
+            RTSHigherLowerConfiguration.current || defaults
+          ));
+          if (!RTSHigherLowerConfiguration.createBrand(
+            configuration.brands[configuration.activeBrand || 'default'] || defaultBrand,
+            name.trim()
+          )) return;
+        }
+      });
+      const deleteBrand = RTS.core.ui.button('Delete', {
+        onClick: () => RTSHigherLowerConfiguration.deleteBrand(brand.value)
+      });
+      brand.addEventListener('change', () =>
+        RTSHigherLowerConfiguration.activateBrand(brand.value)
+      );
+      brandSection.append(
+        RTS.core.ui.field('Brand', brand),
+        newBrand,
+        deleteBrand
+      );
 
       const game = RTS.core.ui.section('Game Settings');
       const rounds = RTS.core.ui.number({ value: 10, min: 1, step: 1 });
@@ -79,9 +131,12 @@
       const save = RTS.core.ui.button('Save Settings', {
         variant: 'blue',
         onClick: () => {
-          const configuration = JSON.parse(JSON.stringify(
+          const configuration = normaliseBrands(clone(
             RTSHigherLowerConfiguration.current || defaults
           ));
+          const activeBrand = brand.value || 'default';
+          configuration.activeBrand = activeBrand;
+          configuration.brands[activeBrand] = collectBrand();
           configuration.settings = {
             defaultRounds: Math.max(1, Number(rounds.value) || 10),
             roundLength: length.value === '30 Seconds' ? 30000 : 60000,
@@ -90,37 +145,39 @@
               easing: easing.value || 'ease-in-out'
             }
           };
-          configuration.appearance = {
-            fontFamily: font.value || 'Arial',
-            board: {
-              color1: boardColor1.value,
-              color2: boardColor2.value,
-              gradientDirection: gradientDirection.getValue(),
-              borderWidth: number(borderWidth.value, 10, 0, 100),
-              borderColor: borderColor.value,
-              cornerRadius: number(cornerRadius.value, 28, 0, 200)
-            },
-            round: {
-              fontSize: number(roundSize.value, 34, 1, 200),
-              color: roundColor.value,
-              shadowColor: roundShadow.value,
-              shadowDirection: roundShadowDirection.getValue()
-            },
-            roundTotal: {
-              fontSize: number(roundTotalSize.value, 24, 1, 200),
-              color: roundTotalColor.value,
-              shadowColor: roundTotalShadow.value,
-              shadowDirection: roundTotalShadowDirection.getValue()
-            },
-            potTotal: {
-              fontSize: number(potTotalSize.value, 24, 1, 200),
-              color: potTotalColor.value,
-              shadowColor: potTotalShadow.value,
-              shadowDirection: potTotalShadowDirection.getValue()
-            }
-          };
+          delete configuration.appearance;
           status.textContent = 'Saving...';
           RTSHigherLowerConfiguration.save(configuration);
+        }
+      });
+
+      const collectBrand = () => ({
+        fontFamily: font.value || 'Arial',
+        board: {
+          color1: boardColor1.value,
+          color2: boardColor2.value,
+          gradientDirection: gradientDirection.getValue(),
+          borderWidth: number(borderWidth.value, 10, 0, 100),
+          borderColor: borderColor.value,
+          cornerRadius: number(cornerRadius.value, 28, 0, 200)
+        },
+        round: {
+          fontSize: number(roundSize.value, 34, 1, 200),
+          color: roundColor.value,
+          shadowColor: roundShadow.value,
+          shadowDirection: roundShadowDirection.getValue()
+        },
+        roundTotal: {
+          fontSize: number(roundTotalSize.value, 24, 1, 200),
+          color: roundTotalColor.value,
+          shadowColor: roundTotalShadow.value,
+          shadowDirection: roundTotalShadowDirection.getValue()
+        },
+        potTotal: {
+          fontSize: number(potTotalSize.value, 24, 1, 200),
+          color: potTotalColor.value,
+          shadowColor: potTotalShadow.value,
+          shadowDirection: potTotalShadowDirection.getValue()
         }
       });
 
@@ -130,7 +187,9 @@
       );
       overlay.append(
         RTS.core.ui.field('Card Duration', duration),
-        RTS.core.ui.field('Card Easing', easing)
+        RTS.core.ui.field('Card Easing', easing),
+        save,
+        status
       );
       board.append(
         RTS.core.ui.field('Colour 1', boardColor1),
@@ -158,18 +217,21 @@
         RTS.core.ui.field('Shadow Colour', potTotalShadow),
         RTS.core.ui.field('Shadow Direction', potTotalShadowDirection)
       );
-      overlay.append(save, status);
-      host.append(game, overlay, fontSettings, board, round, roundTotal, potTotal);
+      host.append(brandSection, game, overlay, fontSettings, board, round, roundTotal, potTotal);
 
       const apply = configuration => {
-        const value = configuration || defaults;
+        const value = normaliseBrands(clone(configuration || defaults));
         const gameSettings = value.settings || defaults.settings;
         const animation = gameSettings.cardAnimation || defaults.settings.cardAnimation;
-        const appearance = value.appearance || defaults.appearance;
-        const boardSettings = appearance.board || defaults.appearance.board;
-        const roundSettings = appearance.round || defaults.appearance.round;
-        const roundTotalSettings = appearance.roundTotal || defaults.appearance.roundTotal;
-        const potTotalSettings = appearance.potTotal || defaults.appearance.potTotal;
+        const brands = value.brands || { default: defaultBrand };
+        const activeBrand = value.activeBrand || Object.keys(brands)[0] || 'default';
+        const appearance = brands[activeBrand] || defaultBrand;
+        const boardSettings = appearance.board || defaultBrand.board;
+        const roundSettings = appearance.round || defaultBrand.round;
+        const roundTotalSettings = appearance.roundTotal || defaultBrand.roundTotal;
+        const potTotalSettings = appearance.potTotal || defaultBrand.potTotal;
+
+        setOptions(brand, Object.keys(brands), activeBrand);
         rounds.value = Number(gameSettings.defaultRounds) || 10;
         length.value = Number(gameSettings.roundLength) === 30000 ? '30 Seconds' : '1 Minute';
         duration.value = Math.max(0, Number(animation.duration) || 500);
