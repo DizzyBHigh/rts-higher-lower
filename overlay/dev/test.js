@@ -35,10 +35,10 @@
 
   const layout = document.createElement('div');
   layout.className = 'hl-layout-editor';
+  const heading = document.createElement('strong');
+  heading.textContent = 'Overlay Layout';
+  layout.appendChild(heading);
   section.appendChild(layout);
-  layout.appendChild(RTS.core.ui.el('strong', {
-    textContent: 'Overlay Layout'
-  }));
 
   const target = RTS.core.ui.positionSelector({
     options: [
