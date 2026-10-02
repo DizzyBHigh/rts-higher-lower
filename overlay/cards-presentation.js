@@ -46,6 +46,24 @@
     return panel;
   }
 
+  function applyCardLayout(extension) {
+    const panel = RTSHigherLowerPresentation.getPanel(extension);
+    const root = panel.element.querySelector('.hl-board');
+    const cards = [
+      extension.state.previousCardElement,
+      extension.state.resultCardElement
+    ];
+
+    cards.forEach(node => {
+      if (!node?.dataset?.slot) return;
+      RTSHigherLowerCards.move(
+        node, root, extension.state.layout,
+        node.dataset.slot, node.dataset.slot,
+        { duration: 0, easing: 'linear' }
+      );
+    });
+  }
+
   function restoreCard(extension, card, position, previous) {
     if (!card || !position) return;
     const panel = RTSHigherLowerPresentation.getPanel(extension);
@@ -114,6 +132,7 @@
 
   window.RTSHigherLowerCardsPresentation = {
     presentDraw,
+    applyLayout: applyCardLayout,
     restoreCard,
     resetCards,
     showCard,
