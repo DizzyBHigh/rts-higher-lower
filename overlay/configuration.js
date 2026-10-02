@@ -43,9 +43,11 @@
       const configuration = JSON.parse(JSON.stringify(
         Configuration.current || { settings: {}, game: {} }
       ));
+      const value = JSON.parse(JSON.stringify(layout));
+      value.coordinateSpace = 'overlay';
       configuration.layouts = {
         ...(configuration.layouts || {}),
-        default: JSON.parse(JSON.stringify(layout))
+        default: value
       };
       configuration.activeLayout = 'default';
       delete configuration.layout;
