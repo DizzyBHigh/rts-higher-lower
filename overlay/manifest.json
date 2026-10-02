@@ -9,6 +9,7 @@
       "game.js",
       "layout.js",
       "board.js",
+      "players.js",
       "presentation.js",
       "configuration.js",
       "persistence.js",
