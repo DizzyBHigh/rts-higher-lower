@@ -39,17 +39,51 @@
       );
     },
 
-    saveLayout(layout) {
+    getLayouts() {
+      return { ...(Configuration.current?.layouts || {}) };
+    },
+
+    getActiveLayoutName() {
+      return Configuration.current?.activeLayout || 'default';
+    },
+
+    saveLayout(layout, name = Configuration.getActiveLayoutName()) {
       const configuration = JSON.parse(JSON.stringify(
         Configuration.current || { settings: {}, game: {} }
       ));
-      const value = JSON.parse(JSON.stringify(layout));
+      const layoutName = String(name || '').trim();
+      if (!layoutName) return false;
+
       configuration.layouts = {
         ...(configuration.layouts || {}),
-        default: value
+        [layoutName]: JSON.parse(JSON.stringify(layout))
       };
-      configuration.activeLayout = 'default';
+      configuration.activeLayout = layoutName;
       delete configuration.layout;
+      return Configuration.save(configuration);
+    },
+
+    activateLayout(name) {
+      const layoutName = String(name || '').trim();
+      if (!layoutName || !Configuration.current?.layouts?.[layoutName])
+        return false;
+
+      const configuration = JSON.parse(JSON.stringify(Configuration.current));
+      configuration.activeLayout = layoutName;
+      return Configuration.save(configuration);
+    },
+
+    deleteLayout(name) {
+      const layoutName = String(name || '').trim();
+      const layouts = Configuration.current?.layouts || {};
+      const names = Object.keys(layouts);
+      if (!layoutName || !layouts[layoutName] || names.length <= 1)
+        return false;
+
+      const configuration = JSON.parse(JSON.stringify(Configuration.current));
+      delete configuration.layouts[layoutName];
+      if (configuration.activeLayout === layoutName)
+        configuration.activeLayout = Object.keys(configuration.layouts)[0];
       return Configuration.save(configuration);
     }
   };
