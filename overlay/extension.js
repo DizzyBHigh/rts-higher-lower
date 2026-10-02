@@ -31,6 +31,7 @@
     const players = extension.state.configuration?.game?.players || [];
     const bonusPot = extension.state.configuration?.game?.bonusPot || 0;
     const state = extension.state.game.start(rounds, players, bonusPot);
+    RTSHigherLowerTimer.stop(extension);
     RTSHigherLowerPresentation.resetCards(extension);
     updateBoard(extension, { round: 0, players: state.players });
     await drawCard(extension);
@@ -40,6 +41,7 @@
   function configure(extension, configuration) {
     const value = configuration || {};
     extension.state.configuration = value;
+    RTSHigherLowerTimer.stop(extension);
     extension.state.layout = RTSHigherLowerLayout.fromConfiguration(value);
     RTSHigherLowerRecovery.apply(extension, value);
     const panel = RTSHigherLowerPresentation.getPanel(extension);
@@ -53,9 +55,13 @@
   async function drawCard(extension) {
     const result = extension.state.game.draw();
     extension.state.card = result.card || null;
-    if (!result.card) return result;
+    if (!result.card) {
+      RTSHigherLowerTimer.stop(extension);
+      return result;
+    }
     updateBoard(extension, { round: result.round });
     await RTSHigherLowerPresentation.presentDraw(extension, result);
+    RTSHigherLowerTimer.start(extension);
     RTSHigherLowerPersistence.save(extension.state.game);
     if (result.type !== 'first-card') reportResult(extension, result);
     return result;
