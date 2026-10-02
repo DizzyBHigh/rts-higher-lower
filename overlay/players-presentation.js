@@ -39,6 +39,7 @@
     const value = extension.state.layout.players;
     panel.element.style.width = value.width + 'px';
     panel.element.style.height = value.height + 'px';
+    panel.element.style.zIndex = String(value.z ?? 10);
     panel.runner.configure({ Center: playerPosition(extension) });
     panel.show(playerPosition(extension));
     return panel;
