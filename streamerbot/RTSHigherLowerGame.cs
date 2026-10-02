@@ -369,7 +369,50 @@ public class CPHInline
                 ["default"] = new JObject()
             },
             ["activeLayout"] = "default",
+            ["brands"] = new JObject
+            {
+                ["default"] = CreateDefaultBrand()
+            },
+            ["activeBrand"] = "default",
             ["game"] = new JObject()
+        };
+    }
+
+    private JObject CreateDefaultBrand()
+    {
+        return new JObject
+        {
+            ["fontFamily"] = "Arial",
+            ["board"] = new JObject
+            {
+                ["color1"] = "#d8c79e",
+                ["color2"] = "#d8c79e",
+                ["gradientDirection"] = 90,
+                ["borderWidth"] = 10,
+                ["borderColor"] = "#6f5a3c",
+                ["cornerRadius"] = 28
+            },
+            ["round"] = new JObject
+            {
+                ["fontSize"] = 34,
+                ["color"] = "#30291f",
+                ["shadowColor"] = "#000000",
+                ["shadowDirection"] = 0
+            },
+            ["roundTotal"] = new JObject
+            {
+                ["fontSize"] = 24,
+                ["color"] = "#30291f",
+                ["shadowColor"] = "#000000",
+                ["shadowDirection"] = 0
+            },
+            ["potTotal"] = new JObject
+            {
+                ["fontSize"] = 24,
+                ["color"] = "#30291f",
+                ["shadowColor"] = "#000000",
+                ["shadowDirection"] = 0
+            }
         };
     }
 
