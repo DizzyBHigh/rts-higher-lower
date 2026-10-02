@@ -8,12 +8,14 @@
       x: 55, y: 125, scale: 100,
       width: 260, height: 400
     },
+    cards: {
+      previous: { x: 525, y: 125, width: 150, height: 210 },
+      lower: { x: 325, y: 385, width: 150, height: 210 },
+      deck: { x: 525, y: 385, width: 150, height: 210 },
+      higher: { x: 725, y: 385, width: 150, height: 210 }
+    },
     elements: {
       round: { x: 0, y: 42, width: 1200, height: 48 },
-      cards: { x: 355, y: 170, width: 490, height: 290 },
-      deck: { x: 0, y: 40, width: 150, height: 210 },
-      previous: { x: 170, y: 40, width: 150, height: 210 },
-      current: { x: 340, y: 40, width: 150, height: 210 },
       totals: { x: 845, y: 575, width: 300, height: 65 }
     }
   };
@@ -38,6 +40,13 @@
     return {
       board: { ...defaults.board, ...(value?.board || {}) },
       players: { ...defaults.players, ...(value?.players || {}) },
+      cards: Object.keys(defaults.cards).reduce((result, key) => {
+        result[key] = {
+          ...defaults.cards[key],
+          ...(value?.cards?.[key] || {})
+        };
+        return result;
+      }, {}),
       elements: Object.keys(defaults.elements).reduce((result, key) => {
         result[key] = {
           ...defaults.elements[key],
