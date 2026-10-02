@@ -40,6 +40,8 @@
   layout.appendChild(heading);
   section.appendChild(layout);
 
+  let positionsVisible = true;
+
   const target = RTS.core.ui.positionSelector({
     options: [
       'board', 'players', 'previous', 'lower', 'deck', 'higher',
@@ -48,6 +50,12 @@
     value: 'board'
   });
   layout.append(RTS.core.ui.field('Target', target));
+
+  const positionToggle = document.createElement('button');
+  positionToggle.type = 'button';
+  positionToggle.textContent = 'Hide Positions';
+  positionToggle.dataset.action = 'toggle-positions';
+  layout.appendChild(positionToggle);
 
   let current = extension.api.getLayout();
 
@@ -82,6 +90,9 @@
       marker.className = 'hl-layout-target';
       root.appendChild(marker);
     }
+
+    marker.hidden = !positionsVisible;
+    if (!positionsVisible) return;
 
     const value = getValue();
     marker.dataset.target = target.value;
@@ -129,6 +140,14 @@
     const action = event.target?.dataset?.action;
     if (!action) return;
     try {
+      if (action === 'toggle-positions') {
+        positionsVisible = !positionsVisible;
+        positionToggle.textContent = positionsVisible
+          ? 'Hide Positions'
+          : 'Show Positions';
+        showTarget();
+        return;
+      }
       if (action === 'state') extension.api.updateState(state);
       if (action === 'start') extension.api.startGame(10);
       if (action === 'draw') await extension.api.drawCard();
