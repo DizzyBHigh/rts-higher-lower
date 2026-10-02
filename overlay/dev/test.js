@@ -39,38 +39,6 @@
     return layout.cards[id] || layout.elements[id];
   };
 
-  const getElement = id => {
-    if (id === 'players') return extension.state.playersPanel?.element;
-    const panel = extension.state.panel?.element;
-    if (!panel) return null;
-    if (id === 'board') return panel.querySelector('.hl-board');
-    return panel.querySelector('.hl-board__' + id);
-  };
-
-  const getMarker = id => {
-    const element = getElement(id);
-    if (!element || !overlay) return null;
-    const rect = element.getBoundingClientRect();
-    const canvas = overlay.getBoundingClientRect();
-    return {
-      x: rect.left - canvas.left,
-      y: rect.top - canvas.top,
-      width: rect.width,
-      height: rect.height
-    };
-  };
-
-  const getPointerScale = id => {
-    const element = getElement(id);
-    if (!element) return 1;
-    if (id === 'players')
-      return overlay?.getBoundingClientRect().width / 1920 || 1;
-    const stage = extension.state.panel?.element.querySelector('.hl-stage');
-    return stage?.getBoundingClientRect().width / 1920 || 1;
-  };
-
-  const overlay = document.getElementById('rts-overlay');
-
   const saveLayout = () =>
     RTSHigherLowerConfiguration.saveLayout(extension.api.getLayout());
 
@@ -84,8 +52,6 @@
     id,
     label: id,
     get: () => getValue(current, id),
-    marker: () => getMarker(id),
-    pointerScale: () => getPointerScale(id),
     set: patch => {
       const next = RTSHigherLowerLayout.create(current);
       Object.assign(getValue(next, id), patch);
