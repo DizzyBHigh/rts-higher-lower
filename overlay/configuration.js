@@ -37,6 +37,19 @@
           rtsHigherLowerConfiguration: JSON.stringify(configuration)
         }
       );
+    },
+
+    saveLayout(layout) {
+      const configuration = JSON.parse(JSON.stringify(
+        Configuration.current || { settings: {}, game: {} }
+      ));
+      configuration.layouts = {
+        ...(configuration.layouts || {}),
+        default: JSON.parse(JSON.stringify(layout))
+      };
+      configuration.activeLayout = 'default';
+      delete configuration.layout;
+      return Configuration.save(configuration);
     }
   };
 
