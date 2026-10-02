@@ -58,7 +58,7 @@
     const eventName =
       message?.data?.eventName ?? message?.eventName;
 
-    if (eventName !== 'RTS - Higher Lower - Configuration') return;
+    if (eventName !== 'RTS - Higher Lower Game') return;
 
     const raw =
       message?.data?.args?.rtsHigherLowerConfiguration ??
