@@ -155,7 +155,7 @@
         roundTotal: {
           fontSize: number(roundTotalSize.value, 24, 1, 200),
           color: roundTotalColor.value,
-          shadowColor: roundTotalShadow.value,
+          shadowColor: roundTotal.value,
           shadowDirection: roundTotalShadowDirection.getValue()
         },
         potTotal: {
@@ -168,7 +168,6 @@
 
       game.append(RTS.core.ui.field('Default Rounds', rounds), RTS.core.ui.field('Round Length', length));
       overlay.append(RTS.core.ui.field('Card Duration', duration), RTS.core.ui.field('Card Easing', easing), save, status);
-      fontSettings.append(RTS.core.ui.field('Font Selector', font));
       board.append(
         RTS.core.ui.field('Colour 1', boardColor1),
         RTS.core.ui.field('Colour 2', boardColor2),
