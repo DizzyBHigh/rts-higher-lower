@@ -47,6 +47,7 @@
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(value));
     panel.show();
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
+    RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(value));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
   }
   async function drawCard(extension) {
@@ -66,6 +67,7 @@
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
     panel.show();
     RTSHigherLowerPlayersPresentation.applyLayout(extension);
+    RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(extension.state.configuration));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
     return extension.state.layout;
   }
@@ -77,6 +79,7 @@
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
     panel.show();
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
+    RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(extension.state.configuration));
   }
   function reportResult(extension, result) {
     RTSOverlaySocket.requestAction('RTS - Overlay - Extension Result', {
