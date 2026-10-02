@@ -9,6 +9,7 @@
       "game.js",
       "layout.js",
       "board.js",
+      "timer.js",
       "players.js",
       "players-presentation.js",
       "cards.js",
