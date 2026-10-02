@@ -7,6 +7,14 @@
     return Number.isFinite(amount) ? amount.toLocaleString('en-US') : '0';
   };
 
+  const shadowOffset = angle => {
+    const radians = (Number(angle) || 0) * Math.PI / 180;
+    return {
+      x: (Math.cos(radians) * 3).toFixed(2) + 'px',
+      y: (Math.sin(radians) * 3).toFixed(2) + 'px'
+    };
+  };
+
   function build(panel) {
     panel.setContent(
       '<div class="hl-stage">' +
@@ -34,6 +42,40 @@
     target.style.width = value.width + 'px';
     target.style.height = value.height + 'px';
     target.style.zIndex = String(value.z ?? 0);
+  }
+
+  function applyAppearance(panel, appearance = {}) {
+    const stage = panel.element.querySelector('.hl-stage') || build(panel);
+    const board = appearance.board || {};
+    const round = appearance.round || {};
+    const roundTotal = appearance.roundTotal || {};
+    const potTotal = appearance.potTotal || {};
+    const roundShadow = shadowOffset(round.shadowDirection);
+    const roundTotalShadow = shadowOffset(roundTotal.shadowDirection);
+    const potTotalShadow = shadowOffset(potTotal.shadowDirection);
+
+    stage.style.setProperty('--hl-font-family', appearance.fontFamily || 'Arial');
+    stage.style.setProperty('--hl-board-color-1', board.color1 || '#d8c79e');
+    stage.style.setProperty('--hl-board-color-2', board.color2 || '#d8c79e');
+    stage.style.setProperty('--hl-board-gradient-direction', (Number(board.gradientDirection) || 0) + 'deg');
+    stage.style.setProperty('--hl-board-border-width', (Number(board.borderWidth) || 0) + 'px');
+    stage.style.setProperty('--hl-board-border-color', board.borderColor || '#6f5a3c');
+    stage.style.setProperty('--hl-board-radius', (Number(board.cornerRadius) || 0) + 'px');
+    stage.style.setProperty('--hl-round-size', (Number(round.fontSize) || 34) + 'px');
+    stage.style.setProperty('--hl-round-color', round.color || '#30291f');
+    stage.style.setProperty('--hl-round-shadow-color', round.shadowColor || '#000000');
+    stage.style.setProperty('--hl-round-shadow-x', roundShadow.x);
+    stage.style.setProperty('--hl-round-shadow-y', roundShadow.y);
+    stage.style.setProperty('--hl-round-total-size', (Number(roundTotal.fontSize) || 24) + 'px');
+    stage.style.setProperty('--hl-round-total-color', roundTotal.color || '#30291f');
+    stage.style.setProperty('--hl-round-total-shadow-color', roundTotal.shadowColor || '#000000');
+    stage.style.setProperty('--hl-round-total-shadow-x', roundTotalShadow.x);
+    stage.style.setProperty('--hl-round-total-shadow-y', roundTotalShadow.y);
+    stage.style.setProperty('--hl-pot-total-size', (Number(potTotal.fontSize) || 24) + 'px');
+    stage.style.setProperty('--hl-pot-total-color', potTotal.color || '#30291f');
+    stage.style.setProperty('--hl-pot-total-shadow-color', potTotal.shadowColor || '#000000');
+    stage.style.setProperty('--hl-pot-total-shadow-x', potTotalShadow.x);
+    stage.style.setProperty('--hl-pot-total-shadow-y', potTotalShadow.y);
   }
 
   function applyLayout(panel, layout) {
@@ -74,5 +116,5 @@
     return stage;
   }
 
-  window.RTSHigherLowerBoard = { build, update, applyLayout };
+  window.RTSHigherLowerBoard = { build, update, applyLayout, applyAppearance };
 })();
