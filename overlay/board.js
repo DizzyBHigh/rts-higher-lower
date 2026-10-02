@@ -9,7 +9,8 @@
 
   function build(panel) {
     panel.setContent(
-      '<div class="hl-board">' +
+      '<div class="hl-stage">' +
+        '<div class="hl-board"></div>' +
         '<div class="hl-board__round"></div>' +
         '<section class="hl-board__cards">' +
           '<div class="hl-board__card-slot hl-board__previous"></div>' +
@@ -23,7 +24,7 @@
         '</div>' +
       '</div>'
     );
-    return panel.element.querySelector('.hl-board');
+    return panel.element.querySelector('.hl-stage');
   }
 
   function applySlot(target, value) {
@@ -36,37 +37,41 @@
   }
 
   function applyLayout(panel, layout) {
-    const root = panel.element.querySelector('.hl-board') || build(panel);
+    const stage = panel.element.querySelector('.hl-stage') || build(panel);
     const board = layout.board;
-    panel.element.style.width = board.width + 'px';
-    panel.element.style.height = board.height + 'px';
-    panel.element.style.zIndex = String(board.z ?? 0);
-    root.style.width = board.width + 'px';
-    root.style.height = board.height + 'px';
+    stage.style.width = '1920px';
+    stage.style.height = '1080px';
+
+    const boardElement = stage.querySelector('.hl-board');
+    boardElement.style.left = (board.x || 0) + 'px';
+    boardElement.style.top = (board.y || 0) + 'px';
+    boardElement.style.width = board.width + 'px';
+    boardElement.style.height = board.height + 'px';
+    boardElement.style.zIndex = String(board.z ?? 0);
+    boardElement.style.transform = 'scale(' + ((Number(board.scale) || 100) / 100) + ')';
+    boardElement.style.transformOrigin = 'top left';
 
     Object.keys(layout.elements).forEach(name => {
-      applySlot(root.querySelector('.hl-board__' + name), layout.elements[name]);
+      applySlot(stage.querySelector('.hl-board__' + name), layout.elements[name]);
     });
 
     Object.keys(layout.cards).forEach(name => {
-      applySlot(root.querySelector('.hl-board__' + name), layout.cards[name]);
+      applySlot(stage.querySelector('.hl-board__' + name), layout.cards[name]);
     });
 
-    return root;
+    return stage;
   }
 
   function update(panel, state = {}) {
     const data = { ...defaults, ...state };
-    const root = panel.element.querySelector('.hl-board') || build(panel);
-
-    root.querySelector('.hl-board__round').textContent =
+    const stage = panel.element.querySelector('.hl-stage') || build(panel);
+    stage.querySelector('.hl-board__round').textContent =
       'ROUND ' + String(data.round);
-    root.querySelector('.hl-board__round-total').textContent =
+    stage.querySelector('.hl-board__round-total').textContent =
       money(data.roundTotal);
-    root.querySelector('.hl-board__pot-total').textContent =
+    stage.querySelector('.hl-board__pot-total').textContent =
       money(data.potTotal);
-
-    return root;
+    return stage;
   }
 
   window.RTSHigherLowerBoard = { build, update, applyLayout };
