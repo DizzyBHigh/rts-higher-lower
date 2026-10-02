@@ -14,14 +14,6 @@
     render(host) {
       if (!host || !RTS.core.ui) return null;
 
-      const game = RTS.core.ui.section('Game Settings');
-      const rounds = RTS.core.ui.number({
-        value: 10, min: 1, step: 1
-      });
-      const length = RTS.core.ui.dropdown({
-        options: ['1 Minute', '30 Seconds'], value: '1 Minute'
-      });
-
       const overlay = RTS.core.ui.section('Overlay Settings');
       const duration = RTS.core.ui.number({
         value: 500, min: 0, step: 50
@@ -39,9 +31,6 @@
         const gameSettings = value.settings || defaults.settings;
         const animation = gameSettings.cardAnimation ||
           defaults.settings.cardAnimation;
-        rounds.value = Number(gameSettings.defaultRounds) || 10;
-        length.value = Number(gameSettings.roundLength) === 30000
-          ? '30 Seconds' : '1 Minute';
         duration.value = Math.max(0, Number(animation.duration) || 500);
         easing.value = animation.easing || 'ease-in-out';
       };
@@ -53,8 +42,7 @@
             RTSHigherLowerConfiguration.current || defaults
           ));
           configuration.settings = {
-            defaultRounds: Math.max(1, Number(rounds.value) || 10),
-            roundLength: length.value === '30 Seconds' ? 30000 : 60000,
+            ...(configuration.settings || {}),
             cardAnimation: {
               duration: Math.max(0, Number(duration.value) || 500),
               easing: easing.value || 'ease-in-out'
@@ -65,17 +53,13 @@
         }
       });
 
-      game.append(
-        RTS.core.ui.field('Default Rounds', rounds),
-        RTS.core.ui.field('Round Length', length)
-      );
       overlay.append(
         RTS.core.ui.field('Card Duration', duration),
         RTS.core.ui.field('Card Easing', easing),
         save,
         status
       );
-      host.append(game, overlay);
+      host.append(overlay);
 
       RTSHigherLowerConfiguration.onChange(configuration => {
         apply(configuration);
