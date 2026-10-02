@@ -30,19 +30,14 @@
   }
 
   function positions(root, layout) {
-    const board = root.getBoundingClientRect();
     const result = {};
     Object.keys(layout.cards).forEach(name => {
-      const target = root.querySelector('.hl-board__' + name);
-      if (!target) return;
-      const rect = target.getBoundingClientRect();
+      const value = layout.cards[name];
       result[name] = {
-        x: (rect.left + rect.width / 2 - board.left - board.width / 2) /
-          board.width * 100,
-        y: (board.top + board.height / 2 - rect.top - rect.height / 2) /
-          board.height * 100,
-        scaleX: rect.width / 150 * 100,
-        scaleY: rect.height / 210 * 100
+        x: Number(value.x) || 0,
+        y: Number(value.y) || 0,
+        scaleX: (Number(value.width) || 150) / 150 * 100,
+        scaleY: (Number(value.height) || 210) / 210 * 100
       };
     });
     return result;
