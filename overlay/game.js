@@ -65,29 +65,31 @@
       const draw = () => {
         if (!state.started)
           throw new Error('Higher Lower game has not started.');
-        if (state.round >= state.rounds)
+        if (state.round >= state.rounds && state.currentCard)
           return { type: 'game-complete', state: snapshot() };
 
         const previous = state.currentCard;
         const card = state.deck.shift();
-        state.round++;
-        state.previousCard = previous;
-        state.currentCard = card;
 
         if (!previous) {
+          state.currentCard = card;
           state.roundHistory.push({
-            round: state.round,
+            round: 0,
             card,
             result: 'start'
           });
 
           return {
             type: 'first-card',
-            round: state.round,
+            round: 0,
             card,
             state: snapshot()
           };
         }
+
+        state.round++;
+        state.previousCard = previous;
+        state.currentCard = card;
 
         const difference = card.value - previous.value;
         const result = difference > 0
