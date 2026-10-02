@@ -20,6 +20,7 @@
       '<div class="hl-stage">' +
         '<div class="hl-board"></div>' +
         '<div class="hl-board__round"></div>' +
+        '<div class="hl-board__round-timer">00:00</div>' +
         '<section class="hl-board__cards">' +
           '<div class="hl-board__card-slot hl-board__previous"></div>' +
           '<div class="hl-board__card-slot hl-board__lower"></div>' +
@@ -59,6 +60,7 @@
     const stage = panel.element.querySelector('.hl-stage') || build(panel);
     const board = appearance.board || {};
     const round = appearance.round || {};
+    const roundTimer = appearance.roundTimer || {};
     const roundTotal = appearance.roundTotal || {};
     const potTotal = appearance.potTotal || {};
     const roundTotalLabel = roundTotal.label || roundTotal;
@@ -88,12 +90,8 @@
       boardElement.style.borderRadius = radius + 'px';
     }
 
-    stage.style.setProperty('--hl-round-size', (Number(round.fontSize) || 34) + 'px');
-    stage.style.setProperty('--hl-round-color', round.color || '#30291f');
-    stage.style.setProperty('--hl-round-shadow-color', round.shadowColor || '#000000');
-    const roundShadow = shadowOffset(round.shadowDirection);
-    stage.style.setProperty('--hl-round-shadow-x', roundShadow.x);
-    stage.style.setProperty('--hl-round-shadow-y', roundShadow.y);
+    applyTextStyle(stage, 'round', round, { fontSize: 34, color: '#30291f', shadowColor: '#000000', textAlign: 'center' });
+    applyTextStyle(stage, 'round-timer', roundTimer, { fontSize: 34, color: '#30291f', shadowColor: '#000000', textAlign: 'center' });
     applyTextStyle(stage, 'round-total-label', roundTotalLabel, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
     applyTextStyle(stage, 'round-total-value', roundTotalValue, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
     applyTextStyle(stage, 'pot-total-label', potTotalLabel, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
@@ -105,6 +103,7 @@
     const board = layout.board;
     const elementSelectors = {
       round: '.hl-board__round',
+      roundTimer: '.hl-board__round-timer',
       roundTotalLabel: '.hl-board__round-total-label',
       roundTotalValue: '.hl-board__round-total-value',
       potTotalLabel: '.hl-board__pot-total-label',
