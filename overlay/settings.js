@@ -20,11 +20,6 @@
     activeBrand: 'default'
   };
 
-  const fonts = [
-    'Arial', 'Verdana', 'Trebuchet MS', 'Georgia', 'Times New Roman',
-    'Courier New', 'Impact', 'system-ui', 'sans-serif'
-  ];
-
   const number = (value, fallback, min = 0, max = 999) => {
     const next = Number(value);
     if (!Number.isFinite(next)) return fallback;
@@ -63,37 +58,25 @@
         onClick: () => {
           const name = window.prompt('Brand name');
           if (!name?.trim()) return;
-          if (!RTSHigherLowerConfiguration.createBrand(collectBrand(), name.trim()))
-            return;
+          if (!RTSHigherLowerConfiguration.createBrand(collectBrand(), name.trim())) return;
         }
       });
       const deleteBrand = RTS.core.ui.button('Delete', {
         onClick: () => RTSHigherLowerConfiguration.deleteBrand(brand.value)
       });
-      brand.addEventListener('change', () =>
-        RTSHigherLowerConfiguration.activateBrand(brand.value)
-      );
-      brandSection.append(
-        RTS.core.ui.field('Brand', brand),
-        newBrand,
-        deleteBrand
-      );
+      brand.addEventListener('change', () => RTSHigherLowerConfiguration.activateBrand(brand.value));
+      brandSection.append(RTS.core.ui.field('Brand', brand), newBrand, deleteBrand);
 
       const game = RTS.core.ui.section('Game Settings');
       const rounds = RTS.core.ui.number({ value: 10, min: 1, step: 1 });
-      const length = RTS.core.ui.dropdown({
-        options: ['1 Minute', '30 Seconds'], value: '1 Minute'
-      });
+      const length = RTS.core.ui.dropdown({ options: ['1 Minute', '30 Seconds'], value: '1 Minute' });
 
       const overlay = RTS.core.ui.section('Overlay Settings');
       const duration = RTS.core.ui.number({ value: 500, min: 0, step: 50 });
-      const easing = RTS.core.ui.dropdown({
-        options: ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'],
-        value: 'ease-in-out'
-      });
+      const easing = RTS.core.ui.dropdown({ options: ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'], value: 'ease-in-out' });
 
       const fontSettings = RTS.core.ui.section('Font Settings');
-      const font = RTS.core.ui.fontSelector({ options: fonts, value: 'Arial' });
+      const font = RTS.core.ui.fontPicker({ value: 'Arial', variant: '400' });
       fontSettings.append(RTS.core.ui.field('Font Selector', font));
 
       const board = RTS.core.ui.section('Background Board');
@@ -126,9 +109,7 @@
       const save = RTS.core.ui.button('Save Settings', {
         variant: 'blue',
         onClick: () => {
-          const configuration = normaliseBrands(clone(
-            RTSHigherLowerConfiguration.current || defaults
-          ));
+          const configuration = normaliseBrands(clone(RTSHigherLowerConfiguration.current || defaults));
           const activeBrand = brand.value || 'default';
           configuration.activeBrand = activeBrand;
           configuration.brands[activeBrand] = collectBrand();
@@ -176,16 +157,8 @@
         }
       });
 
-      game.append(
-        RTS.core.ui.field('Default Rounds', rounds),
-        RTS.core.ui.field('Round Length', length)
-      );
-      overlay.append(
-        RTS.core.ui.field('Card Duration', duration),
-        RTS.core.ui.field('Card Easing', easing),
-        save,
-        status
-      );
+      game.append(RTS.core.ui.field('Default Rounds', rounds), RTS.core.ui.field('Round Length', length));
+      overlay.append(RTS.core.ui.field('Card Duration', duration), RTS.core.ui.field('Card Easing', easing), save, status);
       board.append(
         RTS.core.ui.field('Colour 1', boardColor1),
         RTS.core.ui.field('Colour 2', boardColor2),
@@ -231,7 +204,7 @@
         length.value = Number(gameSettings.roundLength) === 30000 ? '30 Seconds' : '1 Minute';
         duration.value = Math.max(0, Number(animation.duration) || 500);
         easing.value = animation.easing || 'ease-in-out';
-        font.value = appearance.fontFamily || 'Arial';
+        font.setValue(appearance.fontFamily || 'Arial', '400');
         boardColor1.value = boardSettings.color1 || '#d8c79e';
         boardColor2.value = boardSettings.color2 || '#d8c79e';
         gradientDirection.setValue(boardSettings.gradientDirection ?? 90);
