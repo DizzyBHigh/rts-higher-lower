@@ -61,10 +61,22 @@
           if (!RTSHigherLowerConfiguration.createBrand(collectBrand(), name.trim())) return;
         }
       });
+      const saveBrand = RTS.core.ui.button('Save Brand', {
+        variant: 'blue',
+        onClick: () => {
+          const configuration = normaliseBrands(clone(RTSHigherLowerConfiguration.current || defaults));
+          const activeBrand = brand.value || 'default';
+          configuration.activeBrand = activeBrand;
+          configuration.brands[activeBrand] = collectBrand();
+          delete configuration.appearance;
+          RTSHigherLowerConfiguration.save(configuration);
+        }
+      });
       const deleteBrand = RTS.core.ui.button('Delete', {
         onClick: () => RTSHigherLowerConfiguration.deleteBrand(brand.value)
       });
       brand.addEventListener('change', () => RTSHigherLowerConfiguration.activateBrand(brand.value));
+      brandSection.append(RTS.core.ui.field('Brand', brand), newBrand, saveBrand, deleteBrand);
 
       const game = RTS.core.ui.section('Game Settings');
       const rounds = RTS.core.ui.number({ value: 10, min: 1, step: 1 });
@@ -105,6 +117,24 @@
       const potTotalDirection = RTS.core.ui.angle({ value: 0 });
 
       const status = RTS.core.ui.el('small', { className: 'hl-settings-status' });
+      const save = RTS.core.ui.button('Save Settings', {
+        variant: 'blue',
+        onClick: () => {
+          const configuration = normaliseBrands(clone(RTSHigherLowerConfiguration.current || defaults));
+          configuration.activeBrand = brand.value || 'default';
+          configuration.settings = {
+            defaultRounds: Math.max(1, Number(rounds.value) || 10),
+            roundLength: length.value === '30 Seconds' ? 30000 : 60000,
+            cardAnimation: {
+              duration: Math.max(0, Number(duration.value) || 500),
+              easing: easing.value || 'ease-in-out'
+            }
+          };
+          delete configuration.appearance;
+          status.textContent = 'Saving...';
+          RTSHigherLowerConfiguration.save(configuration);
+        }
+      });
 
       const collectBrand = () => ({
         fontFamily: font.value || 'Arial',
@@ -136,45 +166,9 @@
         }
       });
 
-      const saveBrand = RTS.core.ui.button('Save Brand', {
-        variant: 'blue',
-        onClick: () => {
-          const name = brand.value || 'default';
-          status.textContent = 'Saving brand...';
-          RTSHigherLowerConfiguration.saveBrand(collectBrand(), name);
-        }
-      });
-
-      const save = RTS.core.ui.button('Save Settings', {
-        variant: 'blue',
-        onClick: () => {
-          const configuration = normaliseBrands(clone(RTSHigherLowerConfiguration.current || defaults));
-          const activeBrand = brand.value || 'default';
-          configuration.activeBrand = activeBrand;
-          configuration.brands[activeBrand] = collectBrand();
-          configuration.settings = {
-            defaultRounds: Math.max(1, Number(rounds.value) || 10),
-            roundLength: length.value === '30 Seconds' ? 30000 : 60000,
-            cardAnimation: {
-              duration: Math.max(0, Number(duration.value) || 500),
-              easing: easing.value || 'ease-in-out'
-            }
-          };
-          delete configuration.appearance;
-          status.textContent = 'Saving...';
-          RTSHigherLowerConfiguration.save(configuration);
-        }
-      });
-
-      brandSection.append(
-        RTS.core.ui.field('Brand', brand),
-        newBrand,
-        saveBrand,
-        deleteBrand
-      );
-
       game.append(RTS.core.ui.field('Default Rounds', rounds), RTS.core.ui.field('Round Length', length));
       overlay.append(RTS.core.ui.field('Card Duration', duration), RTS.core.ui.field('Card Easing', easing), save, status);
+      fontSettings.append(RTS.core.ui.field('Font Selector', font));
       board.append(
         RTS.core.ui.field('Colour 1', boardColor1),
         RTS.core.ui.field('Colour 2', boardColor2),
@@ -201,7 +195,7 @@
         RTS.core.ui.field('Shadow Colour', potTotalShadow),
         RTS.core.ui.field('Shadow Direction', potTotalDirection)
       );
-      host.append(brandSection, game, overlay, fontSettings, board, round, roundTotal, potTotal);
+      host.append(game, overlay, brandSection, fontSettings, board, round, roundTotal, potTotal);
 
       const apply = configuration => {
         const value = normaliseBrands(clone(configuration || defaults));
