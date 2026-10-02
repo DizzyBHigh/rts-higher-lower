@@ -1,22 +1,22 @@
 (() => {
   const defaults = {
     board: {
-      x: 0, y: 0, scale: 100,
+      x: 0, y: 0, scale: 100, z: 0,
       width: 1200, height: 675
     },
     players: {
-      x: 55, y: 125, scale: 100,
+      x: 55, y: 125, scale: 100, z: 10,
       width: 260, height: 400
     },
     cards: {
-      previous: { x: 525, y: 125, width: 150, height: 210 },
-      lower: { x: 325, y: 385, width: 150, height: 210 },
-      deck: { x: 525, y: 385, width: 150, height: 210 },
-      higher: { x: 725, y: 385, width: 150, height: 210 }
+      previous: { x: 525, y: 125, z: 20, width: 150, height: 210 },
+      lower: { x: 325, y: 385, z: 20, width: 150, height: 210 },
+      deck: { x: 525, y: 385, z: 20, width: 150, height: 210 },
+      higher: { x: 725, y: 385, z: 20, width: 150, height: 210 }
     },
     elements: {
-      round: { x: 0, y: 42, width: 1200, height: 48 },
-      totals: { x: 845, y: 575, width: 300, height: 65 }
+      round: { x: 0, y: 42, z: 30, width: 1200, height: 48 },
+      totals: { x: 845, y: 575, z: 30, width: 300, height: 65 }
     }
   };
 
