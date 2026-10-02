@@ -33,77 +33,70 @@
   section.appendChild(settings);
   RTSHigherLowerSettings.render(settings);
 
-  const editor = document.createElement('div');
-  editor.className = 'hl-layout-editor';
-  section.appendChild(editor);
+  const layout = document.createElement('div');
+  layout.className = 'hl-layout-editor';
+  section.appendChild(layout);
+  layout.appendChild(RTS.core.ui.el('strong', {
+    textContent: 'Overlay Layout'
+  }));
 
-  const layoutTargets = [
-    'board',
-    'players',
-    ...Object.keys(extension.api.getLayout().cards).map(name => 'card:' + name),
-    ...Object.keys(extension.api.getLayout().elements)
-  ];
   const target = RTS.core.ui.positionSelector({
-    options: layoutTargets,
+    options: [
+      'board', 'players', 'previous', 'lower', 'deck', 'higher',
+      'round', 'totals'
+    ],
     value: 'board'
   });
-  editor.append(RTS.core.ui.field('Target', target));
+  layout.append(RTS.core.ui.field('Target', target));
 
-  let layout = extension.api.getLayout();
+  let current = extension.api.getLayout();
 
   const getValue = () => {
-    if (target.value === 'board') return layout.board;
-    if (target.value === 'players') return layout.players;
-    if (target.value.startsWith('card:'))
-      return layout.cards[target.value.slice(5)];
-    return layout.elements[target.value];
+    if (target.value === 'board') return current.board;
+    if (target.value === 'players') return current.players;
+    if (current.cards[target.value]) return current.cards[target.value];
+    return current.elements[target.value];
   };
 
   const apply = patch => {
-    const next = RTSHigherLowerLayout.create(layout);
+    const next = RTSHigherLowerLayout.create(current);
     const item = target.value === 'board'
       ? next.board
       : target.value === 'players'
         ? next.players
-        : target.value.startsWith('card:')
-          ? next.cards[target.value.slice(5)]
-          : next.elements[target.value];
+        : next.cards[target.value] || next.elements[target.value];
     Object.assign(item, patch);
-    layout = extension.api.setLayout(next);
+    current = extension.api.setLayout(next);
     saveConfiguration();
   };
 
   const render = () => {
-    editor.querySelectorAll('.hl-shared-fields').forEach(node => node.remove());
+    layout.querySelectorAll('.hl-shared-fields').forEach(node => node.remove());
     const value = getValue();
     const fields = document.createElement('div');
     fields.className = 'hl-shared-fields';
-
     const position = RTS.core.ui.positionEditor({
       fields: target.value === 'board' ? ['x', 'y', 'scale'] : ['x', 'y'],
       value,
       onChange: next => apply(next)
     });
     fields.append(RTS.core.ui.field('Position', position));
-
     const ratio = RTS.core.ui.aspectRatio({
       width: value.width,
       height: value.height,
       onChange: (width, height) => apply({ width, height })
     });
     fields.append(RTS.core.ui.field('Size', ratio));
-    editor.appendChild(fields);
+    layout.appendChild(fields);
   };
 
   const saveConfiguration = () => {
-    const configuration = JSON.parse(
-      JSON.stringify(RTSHigherLowerConfiguration.current || {
-        settings: {},
-        layout: {},
-        game: {}
-      })
-    );
-    configuration.layout = layout;
+    const configuration = JSON.parse(JSON.stringify(
+      RTSHigherLowerConfiguration.current || {
+        settings: {}, layout: {}, game: {}
+      }
+    ));
+    configuration.layout = current;
     RTSHigherLowerConfiguration.save(configuration);
   };
 
@@ -117,8 +110,7 @@
       if (action === 'start') extension.api.startGame(10);
       if (action === 'draw') await extension.api.drawCard();
       if (action === 'reset') {
-        layout = RTSHigherLowerLayout.create();
-        layout = extension.api.setLayout(layout);
+        current = extension.api.setLayout(RTSHigherLowerLayout.create());
         saveConfiguration();
         render();
       }
