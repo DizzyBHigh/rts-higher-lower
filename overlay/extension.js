@@ -22,6 +22,11 @@
       RTS.core.events?.on('RTS - Overlay - Extension Command', message => handleCommand(extension, message));
     }
   };
+  const getBrand = configuration => {
+    const brands = configuration?.brands || {};
+    const name = configuration?.activeBrand || Object.keys(brands)[0] || 'default';
+    return brands[name] || configuration?.appearance || {};
+  };
   async function startGame(extension, rounds) {
     const players = extension.state.configuration?.game?.players || [];
     const bonusPot = extension.state.configuration?.game?.bonusPot || 0;
@@ -39,7 +44,7 @@
     RTSHigherLowerRecovery.apply(extension, value);
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
-    RTSHigherLowerBoard.applyAppearance(panel, value.appearance);
+    RTSHigherLowerBoard.applyAppearance(panel, getBrand(value));
     panel.show();
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerCardsPresentation.applyLayout(extension);
@@ -58,7 +63,7 @@
     extension.state.layout = RTSHigherLowerLayout.create(RTSHigherLowerLayout.merge(extension.state.layout, value));
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
-    RTSHigherLowerBoard.applyAppearance(panel, extension.state.configuration?.appearance);
+    RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
     panel.show();
     RTSHigherLowerPlayersPresentation.applyLayout(extension);
     RTSHigherLowerCardsPresentation.applyLayout(extension);
@@ -69,7 +74,7 @@
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.update(panel, extension.state.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
-    RTSHigherLowerBoard.applyAppearance(panel, extension.state.configuration?.appearance);
+    RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
     panel.show();
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
   }
