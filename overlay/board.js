@@ -109,6 +109,14 @@
   function applyLayout(panel, layout) {
     const stage = panel.element.querySelector('.hl-stage') || build(panel);
     const board = layout.board;
+    const elementSelectors = {
+      round: '.hl-board__round',
+      roundTotalLabel: '.hl-board__round-total-label',
+      roundTotalValue: '.hl-board__round-total-value',
+      potTotalLabel: '.hl-board__pot-total-label',
+      potTotalValue: '.hl-board__pot-total-value'
+    };
+
     stage.style.width = '1920px';
     stage.style.height = '1080px';
 
@@ -122,7 +130,7 @@
     boardElement.style.transformOrigin = 'top left';
 
     Object.keys(layout.elements).forEach(name => {
-      applySlot(stage.querySelector('.hl-board__' + name), layout.elements[name]);
+      applySlot(stage.querySelector(elementSelectors[name]), layout.elements[name]);
     });
 
     Object.keys(layout.cards).forEach(name => {
