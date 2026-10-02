@@ -44,10 +44,9 @@
   layoutControls.className = 'hl-layout-controls';
   layoutControls.innerHTML = '<span>Layout</span>';
   const layoutSelect = document.createElement('select');
-  const saveLayoutButton = RTS.core.ui.button('Save Layout');
   const saveAsButton = RTS.core.ui.button('Save As');
   const deleteButton = RTS.core.ui.button('Delete');
-  layoutControls.append(layoutSelect, saveLayoutButton, saveAsButton, deleteButton);
+  layoutControls.append(layoutSelect, saveAsButton, deleteButton);
   section.appendChild(layoutControls);
 
   const refreshLayoutList = () => {
@@ -85,7 +84,6 @@
   layoutSelect.addEventListener('change', () => {
     RTSHigherLowerConfiguration.activateLayout(layoutSelect.value);
   });
-  saveLayoutButton.addEventListener('click', saveLayout);
   saveAsButton.addEventListener('click', saveAsLayout);
   deleteButton.addEventListener('click', deleteLayout);
 
