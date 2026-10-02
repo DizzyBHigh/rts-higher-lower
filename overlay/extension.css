@@ -1,4 +1,6 @@
 .rts-panel[data-panel-id="higher-lower-board"] {
+  width: 1920px;
+  height: 1080px;
   min-height: 0;
   padding: 0;
   border: 0;
@@ -6,8 +8,15 @@
   overflow: visible;
 }
 
-.hl-board {
+.hl-stage {
   position: relative;
+  width: 1920px;
+  height: 1080px;
+  overflow: visible;
+}
+
+.hl-board {
+  position: absolute;
   box-sizing: border-box;
   border: 10px solid #6f5a3c;
   border-radius: 28px;
@@ -25,19 +34,14 @@
   box-sizing: border-box;
 }
 
+.hl-board__cards { display: contents; }
+.hl-board__card-slot { pointer-events: none; }
+
 .hl-board__round {
   text-align: center;
   font-size: 34px;
   font-weight: 700;
   letter-spacing: 2px;
-}
-
-.hl-board__cards {
-  inset: 0;
-}
-
-.hl-board__card-slot {
-  pointer-events: none;
 }
 
 .hl-board__deck {
@@ -50,7 +54,7 @@
   width: 150px;
   height: 210px;
   transform-style: preserve-3d;
-  z-index: 2;
+  z-index: 20;
   will-change: transform;
 }
 
@@ -148,12 +152,7 @@
   margin-top: 12px;
 }
 
-.hl-layout-editor label {
-  display: grid;
-  gap: 4px;
-  font-size: 12px;
-}
-
+.hl-layout-editor label { display: grid; gap: 4px; font-size: 12px; }
 .hl-layout-editor select,
 .hl-layout-editor input {
   min-width: 90px;
@@ -163,10 +162,7 @@
   background: #181818;
   color: #eee;
 }
-
-.hl-layout-editor select {
-  min-width: 150px;
-}
+.hl-layout-editor select { min-width: 150px; }
 
 .hl-board__player-vote {
   position: relative;
@@ -189,33 +185,14 @@
   border-right: 7px solid transparent;
 }
 
-.hl-board__player-vote--higher {
-  color: #0384CB;
-}
-
-.hl-board__player-vote--higher::before {
-  border-bottom: 11px solid currentColor;
-}
-
-.hl-board__player-vote--lower {
-  color: #b44;
-}
-
-.hl-board__player-vote--lower::before {
-  border-top: 11px solid currentColor;
-}
-
-.hl-board__player-vote--waiting {
-  color: #777;
-}
-
+.hl-board__player-vote--higher { color: #0384CB; }
+.hl-board__player-vote--higher::before { border-bottom: 11px solid currentColor; }
+.hl-board__player-vote--lower { color: #b44; }
+.hl-board__player-vote--lower::before { border-top: 11px solid currentColor; }
+.hl-board__player-vote--waiting { color: #777; }
 .hl-board__player-vote--waiting::before {
   width: 10px;
   height: 2px;
   background: currentColor;
 }
-
-.hl-board__player-bet {
-  min-width: 70px;
-  text-align: right;
-}
+.hl-board__player-bet { min-width: 70px; text-align: right; }
