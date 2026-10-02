@@ -107,11 +107,29 @@
 
   refreshLayoutList();
 
-  const targets = [
-    'board', 'players', 'previous', 'lower', 'deck', 'higher', 'round', 'totals'
-  ].map(id => ({
+  const targetLabels = {
+    board: 'Board',
+    players: 'Players Panel',
+    previous: 'Previous Card Position',
+    higher: 'Higher Card Position',
+    lower: 'Lower Card Position',
+    deck: 'Deck Position',
+    round: 'Current Round Title',
+    roundTotalLabel: 'Round Total Label',
+    roundTotalValue: 'Round Total Value',
+    potTotalLabel: 'Pot Total Label',
+    potTotalValue: 'Pot Total Value'
+  };
+
+  const targetIds = [
+    'board', 'players', 'previous', 'higher', 'lower', 'deck',
+    'round', 'roundTotalLabel', 'roundTotalValue',
+    'potTotalLabel', 'potTotalValue'
+  ];
+
+  const targets = targetIds.map(id => ({
     id,
-    label: id,
+    label: targetLabels[id],
     get: () => getValue(current, id),
     set: patch => {
       const next = RTSHigherLowerLayout.create(current);
