@@ -155,7 +155,7 @@
         roundTotal: {
           fontSize: number(roundTotalSize.value, 24, 1, 200),
           color: roundTotalColor.value,
-          shadowColor: roundTotal.value,
+          shadowColor: roundTotalShadow.value,
           shadowDirection: roundTotalShadowDirection.getValue()
         },
         potTotal: {
