@@ -23,7 +23,7 @@
 
     request() {
       return RTSOverlaySocket.requestAction(
-        'RTS - Higher Lower - Sync',
+        'RTS - Higher Lower Game - Core',
         { rtsHigherLowerOperation: 'get' }
       );
     },
@@ -31,7 +31,7 @@
     save(configuration) {
       Configuration.current = configuration;
       return RTSOverlaySocket.requestAction(
-        'RTS - Higher Lower - Sync',
+        'RTS - Higher Lower Game - Core',
         {
           rtsHigherLowerOperation: 'save',
           rtsHigherLowerConfiguration: JSON.stringify(configuration)
@@ -44,7 +44,6 @@
         Configuration.current || { settings: {}, game: {} }
       ));
       const value = JSON.parse(JSON.stringify(layout));
-      value.coordinateSpace = 'overlay';
       configuration.layouts = {
         ...(configuration.layouts || {}),
         default: value
