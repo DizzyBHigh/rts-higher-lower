@@ -8,6 +8,8 @@
     init(extension) {
       extension.state.game = RTS.core.higherLowerGame.create();
       extension.state.card = null;
+      extension.state.previousCardElement = null;
+      extension.state.resultCardElement = null;
       extension.state.panel = null;
       extension.state.playersPanel = null;
       extension.state.layout = RTSHigherLowerLayout.create();
@@ -34,8 +36,8 @@
       extension.api.drawCard = () => drawCard(extension);
       extension.api.showCard = card =>
         RTSHigherLowerPresentation.showCard(extension, card);
-      extension.api.flipCard = card =>
-        RTSHigherLowerPresentation.flipCard(extension, card);
+      extension.api.flipCard = () =>
+        RTSHigherLowerPresentation.flipCard(extension);
       extension.api.moveCard = position =>
         RTSHigherLowerPresentation.moveCard(extension, position);
       RTS.core.events?.on(
@@ -115,7 +117,7 @@
     if (command === 'layout') extension.api.setLayout(data);
     if (command === 'draw') extension.api.drawCard();
     if (command === 'show') extension.api.showCard(data);
-    if (command === 'flip') extension.api.flipCard(data);
+    if (command === 'flip') extension.api.flipCard();
     if (command === 'move') extension.api.moveCard(data?.position || data);
   }
   RTS.core.extensions.registerSource(manifest.id, source);
