@@ -1,9 +1,5 @@
 (() => {
-  const manifest = {
-    id: 'rts-higher-lower',
-    name: 'RTS Higher Lower',
-    version: '0.1.0'
-  };
+  const manifest = { id: 'rts-higher-lower', name: 'RTS Higher Lower', version: '0.1.0' };
   const source = {
     init(extension) {
       extension.state.game = RTS.core.higherLowerGame.create();
@@ -13,19 +9,9 @@
       extension.state.panel = null;
       extension.state.playersPanel = null;
       extension.state.layout = RTSHigherLowerLayout.create();
-      extension.state.board = {
-        round: 0, players: [], roundTotal: 0, potTotal: 0
-      };
+      extension.state.board = { round: 0, players: [], roundTotal: 0, potTotal: 0 };
       extension.configure = configuration => configure(extension, configuration);
-      extension.api.startGame = rounds => {
-        const players = extension.state.configuration?.game?.players || [];
-        const bonusPot = extension.state.configuration?.game?.bonusPot || 0;
-        const state = extension.state.game.start(rounds, players, bonusPot);
-        RTSHigherLowerPresentation.resetCards(extension);
-        updateBoard(extension, { round: 0, players: state.players });
-        RTSHigherLowerPersistence.save(extension.state.game);
-        return state;
-      };
+      extension.api.startGame = rounds => startGame(extension, rounds);
       extension.api.updateState = data => updateBoard(extension, data);
       extension.api.setLayout = layout => setLayout(extension, layout);
       extension.api.getLayout = () => extension.state.layout;
@@ -33,10 +19,19 @@
       extension.api.showCard = card => RTSHigherLowerPresentation.showCard(extension, card);
       extension.api.flipCard = () => RTSHigherLowerPresentation.flipCard(extension);
       extension.api.moveCard = position => RTSHigherLowerPresentation.moveCard(extension, position);
-      RTS.core.events?.on('RTS - Overlay - Extension Command',
-        message => handleCommand(extension, message));
+      RTS.core.events?.on('RTS - Overlay - Extension Command', message => handleCommand(extension, message));
     }
   };
+  async function startGame(extension, rounds) {
+    const players = extension.state.configuration?.game?.players || [];
+    const bonusPot = extension.state.configuration?.game?.bonusPot || 0;
+    const state = extension.state.game.start(rounds, players, bonusPot);
+    RTSHigherLowerPresentation.resetCards(extension);
+    updateBoard(extension, { round: 0, players: state.players });
+    await drawCard(extension);
+    RTSHigherLowerPersistence.save(extension.state.game);
+    return extension.state.game.state();
+  }
   function configure(extension, configuration) {
     const value = configuration || {};
     extension.state.configuration = value;
@@ -55,13 +50,11 @@
     updateBoard(extension, { round: result.round });
     await RTSHigherLowerPresentation.presentDraw(extension, result);
     RTSHigherLowerPersistence.save(extension.state.game);
-    reportResult(extension, result);
+    if (result.type !== 'first-card') reportResult(extension, result);
     return result;
   }
   function setLayout(extension, value) {
-    extension.state.layout = RTSHigherLowerLayout.create(
-      RTSHigherLowerLayout.merge(extension.state.layout, value)
-    );
+    extension.state.layout = RTSHigherLowerLayout.create(RTSHigherLowerLayout.merge(extension.state.layout, value));
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     panel.show();
@@ -81,10 +74,7 @@
     RTSOverlaySocket.requestAction('RTS - Overlay - Extension Result', {
       rtsOverlayExtension: manifest.id,
       rtsOverlayEvent: 'higher-lower-result',
-      rtsOverlayData: JSON.stringify({
-        round: result.round, previousCard: result.previous,
-        currentCard: result.card, result: result.result
-      })
+      rtsOverlayData: JSON.stringify({ round: result.round, previousCard: result.previous, currentCard: result.card, result: result.result })
     });
   }
   function handleCommand(extension, message) {
