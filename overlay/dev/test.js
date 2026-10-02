@@ -68,6 +68,28 @@
     Object.assign(item, patch);
     current = extension.api.setLayout(next);
     saveConfiguration();
+    showTarget();
+  };
+
+  const showTarget = () => {
+    const panel = extension.state.panel;
+    const root = panel?.element?.querySelector('.hl-board');
+    if (!root) return;
+
+    let marker = root.querySelector('.hl-layout-target');
+    if (!marker) {
+      marker = document.createElement('div');
+      marker.className = 'hl-layout-target';
+      root.appendChild(marker);
+    }
+
+    const value = getValue();
+    marker.dataset.target = target.value;
+    marker.style.left = value.x + 'px';
+    marker.style.top = value.y + 'px';
+    marker.style.width = value.width + 'px';
+    marker.style.height = value.height + 'px';
+    marker.textContent = target.value;
   };
 
   const render = () => {
@@ -88,6 +110,7 @@
     });
     fields.append(RTS.core.ui.field('Size', ratio));
     layout.appendChild(fields);
+    showTarget();
   };
 
   const saveConfiguration = () => {
