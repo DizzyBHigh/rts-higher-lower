@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 public class CPHInline
 {
     private const string Key = "rts-higher-lower";
-    private const string EventName = "RTS - Higher Lower - Configuration";
+    private const string EventName = "RTS - Higher Lower Game";
 
     public bool Execute()
     {
@@ -242,7 +242,8 @@ public class CPHInline
                 bonusDelta += bet + pot;
                 Increment(user.id, user.platform, "wrong");
                 Increment(
-                    user.id, user.platform, "pointsLost", bet + pot);
+                    user.id, user.platform,
+                    "pointsLost", bet + pot);
                 players.RemoveAt(i);
             }
         }
