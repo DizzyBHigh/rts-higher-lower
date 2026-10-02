@@ -29,7 +29,7 @@
     },
 
     save(configuration) {
-      Configuration.current = configuration;
+      if (!Configuration.apply(configuration)) return false;
       return RTSOverlaySocket.requestAction(
         'RTS - Higher Lower Game - Core',
         {
