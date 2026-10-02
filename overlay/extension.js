@@ -39,6 +39,7 @@
     RTSHigherLowerRecovery.apply(extension, value);
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+    RTSHigherLowerBoard.applyAppearance(panel, value.appearance);
     panel.show();
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerCardsPresentation.applyLayout(extension);
@@ -57,6 +58,7 @@
     extension.state.layout = RTSHigherLowerLayout.create(RTSHigherLowerLayout.merge(extension.state.layout, value));
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+    RTSHigherLowerBoard.applyAppearance(panel, extension.state.configuration?.appearance);
     panel.show();
     RTSHigherLowerPlayersPresentation.applyLayout(extension);
     RTSHigherLowerCardsPresentation.applyLayout(extension);
@@ -67,6 +69,7 @@
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.update(panel, extension.state.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+    RTSHigherLowerBoard.applyAppearance(panel, extension.state.configuration?.appearance);
     panel.show();
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
   }
