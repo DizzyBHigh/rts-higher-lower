@@ -91,17 +91,33 @@
 .hl-layout-target {
   position: absolute;
   box-sizing: border-box;
-  z-index: 10;
-  border: 2px dashed #0384CB;
-  border-radius: 6px;
-  background: rgba(3, 132, 203, 0.12);
+  z-index: 100;
+  border: 3px dashed #0384CB;
+  border-radius: 14px;
+  background: rgba(3, 132, 203, 0.18);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 0 18px rgba(3, 132, 203, 0.75);
   pointer-events: none;
-  color: #0384CB;
-  font: 700 14px/1 sans-serif;
+  color: #fff;
+  font: 700 16px/1 sans-serif;
   text-transform: uppercase;
   text-align: center;
-  padding: 6px;
-  overflow: hidden;
+  padding: 8px;
+  overflow: visible;
+}
+
+.hl-layout-target::before {
+  content: attr(data-target);
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -100%);
+  padding: 5px 9px;
+  border-radius: 4px 4px 0 0;
+  background: #0384CB;
+  color: #fff;
+  white-space: nowrap;
+  font-size: 13px;
+  letter-spacing: 0.5px;
 }
 
 .hl-layout-target::after {
@@ -109,11 +125,12 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 10px;
-  height: 10px;
+  width: 18px;
+  height: 18px;
   transform: translate(-50%, -50%);
-  border: 1px solid #0384CB;
+  border: 2px solid #0384CB;
   border-radius: 50%;
+  box-shadow: 0 -14px 0 -8px #0384CB, 0 14px 0 -8px #0384CB, -14px 0 0 -8px #0384CB, 14px 0 0 -8px #0384CB;
 }
 
 .extension-dev-tools {
