@@ -31,6 +31,7 @@
 }
 
 .hl-board__round,
+.hl-board__round-timer,
 .hl-board__cards,
 .hl-board__card-slot,
 .hl-board__total-label,
@@ -43,12 +44,21 @@
 .hl-board__card-slot { pointer-events: none; }
 
 .hl-board__round {
-  text-align: center;
+  text-align: var(--hl-round-align, center);
   font-size: var(--hl-round-size, 34px);
   font-weight: 700;
   letter-spacing: 2px;
   color: var(--hl-round-color, #30291f);
   text-shadow: var(--hl-round-shadow-x, 3px) var(--hl-round-shadow-y, 0) 2px var(--hl-round-shadow-color, #000000);
+}
+
+.hl-board__round-timer {
+  text-align: var(--hl-round-timer-align, center);
+  font-size: var(--hl-round-timer-size, 34px);
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--hl-round-timer-color, #30291f);
+  text-shadow: var(--hl-round-timer-shadow-x, 3px) var(--hl-round-timer-shadow-y, 0) 2px var(--hl-round-timer-shadow-color, #000000);
 }
 
 .hl-board__deck {
