@@ -57,6 +57,7 @@
     panel.show(extension.state.layout.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
+    RTSHigherLowerCardsPresentation.applyLayout(extension);
   }
   async function drawCard(extension) {
     const result = extension.state.game.draw();
@@ -78,6 +79,7 @@
     panel.show(extension.state.layout.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerPlayersPresentation.applyLayout(extension);
+    RTSHigherLowerCardsPresentation.applyLayout(extension);
     return extension.state.layout;
   }
   function updateBoard(extension, data) {
