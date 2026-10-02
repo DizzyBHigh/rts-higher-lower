@@ -45,9 +45,13 @@
         settings: {}, layout: {}, game: {}
       }
     ));
-    configuration.layout = current;
+    configuration.layout = JSON.parse(JSON.stringify(extension.api.getLayout()));
     RTSHigherLowerConfiguration.save(configuration);
   };
+
+  RTSHigherLowerConfiguration.onChange(() => {
+    current = extension.api.getLayout();
+  });
 
   const targets = [
     'board', 'players', 'previous', 'lower', 'deck', 'higher', 'round', 'totals'
