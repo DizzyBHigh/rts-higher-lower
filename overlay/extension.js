@@ -54,7 +54,7 @@
     panel.runner.configure({ Center: extension.state.layout.board });
     panel.show(extension.state.layout.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
-    RTSHigherLowerPresentation.updatePlayers(extension, extension.state.board);
+    RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
   }
   async function drawCard(extension) {
     const result = extension.state.game.draw();
@@ -75,7 +75,7 @@
     panel.runner.configure({ Center: extension.state.layout.board });
     panel.show(extension.state.layout.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
-    RTSHigherLowerPresentation.applyPlayersLayout(extension);
+    RTSHigherLowerPlayersPresentation.applyLayout(extension);
     return extension.state.layout;
   }
   function updateBoard(extension, data) {
@@ -87,7 +87,7 @@
     RTSHigherLowerBoard.update(panel, extension.state.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     panel.show(extension.state.layout.board);
-    RTSHigherLowerPresentation.updatePlayers(extension, extension.state.board);
+    RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
   }
   function reportResult(extension, result) {
     RTSOverlaySocket.requestAction(
