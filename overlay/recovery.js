@@ -5,10 +5,30 @@
       const gameState = extension.state.game.restore(value.game);
       extension.state.card = gameState.currentCard || null;
 
+      const history = Array.isArray(gameState.roundHistory)
+        ? gameState.roundHistory
+        : [];
+      const last = history[history.length - 1];
+      const previous = gameState.previousCard;
+      const currentPosition = last?.result === 'lower'
+        ? 'lower'
+        : last?.result === 'higher'
+          ? 'higher'
+          : last?.result === 'equal'
+            ? 'deck'
+            : 'previous';
+
+      if (gameState.round > 1 && previous)
+        RTSHigherLowerPresentation.restoreCard(
+          extension, previous, 'previous', true
+        );
+
       if (gameState.currentCard)
-        RTSHigherLowerPresentation.showCard(
+        RTSHigherLowerPresentation.restoreCard(
           extension,
-          gameState.currentCard
+          gameState.currentCard,
+          currentPosition,
+          gameState.round <= 1
         );
 
       updateBoard(extension, gameState);
