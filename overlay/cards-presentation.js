@@ -35,9 +35,7 @@
       extension.state.previousCardElement = node;
     } else {
       const destination = result.result === 'lower' ? 'lower' :
-        result.result === 'higher' ? 'higher' : null;
-      if (!destination)
-        throw new Error('No card slot is defined for result: ' + result.result);
+        result.result === 'higher' ? 'higher' : 'deck';
       await RTSHigherLowerCards.move(
         node, root, extension.state.layout, 'deck', destination, options
       );
@@ -58,12 +56,11 @@
 
     const configured = RTSHigherLowerCards.options(extension);
     configured.duration = 0;
-    const target = position;
     return RTSHigherLowerCards.move(
-      node, root, extension.state.layout, target, target, configured
+      node, root, extension.state.layout, position, position, configured
     ).then(() => {
       node.querySelector('.hl-card__inner').style.transform = 'rotateY(180deg)';
-      node.dataset.slot = target;
+      node.dataset.slot = position;
       if (previous) extension.state.previousCardElement = node;
       else extension.state.resultCardElement = node;
     });
