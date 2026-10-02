@@ -39,15 +39,8 @@
     return layout.cards[id] || layout.elements[id];
   };
 
-  const saveConfiguration = () => {
-    const configuration = JSON.parse(JSON.stringify(
-      RTSHigherLowerConfiguration.current || {
-        settings: {}, layout: {}, game: {}
-      }
-    ));
-    configuration.layout = JSON.parse(JSON.stringify(extension.api.getLayout()));
-    RTSHigherLowerConfiguration.save(configuration);
-  };
+  const saveLayout = () =>
+    RTSHigherLowerConfiguration.saveLayout(extension.api.getLayout());
 
   RTSHigherLowerConfiguration.onChange(() => {
     current = extension.api.getLayout();
@@ -59,18 +52,17 @@
     id,
     label: id,
     get: () => getValue(current, id),
-    set: (patch, options = {}) => {
+    set: patch => {
       const next = RTSHigherLowerLayout.create(current);
       Object.assign(getValue(next, id), patch);
       current = extension.api.setLayout(next);
-      if (!options.transient) saveConfiguration();
     }
   }));
 
   const editor = RTS.core.positionEditor.mount(section, {
     title: 'Overlay Layout',
     targets,
-    onCommit: saveConfiguration
+    onSave: saveLayout
   });
 
   section.addEventListener('click', async event => {
@@ -82,7 +74,6 @@
       if (action === 'draw') await extension.api.drawCard();
       if (action === 'reset') {
         current = extension.api.setLayout(RTSHigherLowerLayout.create());
-        saveConfiguration();
         editor.refresh();
       }
     } catch (error) {
