@@ -22,6 +22,10 @@
     getPanel,
     showCard: (extension, card) =>
       RTSHigherLowerCardsPresentation.showCard(extension, card),
+    restoreCard: (extension, card, position, previous) =>
+      RTSHigherLowerCardsPresentation.restoreCard(
+        extension, card, position, previous
+      ),
     presentDraw: (extension, result) =>
       RTSHigherLowerCardsPresentation.presentDraw(extension, result),
     resetCards: extension =>
