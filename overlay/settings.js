@@ -22,8 +22,11 @@
     'Courier New', 'Impact', 'system-ui', 'sans-serif'
   ];
 
-  const number = (value, fallback, min = 0, max = 999) =>
-    Math.min(max, Math.max(min, Number(value) || fallback));
+  const number = (value, fallback, min = 0, max = 999) => {
+    const next = Number(value);
+    if (!Number.isFinite(next)) return fallback;
+    return Math.min(max, Math.max(min, next));
+  };
 
   const Settings = {
     render(host) {
