@@ -46,6 +46,7 @@ public class CPHInline
             CPH.SetArgument(
                 "rtsHigherLowerConfiguration",
                 configuration.ToString(Newtonsoft.Json.Formatting.None));
+            CPH.SetArgument("rtsHigherLowerSaveStatus", "Layout saved");
             CPH.TriggerEvent(EventName, true);
             return true;
         }
