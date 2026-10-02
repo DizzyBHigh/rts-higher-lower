@@ -65,6 +65,12 @@
     onSave: saveLayout
   });
 
+  RTSOverlaySocket.onEvent(message => {
+    const args = message?.data?.args ?? message?.args;
+    if (args?.rtsHigherLowerSaveStatus)
+      editor.setSaveStatus(args.rtsHigherLowerSaveStatus);
+  });
+
   section.addEventListener('click', async event => {
     const action = event.target?.dataset?.action;
     if (!action) return;
