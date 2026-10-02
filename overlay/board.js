@@ -27,8 +27,14 @@
           '<div class="hl-board__card-slot hl-board__higher"></div>' +
         '</section>' +
         '<div class="hl-board__totals">' +
-          '<div>Round Total <strong class="hl-board__round-total"></strong></div>' +
-          '<div>Pot Total <strong class="hl-board__pot-total"></strong></div>' +
+          '<div class="hl-board__total-row hl-board__round-total-row">' +
+            '<span class="hl-board__total-label hl-board__round-total-label">Round Total</span>' +
+            '<strong class="hl-board__total-value hl-board__round-total-value"></strong>' +
+          '</div>' +
+          '<div class="hl-board__total-row hl-board__pot-total-row">' +
+            '<span class="hl-board__total-label hl-board__pot-total-label">Pot Total</span>' +
+            '<strong class="hl-board__total-value hl-board__pot-total-value"></strong>' +
+          '</div>' +
         '</div>' +
       '</div>'
     );
@@ -44,15 +50,27 @@
     target.style.zIndex = String(value.z ?? 0);
   }
 
+  function applyTextStyle(stage, prefix, settings, fallback) {
+    const value = settings || fallback;
+    const shadow = shadowOffset(value.shadowDirection);
+    stage.style.setProperty('--hl-' + prefix + '-size', (Number(value.fontSize) || fallback.fontSize) + 'px');
+    stage.style.setProperty('--hl-' + prefix + '-color', value.color || fallback.color);
+    stage.style.setProperty('--hl-' + prefix + '-shadow-color', value.shadowColor || fallback.shadowColor);
+    stage.style.setProperty('--hl-' + prefix + '-shadow-x', shadow.x);
+    stage.style.setProperty('--hl-' + prefix + '-shadow-y', shadow.y);
+    stage.style.setProperty('--hl-' + prefix + '-align', value.textAlign || fallback.textAlign || 'right');
+  }
+
   function applyAppearance(panel, appearance = {}) {
     const stage = panel.element.querySelector('.hl-stage') || build(panel);
     const board = appearance.board || {};
     const round = appearance.round || {};
     const roundTotal = appearance.roundTotal || {};
     const potTotal = appearance.potTotal || {};
-    const roundShadow = shadowOffset(round.shadowDirection);
-    const roundTotalShadow = shadowOffset(roundTotal.shadowDirection);
-    const potTotalShadow = shadowOffset(potTotal.shadowDirection);
+    const roundTotalLabel = roundTotal.label || roundTotal;
+    const roundTotalValue = roundTotal.value || roundTotal;
+    const potTotalLabel = potTotal.label || potTotal;
+    const potTotalValue = potTotal.value || potTotal;
     const gradientAngle = ((Number(board.gradientDirection) || 0) + 90) % 360;
     const color1 = board.color1 || '#d8c79e';
     const color2 = board.color2 || '#d8c79e';
@@ -79,18 +97,13 @@
     stage.style.setProperty('--hl-round-size', (Number(round.fontSize) || 34) + 'px');
     stage.style.setProperty('--hl-round-color', round.color || '#30291f');
     stage.style.setProperty('--hl-round-shadow-color', round.shadowColor || '#000000');
+    const roundShadow = shadowOffset(round.shadowDirection);
     stage.style.setProperty('--hl-round-shadow-x', roundShadow.x);
     stage.style.setProperty('--hl-round-shadow-y', roundShadow.y);
-    stage.style.setProperty('--hl-round-total-size', (Number(roundTotal.fontSize) || 24) + 'px');
-    stage.style.setProperty('--hl-round-total-color', roundTotal.color || '#30291f');
-    stage.style.setProperty('--hl-round-total-shadow-color', roundTotal.shadowColor || '#000000');
-    stage.style.setProperty('--hl-round-total-shadow-x', roundTotalShadow.x);
-    stage.style.setProperty('--hl-round-total-shadow-y', roundTotalShadow.y);
-    stage.style.setProperty('--hl-pot-total-size', (Number(potTotal.fontSize) || 24) + 'px');
-    stage.style.setProperty('--hl-pot-total-color', potTotal.color || '#30291f');
-    stage.style.setProperty('--hl-pot-total-shadow-color', potTotal.shadowColor || '#000000');
-    stage.style.setProperty('--hl-pot-total-shadow-x', potTotalShadow.x);
-    stage.style.setProperty('--hl-pot-total-shadow-y', potTotalShadow.y);
+    applyTextStyle(stage, 'round-total-label', roundTotalLabel, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
+    applyTextStyle(stage, 'round-total-value', roundTotalValue, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
+    applyTextStyle(stage, 'pot-total-label', potTotalLabel, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
+    applyTextStyle(stage, 'pot-total-value', potTotalValue, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
   }
 
   function applyLayout(panel, layout) {
@@ -122,12 +135,9 @@
   function update(panel, state = {}) {
     const data = { ...defaults, ...state };
     const stage = panel.element.querySelector('.hl-stage') || build(panel);
-    stage.querySelector('.hl-board__round').textContent =
-      'ROUND ' + String(data.round);
-    stage.querySelector('.hl-board__round-total').textContent =
-      money(data.roundTotal);
-    stage.querySelector('.hl-board__pot-total').textContent =
-      money(data.potTotal);
+    stage.querySelector('.hl-board__round').textContent = 'ROUND ' + String(data.round);
+    stage.querySelector('.hl-board__round-total-value').textContent = money(data.roundTotal);
+    stage.querySelector('.hl-board__pot-total-value').textContent = money(data.potTotal);
     return stage;
   }
 
