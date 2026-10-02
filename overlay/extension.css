@@ -122,7 +122,7 @@
   z-index: 100;
   border: 3px dashed #0384CB;
   border-radius: 14px;
-  background: rgba(3, 132, 203, 0.18);
+  background: transparent;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 0 18px rgba(3, 132, 203, 0.75);
   pointer-events: none;
   color: #fff;
