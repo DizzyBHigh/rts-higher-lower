@@ -91,29 +91,49 @@
   font-family: var(--hl-font-family, Arial, sans-serif);
 }
 
-.hl-board__totals > div {
+.hl-board__total-row {
   min-width: 0;
 }
 
-.hl-board__totals > div:first-child {
-  font-size: var(--hl-round-total-size, 24px);
-  color: var(--hl-round-total-color, #30291f);
-  text-shadow: var(--hl-round-total-shadow-x, 3px) var(--hl-round-total-shadow-y, 0) 2px var(--hl-round-total-shadow-color, #000000);
-}
-
-.hl-board__totals > div:last-child {
-  font-size: var(--hl-pot-total-size, 24px);
-  color: var(--hl-pot-total-color, #30291f);
-  text-shadow: var(--hl-pot-total-shadow-x, 3px) var(--hl-pot-total-shadow-y, 0) 2px var(--hl-pot-total-shadow-color, #000000);
-}
-
-.hl-board__totals strong {
+.hl-board__total-label,
+.hl-board__total-value {
   display: inline-block;
-  min-width: 130px;
-  margin-left: 14px;
+  min-width: 0;
+  font-weight: 400;
   font-size: inherit;
   color: inherit;
-  text-shadow: inherit;
+}
+
+.hl-board__total-label {
+  font-size: var(--hl-round-total-label-size, 24px);
+  color: var(--hl-round-total-label-color, #30291f);
+  text-align: var(--hl-round-total-label-align, right);
+  text-shadow: var(--hl-round-total-label-shadow-x, 3px) var(--hl-round-total-label-shadow-y, 0) 2px var(--hl-round-total-label-shadow-color, #000000);
+}
+
+.hl-board__round-total-value {
+  min-width: 130px;
+  margin-left: 14px;
+  font-size: var(--hl-round-total-value-size, 24px);
+  color: var(--hl-round-total-value-color, #30291f);
+  text-align: var(--hl-round-total-value-align, right);
+  text-shadow: var(--hl-round-total-value-shadow-x, 3px) var(--hl-round-total-value-shadow-y, 0) 2px var(--hl-round-total-value-shadow-color, #000000);
+}
+
+.hl-board__pot-total-label {
+  font-size: var(--hl-pot-total-label-size, 24px);
+  color: var(--hl-pot-total-label-color, #30291f);
+  text-align: var(--hl-pot-total-label-align, right);
+  text-shadow: var(--hl-pot-total-label-shadow-x, 3px) var(--hl-pot-total-label-shadow-y, 0) 2px var(--hl-pot-total-label-shadow-color, #000000);
+}
+
+.hl-board__pot-total-value {
+  min-width: 130px;
+  margin-left: 14px;
+  font-size: var(--hl-pot-total-value-size, 24px);
+  color: var(--hl-pot-total-value-color, #30291f);
+  text-align: var(--hl-pot-total-value-align, right);
+  text-shadow: var(--hl-pot-total-value-shadow-x, 3px) var(--hl-pot-total-value-shadow-y, 0) 2px var(--hl-pot-total-value-shadow-color, #000000);
 }
 
 .hl-layout-target {
