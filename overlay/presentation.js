@@ -1,27 +1,4 @@
 (() => {
-  const canvas = { width: 1920, height: 1080 };
-
-  function playerPosition(extension) {
-    const board = extension.state.layout.board;
-    const players = extension.state.layout.players;
-    const boardScale = Number(board.scale) || 100;
-    const scale = boardScale / 100;
-    const localX = Number(players.x) || 0;
-    const localY = Number(players.y) || 0;
-    const localWidth = Number(players.width) || 0;
-    const localHeight = Number(players.height) || 0;
-    const boardWidth = Number(board.width) || 0;
-    const boardHeight = Number(board.height) || 0;
-    const dx = (localX + localWidth / 2 - boardWidth / 2) * scale;
-    const dy = (localY + localHeight / 2 - boardHeight / 2) * scale;
-
-    return {
-      x: (Number(board.x) || 0) + dx / canvas.width * 100,
-      y: (Number(board.y) || 0) - dy / canvas.height * 100,
-      scale: (Number(players.scale) || 100) * scale
-    };
-  }
-
   function getPanel(extension) {
     if (extension.state.panel) return extension.state.panel;
     const board = extension.state.layout.board;
@@ -31,34 +8,6 @@
     RTSHigherLowerBoard.build(extension.state.panel);
     RTSHigherLowerBoard.applyLayout(extension.state.panel, extension.state.layout);
     return extension.state.panel;
-  }
-
-  function getPlayersPanel(extension) {
-    if (extension.state.playersPanel) return extension.state.playersPanel;
-    const panel = RTS.core.panels.create(
-      'higher-lower-players', { positions: { Center: playerPosition(extension) } }
-    );
-    RTSHigherLowerPlayers.build(panel);
-    extension.state.playersPanel = panel;
-    applyPlayersLayout(extension);
-    return panel;
-  }
-
-  function applyPlayersLayout(extension) {
-    const panel = getPlayersPanel(extension);
-    const value = extension.state.layout.players;
-    panel.element.style.width = value.width + 'px';
-    panel.element.style.height = value.height + 'px';
-    panel.runner.configure({ Center: playerPosition(extension) });
-    panel.show(playerPosition(extension));
-    return panel;
-  }
-
-  function updatePlayers(extension, state = {}) {
-    const panel = getPlayersPanel(extension);
-    RTSHigherLowerPlayers.update(panel, state);
-    applyPlayersLayout(extension);
-    return panel;
   }
 
   function code(card) {
@@ -139,6 +88,7 @@
     const deckTarget = slot(root, 'deck');
     const old = extension.state.currentCardElement;
     removeNode(extension.state.previousCardElement);
+
     if (old) {
       place(old, currentTarget);
       const previous = targetRect(root, previousTarget);
@@ -148,6 +98,7 @@
       ).finished;
       extension.state.previousCardElement = old;
     }
+
     const node = cardElement(extension, result.card);
     root.appendChild(node);
     place(node, deckTarget);
@@ -183,9 +134,6 @@
 
   window.RTSHigherLowerPresentation = {
     getPanel,
-    getPlayersPanel,
-    updatePlayers,
-    applyPlayersLayout,
     showCard: show,
     presentDraw,
     resetCards,
