@@ -118,6 +118,7 @@
     lower: 'Lower Card Position',
     deck: 'Deck Position',
     round: 'Current Round Title',
+    roundTimer: 'Round Timer',
     roundTotalLabel: 'Round Total Label',
     roundTotalValue: 'Round Total Value',
     potTotalLabel: 'Pot Total Label',
@@ -126,7 +127,7 @@
 
   const targetIds = [
     'board', 'players', 'previous', 'higher', 'lower', 'deck',
-    'round', 'roundTotalLabel', 'roundTotalValue',
+    'round', 'roundTimer', 'roundTotalLabel', 'roundTotalValue',
     'potTotalLabel', 'potTotalValue'
   ];
 
