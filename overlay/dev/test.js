@@ -42,11 +42,17 @@
 
   const layoutControls = document.createElement('div');
   layoutControls.className = 'hl-layout-controls';
-  layoutControls.innerHTML = '<span>Layout</span>';
-  const layoutSelect = document.createElement('select');
-  const saveAsButton = RTS.core.ui.button('Save As');
+  const layoutLabel = RTS.core.ui.el('span', {
+    className: 'rts-position-control-title',
+    text: 'Layout'
+  });
+  const layoutSelect = RTS.core.ui.positionSelector({
+    options: [],
+    value: ''
+  });
+  const newLayoutButton = RTS.core.ui.button('New Layout');
   const deleteButton = RTS.core.ui.button('Delete');
-  layoutControls.append(layoutSelect, saveAsButton, deleteButton);
+  layoutControls.append(layoutLabel, layoutSelect, newLayoutButton, deleteButton);
   section.appendChild(layoutControls);
 
   const refreshLayoutList = () => {
@@ -66,12 +72,18 @@
   const saveLayout = () =>
     RTSHigherLowerConfiguration.saveLayout(extension.api.getLayout());
 
-  const saveAsLayout = () => {
-    const name = window.prompt('Layout name:',
-      RTSHigherLowerConfiguration.getActiveLayoutName());
+  const newLayout = () => {
+    const name = window.prompt('New layout name:', '');
     if (!name?.trim()) return;
-    RTSHigherLowerConfiguration.saveLayout(
-      extension.api.getLayout(), name.trim()
+
+    const layoutName = name.trim();
+    if (RTSHigherLowerConfiguration.getLayouts()[layoutName]) {
+      window.alert('A layout with that name already exists.');
+      return;
+    }
+
+    RTSHigherLowerConfiguration.createLayout(
+      extension.api.getLayout(), layoutName
     );
   };
 
@@ -84,7 +96,7 @@
   layoutSelect.addEventListener('change', () => {
     RTSHigherLowerConfiguration.activateLayout(layoutSelect.value);
   });
-  saveAsButton.addEventListener('click', saveAsLayout);
+  newLayoutButton.addEventListener('click', newLayout);
   deleteButton.addEventListener('click', deleteLayout);
 
   RTSHigherLowerConfiguration.onChange(() => {
