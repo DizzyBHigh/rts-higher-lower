@@ -38,6 +38,26 @@
     return panel.element.querySelector('.hl-board__players-panel');
   }
 
+  function applyAppearance(panel, appearance = {}) {
+    const root = panel.element.querySelector('.hl-board__players-panel') ||
+      build(panel);
+    const value = appearance.players || {};
+    const angle = ((Number(value.gradientDirection) || 0) + 90) % 360;
+    const color1 = value.color1 || '#20252a';
+    const color2 = value.color2 || '#20252a';
+    const borderWidth = Number(value.borderWidth) || 0;
+    const borderColor = value.borderColor || '#0384CB';
+    const radius = Number(value.cornerRadius) || 0;
+
+    root.style.setProperty('--hl-players-color-1', color1);
+    root.style.setProperty('--hl-players-color-2', color2);
+    root.style.setProperty('--hl-players-gradient-direction', angle + 'deg');
+    root.style.setProperty('--hl-players-border-width', borderWidth + 'px');
+    root.style.setProperty('--hl-players-border-color', borderColor);
+    root.style.setProperty('--hl-players-radius', radius + 'px');
+    return root;
+  }
+
   function update(panel, state = {}) {
     const root = panel.element.querySelector('.hl-board__players-panel') ||
       build(panel);
@@ -48,5 +68,5 @@
     return root;
   }
 
-  window.RTSHigherLowerPlayers = { build, update };
+  window.RTSHigherLowerPlayers = { build, update, applyAppearance };
 })();
