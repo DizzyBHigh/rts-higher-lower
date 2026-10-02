@@ -37,22 +37,32 @@
   editor.className = 'hl-layout-editor';
   section.appendChild(editor);
 
+  const layoutTargets = [
+    'board',
+    'players',
+    ...Object.keys(extension.api.getLayout().elements)
+  ];
   const target = RTS.core.ui.positionSelector({
-    options: ['board', ...Object.keys(extension.api.getLayout().elements)],
+    options: layoutTargets,
     value: 'board'
   });
   editor.append(RTS.core.ui.field('Target', target));
 
   let layout = extension.api.getLayout();
 
-  const getValue = () =>
-    target.value === 'board' ? layout.board : layout.elements[target.value];
+  const getValue = () => {
+    if (target.value === 'board') return layout.board;
+    if (target.value === 'players') return layout.players;
+    return layout.elements[target.value];
+  };
 
-  const apply = (patch) => {
+  const apply = patch => {
     const next = RTSHigherLowerLayout.create(layout);
     const item = target.value === 'board'
       ? next.board
-      : next.elements[target.value];
+      : target.value === 'players'
+        ? next.players
+        : next.elements[target.value];
     Object.assign(item, patch);
     layout = extension.api.setLayout(next);
     saveConfiguration();
@@ -77,7 +87,6 @@
       onChange: (width, height) => apply({ width, height })
     });
     fields.append(RTS.core.ui.field('Size', ratio));
-
     editor.appendChild(fields);
   };
 
