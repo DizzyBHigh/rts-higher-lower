@@ -40,6 +40,7 @@
   const layoutTargets = [
     'board',
     'players',
+    ...Object.keys(extension.api.getLayout().cards).map(name => 'card:' + name),
     ...Object.keys(extension.api.getLayout().elements)
   ];
   const target = RTS.core.ui.positionSelector({
@@ -53,6 +54,8 @@
   const getValue = () => {
     if (target.value === 'board') return layout.board;
     if (target.value === 'players') return layout.players;
+    if (target.value.startsWith('card:'))
+      return layout.cards[target.value.slice(5)];
     return layout.elements[target.value];
   };
 
@@ -62,7 +65,9 @@
       ? next.board
       : target.value === 'players'
         ? next.players
-        : next.elements[target.value];
+        : target.value.startsWith('card:')
+          ? next.cards[target.value.slice(5)]
+          : next.elements[target.value];
     Object.assign(item, patch);
     layout = extension.api.setLayout(next);
     saveConfiguration();
