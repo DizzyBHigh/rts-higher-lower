@@ -26,16 +26,10 @@
           '<div class="hl-board__card-slot hl-board__deck"></div>' +
           '<div class="hl-board__card-slot hl-board__higher"></div>' +
         '</section>' +
-        '<div class="hl-board__totals">' +
-          '<div class="hl-board__total-row hl-board__round-total-row">' +
-            '<span class="hl-board__total-label hl-board__round-total-label">Round Total</span>' +
-            '<strong class="hl-board__total-value hl-board__round-total-value"></strong>' +
-          '</div>' +
-          '<div class="hl-board__total-row hl-board__pot-total-row">' +
-            '<span class="hl-board__total-label hl-board__pot-total-label">Pot Total</span>' +
-            '<strong class="hl-board__total-value hl-board__pot-total-value"></strong>' +
-          '</div>' +
-        '</div>' +
+        '<span class="hl-board__total-label hl-board__round-total-label">Round Total</span>' +
+        '<strong class="hl-board__total-value hl-board__round-total-value"></strong>' +
+        '<span class="hl-board__total-label hl-board__pot-total-label">Pot Total</span>' +
+        '<strong class="hl-board__total-value hl-board__pot-total-value"></strong>' +
       '</div>'
     );
     return panel.element.querySelector('.hl-stage');
