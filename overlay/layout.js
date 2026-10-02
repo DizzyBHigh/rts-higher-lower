@@ -57,9 +57,17 @@
     };
   }
 
+  function fromConfiguration(configuration) {
+    const value = configuration || {};
+    const name = value.activeLayout || 'default';
+    const stored = value.layouts?.[name] || value.layout;
+    return create(stored);
+  }
+
   window.RTSHigherLowerLayout = {
     defaults,
     create,
-    merge
+    merge,
+    fromConfiguration
   };
 })();
