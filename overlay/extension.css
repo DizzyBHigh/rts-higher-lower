@@ -88,6 +88,34 @@
   font-size: 26px;
 }
 
+.hl-layout-target {
+  position: absolute;
+  box-sizing: border-box;
+  z-index: 10;
+  border: 2px dashed #0384CB;
+  border-radius: 6px;
+  background: rgba(3, 132, 203, 0.12);
+  pointer-events: none;
+  color: #0384CB;
+  font: 700 14px/1 sans-serif;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 6px;
+  overflow: hidden;
+}
+
+.hl-layout-target::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translate(-50%, -50%);
+  border: 1px solid #0384CB;
+  border-radius: 50%;
+}
+
 .extension-dev-tools {
   margin-top: 12px;
   padding: 12px;
