@@ -166,14 +166,17 @@
         }
       });
 
+      let previewFrame = 0;
       function previewBrand() {
-        const configuration = normaliseBrands(clone(RTSHigherLowerConfiguration.current || defaults));
-        const activeBrand = brand.value || 'default';
-        configuration.activeBrand = activeBrand;
-        configuration.brands[activeBrand] = collectBrand();
-        delete configuration.appearance;
-        RTSHigherLowerConfiguration.apply(configuration);
-        status.textContent = 'Preview';
+        if (previewFrame) return;
+        previewFrame = requestAnimationFrame(() => {
+          previewFrame = 0;
+          const extension = RTS.getExtension('rts-higher-lower');
+          const panel = extension?.state?.panel;
+          if (!panel) return;
+          RTSHigherLowerBoard.applyAppearance(panel, collectBrand());
+          status.textContent = 'Preview';
+        });
       }
 
       game.append(RTS.core.ui.field('Default Rounds', rounds), RTS.core.ui.field('Round Length', length));
