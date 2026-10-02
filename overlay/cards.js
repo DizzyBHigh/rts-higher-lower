@@ -49,7 +49,7 @@
   }
 
   function options(extension) {
-    const value = extension.state.configuration?.animation?.card || {};
+    const value = extension.state.configuration?.settings?.cardAnimation || {};
     return {
       duration: Math.max(0, Number(value.duration) || DEFAULT_DURATION),
       easing: value.easing || DEFAULT_EASING
