@@ -40,6 +40,9 @@
     return layout.cards[id] || layout.elements[id];
   };
 
+  const layoutSection = RTS.core.ui.section('Overlay Layout');
+  section.appendChild(layoutSection);
+
   const layoutControls = document.createElement('div');
   layoutControls.className = 'hl-layout-controls';
   const layoutLabel = RTS.core.ui.el('span', {
@@ -53,7 +56,7 @@
   const newLayoutButton = RTS.core.ui.button('New Layout');
   const deleteButton = RTS.core.ui.button('Delete');
   layoutControls.append(layoutLabel, layoutSelect, newLayoutButton, deleteButton);
-  section.appendChild(layoutControls);
+  layoutSection.appendChild(layoutControls);
 
   const refreshLayoutList = () => {
     const active = RTSHigherLowerConfiguration.getActiveLayoutName();
@@ -138,8 +141,8 @@
     }
   }));
 
-  editor = RTS.core.positionEditor.mount(section, {
-    title: 'Overlay Layout',
+  editor = RTS.core.positionEditor.mount(layoutSection, {
+    title: '',
     targets,
     onSave: saveLayout
   });
