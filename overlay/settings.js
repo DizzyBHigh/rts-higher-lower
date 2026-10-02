@@ -63,13 +63,8 @@
         onClick: () => {
           const name = window.prompt('Brand name');
           if (!name?.trim()) return;
-          const configuration = normaliseBrands(clone(
-            RTSHigherLowerConfiguration.current || defaults
-          ));
-          if (!RTSHigherLowerConfiguration.createBrand(
-            configuration.brands[configuration.activeBrand || 'default'] || defaultBrand,
-            name.trim()
-          )) return;
+          if (!RTSHigherLowerConfiguration.createBrand(collectBrand(), name.trim()))
+            return;
         }
       });
       const deleteBrand = RTS.core.ui.button('Delete', {
@@ -125,7 +120,7 @@
       const potTotalSize = RTS.core.ui.number({ value: 24, min: 1, max: 200, step: 1 });
       const potTotalColor = RTS.core.ui.color({ value: '#30291f' });
       const potTotalShadow = RTS.core.ui.color({ value: '#000000' });
-      const potTotalShadowDirection = RTS.core.ui.angle({ value: 0 });
+      const potTotalDirection = RTS.core.ui.angle({ value: 0 });
 
       const status = RTS.core.ui.el('small', { className: 'hl-settings-status' });
       const save = RTS.core.ui.button('Save Settings', {
@@ -177,7 +172,7 @@
           fontSize: number(potTotalSize.value, 24, 1, 200),
           color: potTotalColor.value,
           shadowColor: potTotalShadow.value,
-          shadowDirection: potTotalShadowDirection.getValue()
+          shadowDirection: potTotalDirection.getValue()
         }
       });
 
@@ -215,7 +210,7 @@
         RTS.core.ui.field('Font Size', potTotalSize),
         RTS.core.ui.field('Colour', potTotalColor),
         RTS.core.ui.field('Shadow Colour', potTotalShadow),
-        RTS.core.ui.field('Shadow Direction', potTotalShadowDirection)
+        RTS.core.ui.field('Shadow Direction', potTotalDirection)
       );
       host.append(brandSection, game, overlay, fontSettings, board, round, roundTotal, potTotal);
 
@@ -254,7 +249,7 @@
         potTotalSize.value = number(potTotalSettings.fontSize, 24, 1, 200);
         potTotalColor.value = potTotalSettings.color || '#30291f';
         potTotalShadow.value = potTotalSettings.shadowColor || '#000000';
-        potTotalShadowDirection.setValue(potTotalSettings.shadowDirection ?? 0);
+        potTotalDirection.setValue(potTotalSettings.shadowDirection ?? 0);
       };
 
       RTSHigherLowerConfiguration.onChange(configuration => {
