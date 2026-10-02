@@ -13,6 +13,10 @@
       color1: '#d8c79e', color2: '#d8c79e', gradientDirection: 90,
       borderWidth: 10, borderColor: '#6f5a3c', cornerRadius: 28
     },
+    players: {
+      color1: '#20252a', color2: '#20252a', gradientDirection: 90,
+      borderWidth: 4, borderColor: '#0384CB', cornerRadius: 12
+    },
     round: { fontSize: 34, color: '#30291f', shadowColor: '#000000', shadowDirection: 0 },
     roundTotal: { label: { ...defaultText }, value: { ...defaultText } },
     potTotal: { label: { ...defaultText }, value: { ...defaultText } }
@@ -127,39 +131,41 @@
       const borderColor = RTS.core.ui.color({ value: '#6f5a3c', onInput: () => previewBrand() });
       const cornerRadius = RTS.core.ui.number({ value: 28, min: 0, max: 200, step: 1, onInput: () => previewBrand() });
 
+      const players = RTS.core.ui.section('Player List Panel');
+      const playersColor1 = RTS.core.ui.color({ value: '#20252a', onInput: () => previewBrand() });
+      const playersColor2 = RTS.core.ui.color({ value: '#20252a', onInput: () => previewBrand() });
+      const playersGradientDirection = RTS.core.ui.angle({ value: 90, onInput: () => previewBrand() });
+      const playersBorderWidth = RTS.core.ui.number({ value: 4, min: 0, max: 100, step: 1, onInput: () => previewBrand() });
+      const playersBorderColor = RTS.core.ui.color({ value: '#0384CB', onInput: () => previewBrand() });
+      const playersCornerRadius = RTS.core.ui.number({ value: 12, min: 0, max: 200, step: 1, onInput: () => previewBrand() });
+
       const round = RTS.core.ui.section('Round Information');
       const roundSize = RTS.core.ui.number({ value: 34, min: 1, max: 200, step: 1, onInput: () => previewBrand() });
       const roundColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
       const roundShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
       const roundShadowDirection = RTS.core.ui.angle({ value: 0, onInput: () => previewBrand() });
 
-      const roundTotalLabel = RTS.core.ui.section('Round Total Label');
-      const roundTotalLabelSize = RTS.core.ui.number({ value: 24, min: 1, max: 200, step: 1, onInput: () => previewBrand() });
-      const roundTotalLabelColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
-      const roundTotalLabelShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
-      const roundTotalLabelDirection = RTS.core.ui.angle({ value: 0, onInput: () => previewBrand() });
-      const roundTotalLabelAlign = RTS.core.ui.textAlignment({ value: 'right', onChange: () => previewBrand() });
+      const textControls = (title, defaultsValue) => {
+        const section = RTS.core.ui.section(title);
+        const size = RTS.core.ui.number({ value: defaultsValue.fontSize, min: 1, max: 200, step: 1, onInput: () => previewBrand() });
+        const color = RTS.core.ui.color({ value: defaultsValue.color, onInput: () => previewBrand() });
+        const shadow = RTS.core.ui.color({ value: defaultsValue.shadowColor, onInput: () => previewBrand() });
+        const direction = RTS.core.ui.angle({ value: defaultsValue.shadowDirection, onInput: () => previewBrand() });
+        const align = RTS.core.ui.textAlignment({ value: defaultsValue.textAlign, onChange: () => previewBrand() });
+        section.append(
+          RTS.core.ui.field('Font Size', size),
+          RTS.core.ui.field('Colour', color),
+          RTS.core.ui.field('Shadow Colour', shadow),
+          RTS.core.ui.field('Shadow Direction', direction),
+          RTS.core.ui.field('Text Alignment', align)
+        );
+        return { section, size, color, shadow, direction, align };
+      };
 
-      const roundTotalValue = RTS.core.ui.section('Round Total Value');
-      const roundTotalValueSize = RTS.core.ui.number({ value: 24, min: 1, max: 200, step: 1, onInput: () => previewBrand() });
-      const roundTotalValueColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
-      const roundTotalValueShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
-      const roundTotalValueDirection = RTS.core.ui.angle({ value: 0, onInput: () => previewBrand() });
-      const roundTotalValueAlign = RTS.core.ui.textAlignment({ value: 'right', onChange: () => previewBrand() });
-
-      const potTotalLabel = RTS.core.ui.section('Pot Total Label');
-      const potTotalLabelSize = RTS.core.ui.number({ value: 24, min: 1, max: 200, step: 1, onInput: () => previewBrand() });
-      const potTotalLabelColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
-      const potTotalLabelShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
-      const potTotalLabelDirection = RTS.core.ui.angle({ value: 0, onInput: () => previewBrand() });
-      const potTotalLabelAlign = RTS.core.ui.textAlignment({ value: 'right', onChange: () => previewBrand() });
-
-      const potTotalValue = RTS.core.ui.section('Pot Total Value');
-      const potTotalValueSize = RTS.core.ui.number({ value: 24, min: 1, max: 200, step: 1, onInput: () => previewBrand() });
-      const potTotalValueColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
-      const potTotalValueShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
-      const potTotalValueDirection = RTS.core.ui.angle({ value: 0, onInput: () => previewBrand() });
-      const potTotalValueAlign = RTS.core.ui.textAlignment({ value: 'right', onChange: () => previewBrand() });
+      const roundTotalLabel = textControls('Round Total Label', defaultText);
+      const roundTotalValue = textControls('Round Total Value', defaultText);
+      const potTotalLabel = textControls('Pot Total Label', defaultText);
+      const potTotalValue = textControls('Pot Total Value', defaultText);
 
       const status = RTS.core.ui.el('small', { className: 'hl-settings-status' });
       const save = RTS.core.ui.button('Save Settings', {
@@ -181,12 +187,12 @@
         }
       });
 
-      const collectText = (size, color, shadow, direction, align) => ({
-        fontSize: number(size.value, 24, 1, 200),
-        color: color.value,
-        shadowColor: shadow.value,
-        shadowDirection: direction.getValue(),
-        textAlign: align.getValue()
+      const collectText = value => ({
+        fontSize: number(value.size.value, 24, 1, 200),
+        color: value.color.value,
+        shadowColor: value.shadow.value,
+        shadowDirection: value.direction.getValue(),
+        textAlign: value.align.getValue()
       });
 
       const collectBrand = () => ({
@@ -199,20 +205,22 @@
           borderColor: borderColor.value,
           cornerRadius: number(cornerRadius.value, 28, 0, 200)
         },
+        players: {
+          color1: playersColor1.value,
+          color2: playersColor2.value,
+          gradientDirection: playersGradientDirection.getValue(),
+          borderWidth: number(playersBorderWidth.value, 4, 0, 100),
+          borderColor: playersBorderColor.value,
+          cornerRadius: number(playersCornerRadius.value, 12, 0, 200)
+        },
         round: {
           fontSize: number(roundSize.value, 34, 1, 200),
           color: roundColor.value,
           shadowColor: roundShadow.value,
           shadowDirection: roundShadowDirection.getValue()
         },
-        roundTotal: {
-          label: collectText(roundTotalLabelSize, roundTotalLabelColor, roundTotalLabelShadow, roundTotalLabelDirection, roundTotalLabelAlign),
-          value: collectText(roundTotalValueSize, roundTotalValueColor, roundTotalValueShadow, roundTotalValueDirection, roundTotalValueAlign)
-        },
-        potTotal: {
-          label: collectText(potTotalLabelSize, potTotalLabelColor, potTotalLabelShadow, potTotalLabelDirection, potTotalLabelAlign),
-          value: collectText(potTotalValueSize, potTotalValueColor, potTotalValueShadow, potTotalValueDirection, potTotalValueAlign)
-        }
+        roundTotal: { label: collectText(roundTotalLabel), value: collectText(roundTotalValue) },
+        potTotal: { label: collectText(potTotalLabel), value: collectText(potTotalValue) }
       });
 
       let previewFrame = 0;
@@ -223,7 +231,10 @@
           const extension = RTS.getExtension('rts-higher-lower');
           const panel = extension?.state?.panel;
           if (!panel) return;
-          RTSHigherLowerBoard.applyAppearance(panel, collectBrand());
+          const appearance = collectBrand();
+          RTSHigherLowerBoard.applyAppearance(panel, appearance);
+          const playersPanel = RTSHigherLowerPlayersPresentation.getPanel(extension);
+          RTSHigherLowerPlayers.applyAppearance(playersPanel, appearance);
           status.textContent = 'Preview';
         });
       }
@@ -238,41 +249,25 @@
         RTS.core.ui.field('Border Colour', borderColor),
         RTS.core.ui.field('Corner Radius', cornerRadius)
       );
+      players.append(
+        RTS.core.ui.field('Colour 1', playersColor1),
+        RTS.core.ui.field('Colour 2', playersColor2),
+        RTS.core.ui.field('Gradient Direction', playersGradientDirection),
+        RTS.core.ui.field('Border Width', playersBorderWidth),
+        RTS.core.ui.field('Border Colour', playersBorderColor),
+        RTS.core.ui.field('Corner Radius', playersCornerRadius)
+      );
       round.append(
         RTS.core.ui.field('Font Size', roundSize),
         RTS.core.ui.field('Colour', roundColor),
         RTS.core.ui.field('Shadow Colour', roundShadow),
         RTS.core.ui.field('Shadow Direction', roundShadowDirection)
       );
-      roundTotalLabel.append(
-        RTS.core.ui.field('Font Size', roundTotalLabelSize),
-        RTS.core.ui.field('Colour', roundTotalLabelColor),
-        RTS.core.ui.field('Shadow Colour', roundTotalLabelShadow),
-        RTS.core.ui.field('Shadow Direction', roundTotalLabelDirection),
-        RTS.core.ui.field('Text Alignment', roundTotalLabelAlign)
+      host.append(
+        game, overlay, brandSection, fontSettings, board, players, round,
+        roundTotalLabel.section, roundTotalValue.section,
+        potTotalLabel.section, potTotalValue.section
       );
-      roundTotalValue.append(
-        RTS.core.ui.field('Font Size', roundTotalValueSize),
-        RTS.core.ui.field('Colour', roundTotalValueColor),
-        RTS.core.ui.field('Shadow Colour', roundTotalValueShadow),
-        RTS.core.ui.field('Shadow Direction', roundTotalValueDirection),
-        RTS.core.ui.field('Text Alignment', roundTotalValueAlign)
-      );
-      potTotalLabel.append(
-        RTS.core.ui.field('Font Size', potTotalLabelSize),
-        RTS.core.ui.field('Colour', potTotalLabelColor),
-        RTS.core.ui.field('Shadow Colour', potTotalLabelShadow),
-        RTS.core.ui.field('Shadow Direction', potTotalLabelDirection),
-        RTS.core.ui.field('Text Alignment', potTotalLabelAlign)
-      );
-      potTotalValue.append(
-        RTS.core.ui.field('Font Size', potTotalValueSize),
-        RTS.core.ui.field('Colour', potTotalValueColor),
-        RTS.core.ui.field('Shadow Colour', potTotalValueShadow),
-        RTS.core.ui.field('Shadow Direction', potTotalValueDirection),
-        RTS.core.ui.field('Text Alignment', potTotalValueAlign)
-      );
-      host.append(game, overlay, brandSection, fontSettings, board, round, roundTotalLabel, roundTotalValue, potTotalLabel, potTotalValue);
 
       const apply = configuration => {
         const value = normaliseBrands(clone(configuration || defaults));
@@ -282,6 +277,7 @@
         const activeBrand = value.activeBrand || Object.keys(brands)[0] || 'default';
         const appearance = brands[activeBrand] || defaultBrand;
         const boardSettings = appearance.board || defaultBrand.board;
+        const playersSettings = appearance.players || defaultBrand.players;
         const roundSettings = appearance.round || defaultBrand.round;
         const roundTotalSettings = getText(appearance, 'roundTotal');
         const potTotalSettings = getText(appearance, 'potTotal');
@@ -298,38 +294,44 @@
         borderWidth.value = number(boardSettings.borderWidth, 10, 0, 100);
         borderColor.value = boardSettings.borderColor || '#6f5a3c';
         cornerRadius.value = number(boardSettings.cornerRadius, 28, 0, 200);
+        playersColor1.value = playersSettings.color1 || '#20252a';
+        playersColor2.value = playersSettings.color2 || '#20252a';
+        playersGradientDirection.setValue(playersSettings.gradientDirection ?? 90);
+        playersBorderWidth.value = number(playersSettings.borderWidth, 4, 0, 100);
+        playersBorderColor.value = playersSettings.borderColor || '#0384CB';
+        playersCornerRadius.value = number(playersSettings.cornerRadius, 12, 0, 200);
         roundSize.value = number(roundSettings.fontSize, 34, 1, 200);
         roundColor.value = roundSettings.color || '#30291f';
         roundShadow.value = roundSettings.shadowColor || '#000000';
         roundShadowDirection.setValue(roundSettings.shadowDirection ?? 0);
 
-        roundTotalLabelSize.value = roundTotalSettings.label.fontSize;
-        roundTotalLabelColor.value = roundTotalSettings.label.color;
-        roundTotalLabelShadow.value = roundTotalSettings.label.shadowColor;
-        roundTotalLabelDirection.setValue(roundTotalSettings.label.shadowDirection);
-        roundTotalLabelAlign.setValue(roundTotalSettings.label.textAlign);
-        roundTotalValueSize.value = roundTotalSettings.value.fontSize;
-        roundTotalValueColor.value = roundTotalSettings.value.color;
-        roundTotalValueShadow.value = roundTotalSettings.value.shadowColor;
-        roundTotalValueDirection.setValue(roundTotalSettings.value.shadowDirection);
-        roundTotalValueAlign.setValue(roundTotalSettings.value.textAlign);
-
-        potTotalLabelSize.value = potTotalSettings.label.fontSize;
-        potTotalLabelColor.value = potTotalSettings.label.color;
-        potTotalLabelShadow.value = potTotalSettings.label.shadowColor;
-        potTotalLabelDirection.setValue(potTotalSettings.label.shadowDirection);
-        potTotalLabelAlign.setValue(potTotalSettings.label.textAlign);
-        potTotalValueSize.value = potTotalSettings.value.fontSize;
-        potTotalValueColor.value = potTotalSettings.value.color;
-        potTotalValueShadow.value = potTotalSettings.value.shadowColor;
-        potTotalValueDirection.setValue(potTotalSettings.value.shadowDirection);
-        potTotalValueAlign.setValue(potTotalSettings.value.textAlign);
+        const setText = (target, value) => {
+          target.size.value = value.fontSize;
+          target.color.value = value.color;
+          target.shadow.value = value.shadowColor;
+          target.direction.setValue(value.shadowDirection);
+          target.align.setValue(value.textAlign);
+        };
+        setText(roundTotalLabel, roundTotalSettings.label);
+        setText(roundTotalValue, roundTotalSettings.value);
+        setText(potTotalLabel, potTotalSettings.label);
+        setText(potTotalValue, potTotalSettings.value);
       };
 
       RTSHigherLowerConfiguration.onChange(configuration => {
         apply(configuration);
         status.textContent = 'Saved.';
+        const extension = RTS.getExtension('rts-higher-lower');
+        if (extension) {
+          const appearance = getActiveBrand(configuration);
+          RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), appearance);
+        }
       });
+
+      const getActiveBrand = configuration => {
+        const brands = configuration?.brands || {};
+        return brands[configuration?.activeBrand || Object.keys(brands)[0]] || defaultBrand;
+      };
 
       apply(RTSHigherLowerConfiguration.current || defaults);
       RTSHigherLowerConfiguration.request();
