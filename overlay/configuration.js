@@ -73,5 +73,7 @@
     }
   });
 
+  RTSOverlaySocket.onConnect(() => Configuration.request());
+
   window.RTSHigherLowerConfiguration = Configuration;
 })();
