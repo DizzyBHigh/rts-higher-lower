@@ -9,6 +9,7 @@
       extension.state.game = RTS.core.higherLowerGame.create();
       extension.state.card = null;
       extension.state.panel = null;
+      extension.state.playersPanel = null;
       extension.state.layout = RTSHigherLowerLayout.create();
       extension.state.board = {
         round: 0,
@@ -23,7 +24,7 @@
         const bonusPot = extension.state.configuration?.game?.bonusPot || 0;
         const state = extension.state.game.start(rounds, players, bonusPot);
         RTSHigherLowerPresentation.resetCards(extension);
-        updateBoard(extension, { round: 0 });
+        updateBoard(extension, { round: 0, players: state.players });
         RTSHigherLowerPersistence.save(extension.state.game);
         return state;
       };
@@ -50,17 +51,15 @@
     RTSHigherLowerRecovery.apply(extension, value);
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
-    panel.runner.configure({
-      Center: extension.state.layout.board
-    });
+    panel.runner.configure({ Center: extension.state.layout.board });
     panel.show(extension.state.layout.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+    RTSHigherLowerPresentation.updatePlayers(extension, extension.state.board);
   }
   async function drawCard(extension) {
     const result = extension.state.game.draw();
     extension.state.card = result.card || null;
-    if (!result.card)
-      return result;
+    if (!result.card) return result;
     updateBoard(extension, { round: result.round });
     await RTSHigherLowerPresentation.presentDraw(extension, result);
     RTSHigherLowerPersistence.save(extension.state.game);
@@ -73,11 +72,10 @@
     );
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
-    panel.runner.configure({
-      Center: extension.state.layout.board
-    });
+    panel.runner.configure({ Center: extension.state.layout.board });
     panel.show(extension.state.layout.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+    RTSHigherLowerPresentation.applyPlayersLayout(extension);
     return extension.state.layout;
   }
   function updateBoard(extension, data) {
@@ -89,6 +87,7 @@
     RTSHigherLowerBoard.update(panel, extension.state.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     panel.show(extension.state.layout.board);
+    RTSHigherLowerPresentation.updatePlayers(extension, extension.state.board);
   }
   function reportResult(extension, result) {
     RTSOverlaySocket.requestAction(
@@ -110,23 +109,14 @@
     if (args.rtsOverlayExtension !== manifest.id) return;
     const command = args.rtsOverlayCommand || args.command;
     const rawData = args.rtsOverlayData || args.data;
-    const data = typeof rawData === 'string'
-      ? JSON.parse(rawData)
-      : rawData;
-    if (command === 'start')
-      extension.api.startGame(data?.rounds ?? data ?? 10);
-    if (command === 'state' || command === 'update')
-      extension.api.updateState(data);
-    if (command === 'layout')
-      extension.api.setLayout(data);
-    if (command === 'draw')
-      extension.api.drawCard();
-    if (command === 'show')
-      extension.api.showCard(data);
-    if (command === 'flip')
-      extension.api.flipCard(data);
-    if (command === 'move')
-      extension.api.moveCard(data?.position || data);
+    const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+    if (command === 'start') extension.api.startGame(data?.rounds ?? data ?? 10);
+    if (command === 'state' || command === 'update') extension.api.updateState(data);
+    if (command === 'layout') extension.api.setLayout(data);
+    if (command === 'draw') extension.api.drawCard();
+    if (command === 'show') extension.api.showCard(data);
+    if (command === 'flip') extension.api.flipCard(data);
+    if (command === 'move') extension.api.moveCard(data?.position || data);
   }
   RTS.core.extensions.registerSource(manifest.id, source);
 })();
