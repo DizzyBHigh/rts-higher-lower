@@ -10,6 +10,7 @@
       "layout.js",
       "board.js",
       "players.js",
+      "players-presentation.js",
       "presentation.js",
       "configuration.js",
       "persistence.js",
