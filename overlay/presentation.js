@@ -1,12 +1,12 @@
 (() => {
   function getPanel(extension) {
     if (extension.state.panel) return extension.state.panel;
-    const board = extension.state.layout.board;
-    extension.state.panel = RTS.core.panels.create(
-      'higher-lower-board', { positions: { Center: board } }
-    );
+    extension.state.panel = RTS.core.panels.create('higher-lower-board');
     RTSHigherLowerBoard.build(extension.state.panel);
-    RTSHigherLowerBoard.applyLayout(extension.state.panel, extension.state.layout);
+    RTSHigherLowerBoard.applyLayout(
+      extension.state.panel,
+      extension.state.layout
+    );
     return extension.state.panel;
   }
 
