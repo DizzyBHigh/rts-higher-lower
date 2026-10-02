@@ -11,6 +11,7 @@
       "board.js",
       "players.js",
       "players-presentation.js",
+      "cards.js",
       "cards-presentation.js",
       "presentation.js",
       "configuration.js",
