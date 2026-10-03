@@ -36,19 +36,12 @@
   }
 
   function merge(base, value) {
-    const source = value || {};
-    return {
-      board: { ...(base?.board || {}), ...(source.board || {}) },
-      players: { ...(base?.players || {}), ...(source.players || {}) },
-      cards: Object.keys(defaults.cards).reduce((result, key) => {
-        result[key] = { ...(base?.cards?.[key] || {}), ...(source.cards?.[key] || {}) };
-        return result;
-      }, {}),
-      elements: Object.keys(defaults.elements).reduce((result, key) => {
-        result[key] = { ...(base?.elements?.[key] || {}), ...(source.elements?.[key] || {}) };
-        return result;
-      }, {})
-    };
+    return create({
+      ...(base || {}),
+      ...(value || {}),
+      cards: { ...(base?.cards || {}), ...(value?.cards || {}) },
+      elements: { ...(base?.elements || {}), ...(value?.elements || {}) }
+    });
   }
 
   function fromConfiguration(configuration) {
@@ -60,39 +53,55 @@
   function targets(extension) {
     const panel = extension.state.panel?.element;
     const players = extension.state.playersPanel?.element;
-    const result = panel ? Array.from(panel.querySelectorAll(
-      '.hl-board,.hl-board__round,.hl-board__round-timer,' +
-      '.hl-board__previous,.hl-board__higher,.hl-board__lower,.hl-board__deck,' +
-      '.hl-board__round-total-label,.hl-board__round-total-value,' +
-      '.hl-board__pot-total-label,.hl-board__pot-total-value'
-    )) : [];
-    if (players) result.push(players);
+    const result = {};
+    if (panel) {
+      result.board = panel.querySelector('.hl-board');
+      result.elements = {
+        round: panel.querySelector('.hl-board__round'),
+        roundTimer: panel.querySelector('.hl-board__round-timer'),
+        roundTotalLabel: panel.querySelector('.hl-board__round-total-label'),
+        roundTotalValue: panel.querySelector('.hl-board__round-total-value'),
+        potTotalLabel: panel.querySelector('.hl-board__pot-total-label'),
+        potTotalValue: panel.querySelector('.hl-board__pot-total-value')
+      };
+      result.cards = {
+        previous: panel.querySelector('.hl-board__previous'),
+        higher: panel.querySelector('.hl-board__higher'),
+        lower: panel.querySelector('.hl-board__lower'),
+        deck: panel.querySelector('.hl-board__deck')
+      };
+    }
+    result.players = players;
     return result;
   }
 
-  function snapshot(extension) {
-    return targets(extension).map(element => ({
-      element,
-      left: getComputedStyle(element).left,
-      top: getComputedStyle(element).top,
-      width: getComputedStyle(element).width,
-      height: getComputedStyle(element).height
-    }));
-  }
-
-  function animate(extension, before) {
-    const settings = RTSHigherLowerConfiguration.current?.settings || {};
-    const duration = Math.max(0, Number(settings.cardAnimation?.duration) || 500);
-    const easing = settings.cardAnimation?.easing || 'ease-in-out';
-    if (!duration) return;
-
-    before.forEach(item => {
-      const style = getComputedStyle(item.element);
-      item.element.animate([
-        { left: item.left, top: item.top, width: item.width, height: item.height },
-        { left: style.left, top: style.top, width: style.width, height: style.height }
-      ], { duration, easing });
-    });
+  function applyValue(element, value, path) {
+    if (!element || !value) return;
+    if (path === 'board') {
+      element.style.left = (value.x || 0) + 'px';
+      element.style.top = (value.y || 0) + 'px';
+      element.style.width = value.width + 'px';
+      element.style.height = value.height + 'px';
+      element.style.zIndex = String(value.z ?? 0);
+      element.style.transform = 'scale(' + ((Number(value.scale) || 100) / 100) + ')';
+      element.style.transformOrigin = 'top left';
+      return;
+    }
+    if (path === 'players') {
+      element.style.width = value.width + 'px';
+      element.style.height = value.height + 'px';
+      element.style.zIndex = String(value.z ?? 10);
+      RTS.core.positioning.apply(element, {
+        x: value.x, y: value.y, z: value.z,
+        scaleX: value.scale, scaleY: value.scale
+      });
+      return;
+    }
+    element.style.left = (value.x || 0) + 'px';
+    element.style.top = (value.y || 0) + 'px';
+    element.style.width = value.width + 'px';
+    element.style.height = value.height + 'px';
+    element.style.zIndex = String(value.z ?? 0);
   }
 
   window.RTSHigherLowerLayout = {
@@ -101,11 +110,14 @@
     create,
     merge,
     fromConfiguration,
-    transition(extension, apply) {
-      const before = snapshot(extension);
-      const result = apply();
-      requestAnimationFrame(() => animate(extension, before));
-      return result;
+    transition(extension, from, to, complete) {
+      const settings = RTSHigherLowerConfiguration.current?.settings || {};
+      const options = settings.cardAnimation || {};
+      const runner = RTS.core.layoutAnimation.createRunner(targets(extension), applyValue);
+      runner.animate(from, to, {
+        duration: Math.max(0, Number(options.duration) || 500),
+        easing: options.easing || 'ease-in-out'
+      }, complete);
     }
   };
 })();
