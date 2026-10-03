@@ -1,6 +1,4 @@
 const RTSHigherLowerRuntime = (() => {
-  const manifest = { id: 'rts-higher-lower', name: 'RTS Higher Lower', version: '0.1.0' };
-
   const getBrand = configuration => {
     const brands = configuration?.brands || {};
     const name = configuration?.activeBrand || Object.keys(brands)[0] || 'default';
@@ -83,7 +81,7 @@ const RTSHigherLowerRuntime = (() => {
     await RTSHigherLowerPresentation.presentDraw(extension, result);
     RTSHigherLowerTimer.start(extension);
     RTSHigherLowerPersistence.save(extension.state.game);
-    if (result.type !== 'first-card') reportResult(extension, result);
+    if (result.type !== 'first-card') RTSHigherLowerCommands.reportResult(extension, result);
     return result;
   }
 
@@ -129,56 +127,5 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(extension.state.configuration));
   }
 
-  function reportResult(extension, result) {
-    RTSOverlaySocket.requestAction('RTS - Overlay - Extension Result', {
-      rtsOverlayExtension: manifest.id,
-      rtsOverlayEvent: 'higher-lower-result',
-      rtsOverlayData: JSON.stringify({ round: result.round, previousCard: result.previous, currentCard: result.card, result: result.result })
-    });
-  }
-
-  function handleCommand(extension, message) {
-    const args = message?.data?.args || message?.args || {};
-    if (args.rtsOverlayExtension !== manifest.id) return;
-    const command = args.rtsOverlayCommand || args.command;
-    const rawData = args.rtsOverlayData || args.data;
-    const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
-    if (command === 'start') extension.api.startGame(data?.rounds ?? data ?? 10);
-    if (command === 'registration') {
-      const startedAt = data?.startedAt ?? data ?? Date.now();
-      RTSHigherLowerPresentation.hide(extension);
-      RTSHigherLowerTimer.startRegistration(extension, startedAt);
-    }
-    if (command === 'reset') extension.api.resetGame();
-    if (command === 'hide') RTSHigherLowerPresentation.hide(extension);
-    if (command === 'state' || command === 'update') extension.api.updateState(data);
-    if (command === 'layout') extension.api.setLayout(data);
-    if (command === 'draw') extension.api.drawCard();
-    if (command === 'show') extension.api.showCard(data);
-    if (command === 'flip') extension.api.flipCard();
-    if (command === 'move') extension.api.moveCard(data?.position || data);
-  }
-
-  function init(extension) {
-    extension.state.game = RTS.core.higherLowerGame.create();
-    extension.state.card = null;
-    extension.state.previousCardElement = null;
-    extension.state.resultCardElement = null;
-    extension.state.panel = null;
-    extension.state.playersPanel = null;
-    extension.state.layout = RTSHigherLowerLayout.create();
-    extension.state.board = { round: 0, players: [], roundTotal: 0, potTotal: 0 };
-    extension.configure = configuration => configure(extension, configuration);
-    extension.api.startGame = rounds => startGame(extension, rounds);
-    extension.api.updateState = data => updateBoard(extension, data);
-    extension.api.setLayout = layout => setLayout(extension, layout);
-    extension.api.getLayout = () => extension.state.layout;
-    extension.api.drawCard = () => drawCard(extension);
-    extension.api.showCard = card => RTSHigherLowerPresentation.showCard(extension, card);
-    extension.api.flipCard = () => RTSHigherLowerPresentation.flipCard(extension);
-    extension.api.moveCard = position => RTSHigherLowerPresentation.moveCard(extension, position);
-    extension.api.resetGame = () => resetGame(extension);
-  }
-
-  return { manifest, init, handleCommand };
+  return { configure, startGame, resetGame, drawCard, setLayout, updateBoard };
 })();
