@@ -23,6 +23,7 @@
     ],
     "css": [
       "extension.css",
+      "players.css",
       "settings.css"
     ],
     "dev": {
