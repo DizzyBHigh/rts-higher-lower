@@ -25,11 +25,14 @@
     return Number.isFinite(amount) ? amount.toLocaleString('en-US') : '0';
   };
 
-  const shadowOffset = angle => {
-    const radians = (Number(angle) || 0) * Math.PI / 180;
+  const shadowOffset = value => {
+    const source = value && typeof value === 'object' ? value : { angle: Number(value) || 0, distance: 3 };
+    const angle = Number(source.angle) || 0;
+    const distance = Math.max(0, Number(source.distance) || 0);
+    const radians = angle * Math.PI / 180;
     return {
-      x: (Math.cos(radians) * 3).toFixed(2) + 'px',
-      y: (Math.sin(radians) * 3).toFixed(2) + 'px'
+      x: (Math.sin(radians) * distance).toFixed(2) + 'px',
+      y: (-Math.cos(radians) * distance).toFixed(2) + 'px'
     };
   };
 
