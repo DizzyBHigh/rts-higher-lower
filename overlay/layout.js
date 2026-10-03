@@ -114,10 +114,15 @@
       const settings = RTSHigherLowerConfiguration.current?.settings || {};
       const options = settings.cardAnimation || {};
       const runner = RTS.core.layoutAnimation.createRunner(targets(extension), applyValue);
-      runner.animate(from, to, {
-        duration: Math.max(0, Number(options.duration) || 500),
-        easing: options.easing || 'ease-in-out'
-      }, complete);
+      return new Promise(resolve => {
+        runner.animate(from, to, {
+          duration: Math.max(0, Number(options.duration) || 500),
+          easing: options.easing || 'ease-in-out'
+        }, () => {
+          if (typeof complete === 'function') complete();
+          resolve();
+        });
+      });
     }
   };
 })();
