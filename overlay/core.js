@@ -25,7 +25,7 @@
       extension.api.flipCard = () => RTSHigherLowerPresentation.flipCard(extension);
       extension.api.moveCard = position => RTSHigherLowerPresentation.moveCard(extension, position);
       extension.api.resetGame = () => RTSHigherLowerRuntime.resetGame(extension);
-      RTS.core.events?.on('RTS - Overlay - Extension Command', message =>
+      RTS.core.events?.on('RTS - Higher Lower Game', message =>
         RTSHigherLowerCommands.handleCommand(extension, message)
       );
     }
