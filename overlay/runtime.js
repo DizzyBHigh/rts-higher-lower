@@ -14,6 +14,13 @@ const RTSHigherLowerRuntime = (() => {
     return preferred && layouts[preferred] ? preferred : value.activeLayout || Object.keys(layouts)[0] || 'default';
   }
 
+  function getConfiguredLayout(configuration, name) {
+    const value = configuration || {};
+    const layouts = value.layouts || {};
+    const selected = name && layouts[name] ? name : getGameLayoutName(value);
+    return RTSHigherLowerLayout.create(layouts[selected] || value.layout);
+  }
+
   function applyDefaults(configuration) {
     const value = { ...(configuration || {}) };
     const settings = value.settings || {};
@@ -35,8 +42,10 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(value));
     const game = value.game || {};
-    if (game.state === 'playing') RTSHigherLowerPresentation.show(extension);
-    else RTSHigherLowerPresentation.hide(extension);
+    if (game.state === 'playing' || game.state === 'registration')
+      RTSHigherLowerPresentation.show(extension);
+    else
+      RTSHigherLowerPresentation.hide(extension);
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(value));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
@@ -45,14 +54,32 @@ const RTSHigherLowerRuntime = (() => {
   }
 
   async function startGame(extension, rounds) {
-    if (extension.state.configuration) configure(extension, applyDefaults(extension.state.configuration));
-    const players = extension.state.configuration?.game?.players || [];
-    const bonusPot = extension.state.configuration?.game?.bonusPot || 0;
-    const state = extension.state.game.start(rounds, players, bonusPot);
+    const configuration = extension.state.configuration || {};
+    const hiddenLayout = getConfiguredLayout(configuration, configuration.settings?.hiddenLayout);
+    const showingLayout = getConfiguredLayout(configuration, configuration.settings?.showingLayout);
+    const state = extension.state.game.start(
+      rounds,
+      configuration.game?.players || [],
+      configuration.game?.bonusPot || 0
+    );
+
     RTSHigherLowerTimer.stop(extension);
     RTSHigherLowerPresentation.resetCards(extension);
+
+    extension.state.layout = hiddenLayout;
+    applyLayout(extension);
     RTSHigherLowerPresentation.show(extension);
-    updateBoard(extension, { round: 0, players: state.players, startedPlayers: state.startedPlayers });
+
+    if (JSON.stringify(hiddenLayout) !== JSON.stringify(showingLayout))
+      await RTSHigherLowerLayout.transition(extension, hiddenLayout, showingLayout);
+
+    extension.state.layout = showingLayout;
+    applyLayout(extension);
+    updateBoard(extension, {
+      round: 0,
+      players: state.players,
+      startedPlayers: state.startedPlayers
+    });
     await drawCard(extension);
     RTSHigherLowerPersistence.save(extension.state.game);
     return extension.state.game.state();
@@ -84,8 +111,10 @@ const RTSHigherLowerRuntime = (() => {
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
-    if (extension.state.configuration?.game?.state === 'playing') RTSHigherLowerPresentation.show(extension);
-    else RTSHigherLowerPresentation.hide(extension);
+    if (extension.state.configuration?.game?.state === 'playing' || extension.state.configuration?.game?.state === 'registration')
+      RTSHigherLowerPresentation.show(extension);
+    else
+      RTSHigherLowerPresentation.hide(extension);
     RTSHigherLowerPlayersPresentation.applyLayout(extension);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(extension.state.configuration));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
@@ -113,8 +142,10 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerBoard.update(panel, extension.state.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
-    if (extension.state.configuration?.game?.state === 'playing') RTSHigherLowerPresentation.show(extension);
-    else RTSHigherLowerPresentation.hide(extension);
+    if (extension.state.configuration?.game?.state === 'playing' || extension.state.configuration?.game?.state === 'registration')
+      RTSHigherLowerPresentation.show(extension);
+    else
+      RTSHigherLowerPresentation.hide(extension);
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(extension.state.configuration));
   }
