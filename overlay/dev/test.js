@@ -34,6 +34,7 @@
 
   let current = extension.api.getLayout();
   let editor = null;
+  let labelsVisible = true;
 
   const getValue = (layout, id) => {
     if (id === 'board' || id === 'players') return layout[id];
@@ -49,13 +50,19 @@
     className: 'rts-position-control-title',
     text: 'Layout'
   });
-  const layoutSelect = RTS.core.ui.positionSelector({
-    options: [],
-    value: ''
-  });
+  const layoutSelect = RTS.core.ui.positionSelector({ options: [], value: '' });
   const newLayoutButton = RTS.core.ui.button('New Layout');
   const deleteButton = RTS.core.ui.button('Delete');
-  layoutControls.append(layoutLabel, layoutSelect, newLayoutButton, deleteButton);
+  const labelButton = RTS.core.ui.button('Hide Labels', {
+    onClick: () => {
+      labelsVisible = !labelsVisible;
+      document.querySelectorAll('.rts-position-marker').forEach(marker =>
+        marker.classList.toggle('hide-label', !labelsVisible)
+      );
+      labelButton.textContent = labelsVisible ? 'Hide Labels' : 'Show Labels';
+    }
+  });
+  layoutControls.append(layoutLabel, layoutSelect, newLayoutButton, deleteButton, labelButton);
   layoutSection.appendChild(layoutControls);
 
   const refreshLayoutList = () => {
@@ -78,16 +85,12 @@
   const newLayout = () => {
     const name = window.prompt('New layout name:', '');
     if (!name?.trim()) return;
-
     const layoutName = name.trim();
     if (RTSHigherLowerConfiguration.getLayouts()[layoutName]) {
       window.alert('A layout with that name already exists.');
       return;
     }
-
-    RTSHigherLowerConfiguration.createLayout(
-      extension.api.getLayout(), layoutName
-    );
+    RTSHigherLowerConfiguration.createLayout(extension.api.getLayout(), layoutName);
   };
 
   const deleteLayout = () => {
