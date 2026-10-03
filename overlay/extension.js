@@ -33,7 +33,11 @@
     const state = extension.state.game.start(rounds, players, bonusPot);
     RTSHigherLowerTimer.stop(extension);
     RTSHigherLowerPresentation.resetCards(extension);
-    updateBoard(extension, { round: 0, players: state.players });
+    updateBoard(extension, {
+      round: 0,
+      players: state.players,
+      startedPlayers: state.startedPlayers
+    });
     await drawCard(extension);
     RTSHigherLowerPersistence.save(extension.state.game);
     return extension.state.game.state();
