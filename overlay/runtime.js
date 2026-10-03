@@ -34,6 +34,7 @@ const RTSHigherLowerRuntime = (() => {
 
   function configure(extension, configuration) {
     const value = applyDefaults(configuration || {});
+    RTS.core.log?.info('Higher Lower configure', { state: value.game?.state, activeLayout: value.activeLayout });
     extension.state.configuration = value;
     RTSHigherLowerTimer.stop(extension);
     extension.state.layout = RTSHigherLowerLayout.fromConfiguration(value);
@@ -54,6 +55,7 @@ const RTSHigherLowerRuntime = (() => {
   }
 
   async function startGame(extension, rounds) {
+    RTS.core.log?.info('Higher Lower startGame entered', { rounds });
     const configuration = extension.state.configuration || {};
     const hiddenLayout = getConfiguredLayout(configuration, configuration.settings?.hiddenLayout);
     const showingLayout = getConfiguredLayout(configuration, configuration.settings?.showingLayout);
@@ -62,6 +64,7 @@ const RTSHigherLowerRuntime = (() => {
       configuration.game?.players || [],
       configuration.game?.bonusPot || 0
     );
+    RTS.core.log?.info('Higher Lower game state started', state);
 
     RTSHigherLowerTimer.stop(extension);
     RTSHigherLowerPresentation.resetCards(extension);
@@ -70,8 +73,10 @@ const RTSHigherLowerRuntime = (() => {
     applyLayout(extension);
     RTSHigherLowerPresentation.show(extension);
 
-    if (JSON.stringify(hiddenLayout) !== JSON.stringify(showingLayout))
+    if (JSON.stringify(hiddenLayout) !== JSON.stringify(showingLayout)) {
+      RTS.core.log?.info('Higher Lower animating hidden layout to showing layout');
       await RTSHigherLowerLayout.transition(extension, hiddenLayout, showingLayout);
+    }
 
     extension.state.layout = showingLayout;
     applyLayout(extension);
@@ -82,6 +87,7 @@ const RTSHigherLowerRuntime = (() => {
     });
     await drawCard(extension);
     RTSHigherLowerPersistence.save(extension.state.game);
+    RTS.core.log?.info('Higher Lower startGame completed');
     return extension.state.game.state();
   }
 
