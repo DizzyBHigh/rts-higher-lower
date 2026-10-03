@@ -14,6 +14,9 @@ Commands: !join
 RTS - Higher Lower Game - Start : Execute Method(RTS - Higher Lower Game - Core, Start Game)
 Commands: !start
 
+RTS - Higher Lower Game - Reset : Execute Method(RTS - Higher Lower Game - Core, Reset)
+Commands: !rts-hl-reset
+
 RTS - Higher Lower Game - Vote : Execute Method(RTS - Higher Lower Game - Core, Vote)
 Commands: !vote <higher|lower> <amount>
 
