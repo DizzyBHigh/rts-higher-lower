@@ -102,7 +102,7 @@ public class CPHInline
 
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "registration");
-        CPH.SetArgument("rtsOverlayData", game["registrationStartedAt"]);
+        CPH.SetArgument("rtsOverlayData", game.Value<long>("registrationStartedAt"));
 
         CPH.TriggerEvent(EventName, true);
         return true;
