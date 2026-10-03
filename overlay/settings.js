@@ -127,6 +127,7 @@
       brand.addEventListener('change', () => RTSHigherLowerConfiguration.activateBrand(brand.value));
 
       const elementStyles = RTS.core.ui.section('Element Styles');
+      const fontSection = RTS.core.ui.section('Font');
       const font = RTS.core.ui.fontPicker({ value: 'Arial', variant: '400', onChange: () => previewBrand() });
 
       const board = RTS.core.ui.section('Game Background');
@@ -146,10 +147,7 @@
       const playersCornerRadius = RTS.core.ui.number({ value: 12, min: 0, max: 200, step: 1, onInput: () => previewBrand() });
       const playersTitleColor = RTS.core.ui.color({ value: '#ffffff', onInput: () => previewBrand() });
       const playersTitleShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
-      const playersTitleShadowDirection = RTS.core.ui.angle({
-        value: defaultBrand.players.title.shadowDirection,
-        onInput: () => previewBrand()
-      });
+      const playersTitleShadowDirection = RTS.core.ui.angle({ value: defaultBrand.players.title.shadowDirection, onInput: () => previewBrand() });
 
       const round = RTS.core.ui.section('Round Information');
       const roundColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
@@ -186,10 +184,7 @@
           configuration.settings = {
             defaultRounds: Math.max(1, Number(rounds.value) || 10),
             roundLength: length.value === '30 Seconds' ? 30000 : 60000,
-            cardAnimation: {
-              duration: Math.max(0, Number(duration.value) || 500),
-              easing: easing.value || 'ease-in-out'
-            }
+            cardAnimation: { duration: Math.max(0, Number(duration.value) || 500), easing: easing.value || 'ease-in-out' }
           };
           delete configuration.appearance;
           status.textContent = 'Saving...';
@@ -221,17 +216,9 @@
           borderWidth: number(playersBorderWidth.value, 4, 0, 100),
           borderColor: playersBorderColor.value,
           cornerRadius: number(playersCornerRadius.value, 12, 0, 200),
-          title: {
-            color: playersTitleColor.value,
-            shadowColor: playersTitleShadow.value,
-            shadowDirection: playersTitleShadowDirection.getValue()
-          }
+          title: { color: playersTitleColor.value, shadowColor: playersTitleShadow.value, shadowDirection: playersTitleShadowDirection.getValue() }
         },
-        round: {
-          color: roundColor.value,
-          shadowColor: roundShadow.value,
-          shadowDirection: roundShadowDirection.getValue()
-        },
+        round: { color: roundColor.value, shadowColor: roundShadow.value, shadowDirection: roundShadowDirection.getValue() },
         roundTimer: collectText(roundTimer),
         roundTotal: { label: collectText(roundTotalLabel), value: collectText(roundTotalValue) },
         potTotal: { label: collectText(potTotalLabel), value: collectText(potTotalValue) }
@@ -261,23 +248,9 @@
         save,
         status
       );
-      brandSection.append(
-        RTS.core.ui.field('Brand', brand),
-        newBrand,
-        saveBrand,
-        deleteBrand
-      );
-      elementStyles.append(
-        RTS.core.ui.field('Font', font),
-        board,
-        players,
-        round,
-        roundTimer.section,
-        roundTotalLabel.section,
-        roundTotalValue.section,
-        potTotalLabel.section,
-        potTotalValue.section
-      );
+      brandSection.append(RTS.core.ui.field('Brand', brand), newBrand, saveBrand, deleteBrand);
+      fontSection.append(RTS.core.ui.field('Font', font));
+      elementStyles.append(fontSection, board, players, round, roundTimer.section, roundTotalLabel.section, roundTotalValue.section, potTotalLabel.section, potTotalValue.section);
       brandSection.append(elementStyles);
       host.append(game, brandSection);
 
