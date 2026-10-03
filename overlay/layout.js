@@ -1,13 +1,7 @@
 (() => {
   const defaults = {
-    board: {
-      x: 0, y: 0, scale: 100, z: 0,
-      width: 1200, height: 675
-    },
-    players: {
-      x: 55, y: 125, scale: 100, z: 10,
-      width: 260, height: 400
-    },
+    board: { x: 0, y: 0, scale: 100, z: 0, width: 1200, height: 675 },
+    players: { x: 55, y: 125, scale: 100, z: 10, width: 260, height: 400 },
     cards: {
       previous: { x: 525, y: 125, z: 20, width: 150, height: 210 },
       higher: { x: 725, y: 385, z: 20, width: 150, height: 210 },
@@ -24,21 +18,7 @@
     }
   };
 
-  function clone(value) {
-    return JSON.parse(JSON.stringify(value));
-  }
-
-  function merge(base, value) {
-    const result = clone(base);
-    const source = value || {};
-    Object.keys(source).forEach(key => {
-      if (source[key] && typeof source[key] === 'object')
-        result[key] = { ...(result[key] || {}), ...source[key] };
-      else
-        result[key] = source[key];
-    });
-    return result;
-  }
+  const clone = value => JSON.parse(JSON.stringify(value));
 
   function create(value) {
     return {
@@ -58,14 +38,56 @@
   function fromConfiguration(configuration) {
     const value = configuration || {};
     const name = value.activeLayout || 'default';
-    const stored = value.layouts?.[name] || value.layout;
-    return create(stored);
+    return create(value.layouts?.[name] || value.layout);
+  }
+
+  function targets(extension) {
+    const panel = extension.state.panel?.element;
+    const players = extension.state.playersPanel?.element;
+    const result = panel ? Array.from(panel.querySelectorAll(
+      '.hl-board,.hl-board__round,.hl-board__round-timer,' +
+      '.hl-board__previous,.hl-board__higher,.hl-board__lower,.hl-board__deck,' +
+      '.hl-board__round-total-label,.hl-board__round-total-value,' +
+      '.hl-board__pot-total-label,.hl-board__pot-total-value'
+    )) : [];
+    if (players) result.push(players);
+    return result;
+  }
+
+  function snapshot(extension) {
+    return targets(extension).map(element => ({
+      element,
+      left: getComputedStyle(element).left,
+      top: getComputedStyle(element).top,
+      width: getComputedStyle(element).width,
+      height: getComputedStyle(element).height
+    }));
+  }
+
+  function animate(extension, before) {
+    const settings = RTSHigherLowerConfiguration.current?.settings || {};
+    const duration = Math.max(0, Number(settings.cardAnimation?.duration) || 500);
+    const easing = settings.cardAnimation?.easing || 'ease-in-out';
+    if (!duration) return;
+
+    before.forEach(item => {
+      const style = getComputedStyle(item.element);
+      item.element.animate([
+        { left: item.left, top: item.top, width: item.width, height: item.height },
+        { left: style.left, top: style.top, width: style.width, height: style.height }
+      ], { duration, easing });
+    });
   }
 
   window.RTSHigherLowerLayout = {
     defaults,
     create,
-    merge,
-    fromConfiguration
+    fromConfiguration,
+    transition(extension, apply) {
+      const before = snapshot(extension);
+      const result = apply();
+      requestAnimationFrame(() => animate(extension, before));
+      return result;
+    }
   };
 })();
