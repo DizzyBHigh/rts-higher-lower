@@ -1,4 +1,4 @@
-.hl-board__players-panel {
+.hl-players {
   box-sizing: border-box;
   width: 100%;
   height: 100%;
@@ -14,7 +14,7 @@
   overflow: hidden;
 }
 
-.hl-board__heading {
+.hl-players__heading {
   margin-bottom: 8px;
   font-size: 20px;
   font-weight: 700;
@@ -22,13 +22,13 @@
   text-shadow: var(--hl-players-title-shadow-x, 0px) var(--hl-players-title-shadow-y, 3px) 0 var(--hl-players-title-shadow-color, #000);
 }
 
-.hl-board__players {
+.hl-players__list {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.hl-board__player {
+.hl-players__player {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 26px 70px;
   align-items: center;
@@ -36,8 +36,8 @@
   min-height: 26px;
 }
 
-.hl-board__player-name,
-.hl-board__player-bet {
+.hl-players__name,
+.hl-players__bet {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -45,11 +45,11 @@
   font-size: 15px;
 }
 
-.hl-board__player-bet {
+.hl-players__bet {
   text-align: right;
 }
 
-.hl-board__player-vote {
+.hl-players__vote {
   position: relative;
   display: grid;
   place-items: center;
@@ -60,43 +60,43 @@
   background: #666;
 }
 
-.hl-board__player-vote::after {
+.hl-players__vote::after {
   content: '';
   display: block;
   width: 0;
   height: 0;
 }
 
-.hl-board__player-vote--higher::after {
+.hl-players__vote--higher::after {
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
   border-bottom: 7px solid #fff;
 }
 
-.hl-board__player-vote--lower::after {
+.hl-players__vote--lower::after {
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
   border-top: 7px solid #fff;
 }
 
-.hl-board__player-vote--platform-twitch {
+.hl-players__vote--platform-twitch {
   background: #9146ff;
 }
 
-.hl-board__player-vote--platform-youtube {
+.hl-players__vote--platform-youtube {
   background: #ff0000;
 }
 
-.hl-board__player-vote--platform-kick {
+.hl-players__vote--platform-kick {
   background: #53fc18;
 }
 
-.hl-board__player-vote--platform-unknown,
-.hl-board__player-vote--waiting {
+.hl-players__vote--platform-unknown,
+.hl-players__vote--waiting {
   background: #777;
 }
 
-.hl-board__players-count {
+.hl-players__count {
   margin-left: 6px;
   font-size: 14px;
   font-weight: normal;
