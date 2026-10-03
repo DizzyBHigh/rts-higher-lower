@@ -37,7 +37,10 @@
   function build(panel) {
     panel.setContent(
       '<section class="hl-board__players-panel">' +
-        '<div class="hl-board__heading">Players</div>' +
+        '<div class="hl-board__heading">' +
+          '<span>Players</span>' +
+          '<span class="hl-board__players-count">0/0</span>' +
+        '</div>' +
         '<div class="hl-board__players"></div>' +
       '</section>'
     );
@@ -68,7 +71,11 @@
     const root = panel.element.querySelector('.hl-board__players-panel') ||
       build(panel);
     const list = root.querySelector('.hl-board__players');
+    const count = root.querySelector('.hl-board__players-count');
     const players = Array.isArray(state.players) ? state.players : [];
+    const started = Number(state.startedPlayers) || players.length;
+
+    if (count) count.textContent = players.length + '/' + started;
     list.replaceChildren();
     players.forEach(player => list.appendChild(playerRow(player)));
     return root;
