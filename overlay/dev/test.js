@@ -49,7 +49,7 @@
   };
 
   const layoutSection = RTS.core.ui.section('Overlay Layout');
-  settings.insertBefore(layoutSection, settingsApi.elementStyles);
+  settings.appendChild(layoutSection);
 
   const layoutControls = document.createElement('div');
   layoutControls.className = 'hl-layout-controls';
