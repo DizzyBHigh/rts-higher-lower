@@ -1,15 +1,25 @@
+.hl-board__players-panel {
+  padding: 14px;
+}
+
+.hl-board__heading {
+  margin-bottom: 8px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
 .hl-board__players {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .hl-board__player {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 30px 80px;
+  grid-template-columns: minmax(0, 1fr) 26px 70px;
   align-items: center;
-  gap: 8px;
-  min-height: 30px;
+  gap: 6px;
+  min-height: 26px;
 }
 
 .hl-board__player-name,
@@ -18,7 +28,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 18px;
+  font-size: 15px;
 }
 
 .hl-board__player-bet {
@@ -29,8 +39,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   justify-self: center;
   border-radius: 50%;
   background: #666;
@@ -44,15 +54,15 @@
 }
 
 .hl-board__player-vote--higher::after {
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-bottom: 8px solid #fff;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 7px solid #fff;
 }
 
 .hl-board__player-vote--lower::after {
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 8px solid #fff;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 7px solid #fff;
 }
 
 .hl-board__player-vote--platform-twitch {
@@ -73,7 +83,7 @@
 }
 
 .hl-board__players-count {
-  margin-left: 10px;
-  font-size: 18px;
+  margin-left: 6px;
+  font-size: 14px;
   font-weight: normal;
 }
