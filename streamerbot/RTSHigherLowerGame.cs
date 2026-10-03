@@ -53,7 +53,7 @@ public class CPHInline
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "layout");
         CPH.SetArgument("rtsOverlayData", layout);
-        return CPH.RunAction("RTS - Overlay - Extension Command", true);
+        return CPH.RunAction("RTS - Higher Lower Game - Connector", true);
     }
 
     public bool Join()
@@ -80,6 +80,7 @@ public class CPHInline
         var configuration = ReadConfiguration();
         var existing = GetGame(configuration);
         if (existing.Value<string>("state") == "registration" || existing.Value<string>("state") == "playing") return false;
+
         int rounds = configuration["settings"]?.Value<int?>("defaultRounds") ?? 10;
         if (CPH.TryGetArg("rtsHigherLowerRounds", out int requestedRounds)) rounds = requestedRounds;
         if (rounds < 1) return false;
@@ -94,6 +95,7 @@ public class CPHInline
             ["bonusPot"] = 0,
             ["registrationStartedAt"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
         };
+
         configuration["game"] = game;
         Save(configuration);
         SetStartCommandEnabled(false);
@@ -101,12 +103,9 @@ public class CPHInline
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "registration");
         CPH.SetArgument("rtsOverlayData", game["registrationStartedAt"]);
-        if (CPH.RunAction("RTS - Overlay - Extension Command", true)) return true;
 
-        configuration["game"] = new JObject();
-        Save(configuration);
-        SetStartCommandEnabled(true);
-        return false;
+        CPH.TriggerEvent(EventName, true);
+        return true;
     }
 
     private bool BeginGame()
@@ -132,7 +131,7 @@ public class CPHInline
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "start");
         CPH.SetArgument("rtsOverlayData", game.Value<int?>("rounds") ?? 10);
-        return CPH.RunAction("RTS - Overlay - Extension Command", true);
+        return CPH.RunAction("RTS - Higher Lower Game - Connector", true);
     }
 
     public bool Reset()
@@ -150,7 +149,7 @@ public class CPHInline
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "reset");
         CPH.SetArgument("rtsOverlayData", null);
-        CPH.RunAction("RTS - Overlay - Extension Command", true);
+        CPH.RunAction("RTS - Higher Lower Game - Connector", true);
     }
 
     private bool Draw()
@@ -159,7 +158,7 @@ public class CPHInline
         if (GetGame(configuration).Value<string>("state") != "playing") return false;
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "draw");
-        return CPH.RunAction("RTS - Overlay - Extension Command", true);
+        return CPH.RunAction("RTS - Higher Lower Game - Connector", true);
     }
 
     public bool Vote()
