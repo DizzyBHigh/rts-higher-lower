@@ -1,6 +1,5 @@
 (() => {
   const defaultText = {
-    fontSize: 24,
     color: '#30291f',
     shadowColor: '#000000',
     shadowDirection: 0,
@@ -17,8 +16,8 @@
       color1: '#20252a', color2: '#20252a', gradientDirection: 90,
       borderWidth: 4, borderColor: '#0384CB', cornerRadius: 12
     },
-    round: { fontSize: 34, color: '#30291f', shadowColor: '#000000', shadowDirection: 0 },
-    roundTimer: { fontSize: 34, color: '#30291f', shadowColor: '#000000', shadowDirection: 0, textAlign: 'center' },
+    round: { color: '#30291f', shadowColor: '#000000', shadowDirection: 0 },
+    roundTimer: { color: '#30291f', shadowColor: '#000000', shadowDirection: 0, textAlign: 'center' },
     roundTotal: { label: { ...defaultText }, value: { ...defaultText } },
     potTotal: { label: { ...defaultText }, value: { ...defaultText } }
   };
@@ -44,7 +43,6 @@
   const normaliseText = (value, fallback = defaultText) => {
     const source = value || {};
     return {
-      fontSize: number(source.fontSize, fallback.fontSize, 1, 200),
       color: source.color || fallback.color,
       shadowColor: source.shadowColor || fallback.shadowColor,
       shadowDirection: Number(source.shadowDirection) || 0,
@@ -141,26 +139,23 @@
       const playersCornerRadius = RTS.core.ui.number({ value: 12, min: 0, max: 200, step: 1, onInput: () => previewBrand() });
 
       const round = RTS.core.ui.section('Round Information');
-      const roundSize = RTS.core.ui.number({ value: 34, min: 1, max: 200, step: 1, onInput: () => previewBrand() });
       const roundColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
       const roundShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
       const roundShadowDirection = RTS.core.ui.angle({ value: 0, onInput: () => previewBrand() });
 
       const textControls = (title, defaultsValue) => {
         const section = RTS.core.ui.section(title);
-        const size = RTS.core.ui.number({ value: defaultsValue.fontSize, min: 1, max: 200, step: 1, onInput: () => previewBrand() });
         const color = RTS.core.ui.color({ value: defaultsValue.color, onInput: () => previewBrand() });
         const shadow = RTS.core.ui.color({ value: defaultsValue.shadowColor, onInput: () => previewBrand() });
         const direction = RTS.core.ui.angle({ value: defaultsValue.shadowDirection, onInput: () => previewBrand() });
         const align = RTS.core.ui.textAlignment({ value: defaultsValue.textAlign, onChange: () => previewBrand() });
         section.append(
-          RTS.core.ui.field('Font Size', size),
           RTS.core.ui.field('Colour', color),
           RTS.core.ui.field('Shadow Colour', shadow),
           RTS.core.ui.field('Shadow Direction', direction),
           RTS.core.ui.field('Text Alignment', align)
         );
-        return { section, size, color, shadow, direction, align };
+        return { section, color, shadow, direction, align };
       };
 
       const roundTimer = textControls('Round Timer', defaultBrand.roundTimer);
@@ -190,7 +185,6 @@
       });
 
       const collectText = value => ({
-        fontSize: number(value.size.value, 24, 1, 200),
         color: value.color.value,
         shadowColor: value.shadow.value,
         shadowDirection: value.direction.getValue(),
@@ -216,7 +210,6 @@
           cornerRadius: number(playersCornerRadius.value, 12, 0, 200)
         },
         round: {
-          fontSize: number(roundSize.value, 34, 1, 200),
           color: roundColor.value,
           shadowColor: roundShadow.value,
           shadowDirection: roundShadowDirection.getValue()
@@ -261,7 +254,6 @@
         RTS.core.ui.field('Corner Radius', playersCornerRadius)
       );
       round.append(
-        RTS.core.ui.field('Font Size', roundSize),
         RTS.core.ui.field('Colour', roundColor),
         RTS.core.ui.field('Shadow Colour', roundShadow),
         RTS.core.ui.field('Shadow Direction', roundShadowDirection)
@@ -304,23 +296,17 @@
         playersBorderWidth.value = number(playersSettings.borderWidth, 4, 0, 100);
         playersBorderColor.value = playersSettings.borderColor || '#0384CB';
         playersCornerRadius.value = number(playersSettings.cornerRadius, 12, 0, 200);
-        roundSize.value = number(roundSettings.fontSize, 34, 1, 200);
         roundColor.value = roundSettings.color || '#30291f';
         roundShadow.value = roundSettings.shadowColor || '#000000';
         roundShadowDirection.setValue(roundSettings.shadowDirection ?? 0);
-        roundTimer.size.value = number(roundTimerSettings.fontSize, 34, 1, 200);
-        roundTimer.color.value = roundTimerSettings.color || '#30291f';
-        roundTimer.shadow.value = roundTimerSettings.shadowColor || '#000000';
-        roundTimer.direction.setValue(roundTimerSettings.shadowDirection ?? 0);
-        roundTimer.align.setValue(roundTimerSettings.textAlign || 'center');
 
         const setText = (target, value) => {
-          target.size.value = value.fontSize;
           target.color.value = value.color;
           target.shadow.value = value.shadowColor;
           target.direction.setValue(value.shadowDirection);
           target.align.setValue(value.textAlign);
         };
+        setText(roundTimer, roundTimerSettings);
         setText(roundTotalLabel, roundTotalSettings.label);
         setText(roundTotalValue, roundTotalSettings.value);
         setText(potTotalLabel, potTotalSettings.label);
@@ -338,12 +324,12 @@
       });
 
       const getActiveBrand = configuration => {
-        const brands = configuration?.brands || {};
-        return brands[configuration?.activeBrand || Object.keys(brands)[0]] || defaultBrand;
+        const value = normaliseBrands(clone(configuration || defaults));
+        const brands = value.brands || { default: defaultBrand };
+        return brands[value.activeBrand || Object.keys(brands)[0] || 'default'] || defaultBrand;
       };
 
-      apply(RTSHigherLowerConfiguration.current || defaults);
-      RTSHigherLowerConfiguration.request();
+      RTSHigherLowerConfiguration.onReady(apply);
       return { apply };
     }
   };
