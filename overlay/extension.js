@@ -48,6 +48,7 @@
     const state = extension.state.game.start(rounds, players, bonusPot);
     RTSHigherLowerTimer.stop(extension);
     RTSHigherLowerPresentation.resetCards(extension);
+    RTSHigherLowerPresentation.show(extension);
     updateBoard(extension, { round: 0, players: state.players, startedPlayers: state.startedPlayers });
     await drawCard(extension);
     RTSHigherLowerPersistence.save(extension.state.game);
@@ -63,11 +64,12 @@
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(value));
-    panel.show();
+    const game = value.game || {};
+    if (game.state === 'playing') RTSHigherLowerPresentation.show(extension);
+    else RTSHigherLowerPresentation.hide(extension);
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(value));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
-    const game = value.game || {};
     if (game.state === 'registration' && game.registrationStartedAt)
       RTSHigherLowerTimer.startRegistration(extension, game.registrationStartedAt);
   }
@@ -78,6 +80,7 @@
     extension.state.card = null;
     RTSHigherLowerPresentation.resetCards(extension);
     updateBoard(extension, { round: 0, players: [], roundTotal: 0, potTotal: 0, startedPlayers: 0 });
+    RTSHigherLowerPresentation.hide(extension);
     return true;
   }
 
@@ -124,7 +127,8 @@
     RTSHigherLowerBoard.update(panel, extension.state.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
-    panel.show();
+    if (extension.state.configuration?.game?.state === 'playing')
+      RTSHigherLowerPresentation.show(extension);
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(extension.state.configuration));
   }
@@ -146,9 +150,11 @@
     if (command === 'start') extension.api.startGame(data?.rounds ?? data ?? 10);
     if (command === 'registration') {
       const startedAt = data?.startedAt ?? data ?? Date.now();
+      RTSHigherLowerPresentation.hide(extension);
       RTSHigherLowerTimer.startRegistration(extension, startedAt);
     }
     if (command === 'reset') extension.api.resetGame();
+    if (command === 'hide') RTSHigherLowerPresentation.hide(extension);
     if (command === 'state' || command === 'update') extension.api.updateState(data);
     if (command === 'layout') extension.api.setLayout(data);
     if (command === 'draw') extension.api.drawCard();
