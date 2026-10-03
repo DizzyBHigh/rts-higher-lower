@@ -142,7 +142,14 @@
     RTSHigherLowerConfiguration.deleteLayout(name);
   };
 
-  layoutSelect.addEventListener('change', () => RTSHigherLowerConfiguration.activateLayout(layoutSelect.value));
+  layoutSelect.addEventListener('change', () => {
+    const name = layoutSelect.value;
+    if (!name) return;
+    const layouts = RTSHigherLowerConfiguration.getLayouts();
+    if (!layouts[name]) return;
+    current = extension.api.setLayout(name);
+    editor?.refresh();
+  });
   newLayoutButton.addEventListener('click', newLayout);
   deleteButton.addEventListener('click', deleteLayout);
 
