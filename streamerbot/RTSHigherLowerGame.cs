@@ -30,18 +30,9 @@ public class CPHInline
 
     public bool LoadExtension()
     {
-        CPH.SetArgument(
-            "rtsOverlayExtension",
-            "rts-higher-lower");
-
-        CPH.SetArgument(
-            "rtsOverlayManifestUrl",
-            "https://dizzybhigh.github.io/rts-higher-lower/overlay/manifest.json");
-
-        CPH.TriggerEvent(
-            "RTS - Overlay - Load Extension",
-            true);
-
+        CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
+        CPH.SetArgument("rtsOverlayManifestUrl", "https://dizzybhigh.github.io/rts-higher-lower/overlay/manifest.json");
+        CPH.TriggerEvent("RTS - Overlay - Load Extension", true);
         return true;
     }
     public bool Layout()
@@ -80,11 +71,9 @@ public class CPHInline
         var configuration = ReadConfiguration();
         var existing = GetGame(configuration);
         if (existing.Value<string>("state") == "registration" || existing.Value<string>("state") == "playing") return false;
-
         int rounds = configuration["settings"]?.Value<int?>("defaultRounds") ?? 10;
         if (CPH.TryGetArg("rtsHigherLowerRounds", out int requestedRounds)) rounds = requestedRounds;
         if (rounds < 1) return false;
-
         var game = new JObject
         {
             ["state"] = "registration",
@@ -95,11 +84,9 @@ public class CPHInline
             ["bonusPot"] = 0,
             ["registrationStartedAt"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
         };
-
         configuration["game"] = game;
         Save(configuration);
         SetStartCommandEnabled(false);
-
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "registration");
         CPH.SetArgument("rtsOverlayData", game.Value<long>("registrationStartedAt"));
@@ -122,12 +109,10 @@ public class CPHInline
             ResetOverlay();
             return false;
         }
-
         game["state"] = "playing";
         game["active"] = true;
         game.Remove("registrationStartedAt");
         Save(configuration);
-
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "start");
         CPH.SetArgument("rtsOverlayData", game.Value<int?>("rounds") ?? 10);
@@ -384,61 +369,4 @@ public class CPHInline
     private bool ReadUser(out string id, out Platform platform)
     {
         id = ""; platform = Platform.Twitch;
-        return CPH.TryGetArg("userId", out id) && CPH.TryGetArg("userType", out string type) && Enum.TryParse(type, true, out platform);
-    }
-
-    private JObject Find(JArray players, string id, Platform platform)
-    {
-        string name = PlatformName(platform);
-        foreach (JObject player in players)
-        {
-            if (player.Value<string>("id") != id) continue;
-            string stored = player.Value<string>("platform");
-            if (stored == name || (string.IsNullOrWhiteSpace(stored) && platform == Platform.Twitch))
-            {
-                player["platform"] = name;
-                return player;
-            }
-        }
-        return null;
-    }
-
-    private (string id, Platform platform) Identity(JObject player)
-    {
-        string id = player.Value<string>("id");
-        string name = player.Value<string>("platform") ?? "twitch";
-        Platform platform = Enum.TryParse(name, true, out Platform parsed) ? parsed : Platform.Twitch;
-        return (id, platform);
-    }
-
-    private string PlatformName(Platform platform) => platform.ToString().ToLowerInvariant();
-    private void Increment(string id, Platform platform, string name, int amount = 1) => SetVar(id, platform, name, GetVar(id, platform, name) + amount);
-    private void AddPoints(string id, Platform platform, int amount) => SetVar(id, platform, "points", GetVar(id, platform, "points") + amount);
-
-    private int GetVar(string id, Platform platform, string name)
-    {
-        switch (platform)
-        {
-            case Platform.YouTube: return CPH.GetYouTubeUserVarById<int?>(id, name, true) ?? 0;
-            case Platform.Kick: return CPH.GetKickUserVarById<int?>(id, name, true) ?? 0;
-            default: return CPH.GetTwitchUserVarById<int?>(id, name, true) ?? 0;
-        }
-    }
-
-    private void SetVar(string id, Platform platform, string name, int value)
-    {
-        switch (platform)
-        {
-            case Platform.YouTube: CPH.SetYouTubeUserVarById(id, name, value, true); break;
-            case Platform.Kick: CPH.SetKickUserVarById(id, name, value, true); break;
-            default: CPH.SetTwitchUserVarById(id, name, value, true); break;
-        }
-    }
-}
-
-public enum Platform
-{
-    Twitch,
-    YouTube,
-    Kick
-}
+        return CPH.TryGetArg("userId", out id) && CPH.TryGetArg("userType", out string type)... (truncated)

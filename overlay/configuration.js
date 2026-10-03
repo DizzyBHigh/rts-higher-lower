@@ -37,7 +37,7 @@
 
     request() {
       return RTSOverlaySocket.requestAction(
-        'RTS - Higher Lower Game - Core',
+        'RTS - Higher Lower - Core',
         { rtsHigherLowerOperation: 'get' }
       );
     },
@@ -45,7 +45,7 @@
     save(configuration) {
       if (!Configuration.apply(configuration)) return false;
       return RTSOverlaySocket.requestAction(
-        'RTS - Higher Lower Game - Core',
+        'RTS - Higher Lower - Core',
         {
           rtsHigherLowerOperation: 'save',
           rtsHigherLowerConfiguration: JSON.stringify(configuration)

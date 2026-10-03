@@ -75,6 +75,18 @@
     return result;
   }
 
+  function flattenTargets(value, path, result) {
+    if (!value || typeof value !== 'object') return;
+    Object.keys(value).forEach(key => {
+      const nextPath = path ? path + '.' + key : key;
+      const item = value[key];
+      if (item && typeof item === 'object' && !Array.isArray(item)) {
+        if (item.nodeType) result[nextPath] = item;
+        else flattenTargets(item, nextPath, result);
+      }
+    });
+  }
+
   function applyValue(element, value, path) {
     if (!element || !value) return;
     if (path === 'board') {
@@ -113,7 +125,7 @@
     transition(extension, from, to, complete) {
       const settings = RTSHigherLowerConfiguration.current?.settings || {};
       const options = settings.cardAnimation || {};
-      const runner = RTS.core.layoutAnimation.createRunner(targets(extension), applyValue);
+      const runner = RTS.core.layoutAnimation.createRunner(flattenedTargets(extension), applyValue);
       return new Promise(resolve => {
         runner.animate(from, to, {
           duration: Math.max(0, Number(options.duration) || 500),
@@ -125,4 +137,23 @@
       });
     }
   };
+
+  function flattenedTargets(extension) {
+    return flattenTargetGroups(targets(extension));
+  }
+
+  function flattenTargetGroups(value) {
+    const result = {};
+    Object.keys(value || {}).forEach(key => {
+      const item = value[key];
+      if (!item) return;
+      if (item.nodeType) result[key] = item;
+      else if (typeof item === 'object') {
+        Object.keys(item).forEach(child => {
+          if (item[child]) result[key + '.' + child] = item[child];
+        });
+      }
+    });
+    return result;
+  }
 })();
