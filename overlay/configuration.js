@@ -21,6 +21,20 @@
         Configuration.listeners.push(listener);
     },
 
+    onReady(listener) {
+      if (typeof listener !== 'function') return;
+      if (Configuration.current) {
+        listener(Configuration.current);
+        return;
+      }
+      const ready = configuration => {
+        const index = Configuration.listeners.indexOf(ready);
+        if (index >= 0) Configuration.listeners.splice(index, 1);
+        listener(configuration);
+      };
+      Configuration.listeners.push(ready);
+    },
+
     request() {
       return RTSOverlaySocket.requestAction(
         'RTS - Higher Lower Game - Core',
