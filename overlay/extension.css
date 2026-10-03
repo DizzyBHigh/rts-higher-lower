@@ -176,43 +176,37 @@
   box-shadow: 0 -14px 0 -8px #0384CB, 0 14px 0 -8px #0384CB, -14px 0 0 -8px #0384CB, 14px 0 0 -8px #0384CB;
 }
 
-.extension-dev-tools {
+.hl-dev {
   margin-top: 12px;
   padding: 12px;
   border: 1px solid #444;
   border-radius: 6px;
 }
 
-.hl-settings-editor {
+.hl-dev__settings {
   display: block;
   width: 100%;
 }
 
-.hl-settings-editor .rts-ui-section {
+.hl-dev__settings .rts-ui-section {
   margin: 10px 0;
   width: 100%;
   box-sizing: border-box;
 }
 
-.hl-settings-editor .rts-ui-button {
+.hl-dev__settings .rts-ui-button {
   margin-top: 4px;
 }
 
-.hl-settings-status {
+.hl-dev__status {
   color: var(--rts-ui-muted, #AAB0BA);
   margin-left: 8px;
 }
 
-.hl-layout-editor {
+.hl-dev__layout-controls {
   display: flex;
   flex-wrap: wrap;
   align-items: end;
   gap: 8px;
   margin-top: 12px;
-}
-
-.hl-layout-editor label { display: grid; gap: 4px; font-size: 12px; }
-.hl-layout-editor select,
-.hl-layout-editor input {
-  min-width: 120px;
 }
