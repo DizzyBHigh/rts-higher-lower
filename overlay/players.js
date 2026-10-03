@@ -57,6 +57,13 @@
     const borderWidth = Number(value.borderWidth) || 0;
     const borderColor = value.borderColor || '#0384CB';
     const radius = Number(value.cornerRadius) || 0;
+    const title = value.title || {};
+    const titleShadow = title.shadowDirection || {};
+    const shadowAngle = Number(titleShadow.angle) || 0;
+    const shadowDistance = Math.max(0, Number(titleShadow.distance) || 0);
+    const shadowRadians = shadowAngle * Math.PI / 180;
+    const shadowX = Math.sin(shadowRadians) * shadowDistance;
+    const shadowY = -Math.cos(shadowRadians) * shadowDistance;
 
     root.style.setProperty('--hl-players-color-1', color1);
     root.style.setProperty('--hl-players-color-2', color2);
@@ -64,6 +71,10 @@
     root.style.setProperty('--hl-players-border-width', borderWidth + 'px');
     root.style.setProperty('--hl-players-border-color', borderColor);
     root.style.setProperty('--hl-players-radius', radius + 'px');
+    root.style.setProperty('--hl-players-title-color', title.color || '#ffffff');
+    root.style.setProperty('--hl-players-title-shadow-color', title.shadowColor || '#000000');
+    root.style.setProperty('--hl-players-title-shadow-x', shadowX + 'px');
+    root.style.setProperty('--hl-players-title-shadow-y', shadowY + 'px');
     return root;
   }
 
