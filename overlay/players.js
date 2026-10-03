@@ -12,22 +12,22 @@
 
   function playerRow(player) {
     const row = document.createElement('div');
-    row.className = 'hl-board__player';
+    row.className = 'hl-players__player';
 
     const name = document.createElement('span');
-    name.className = 'hl-board__player-name';
+    name.className = 'hl-players__name';
     name.textContent = player.name || '';
 
     const vote = String(player.vote || '').toLowerCase();
     const platform = platformName(player.platform);
     const icon = document.createElement('span');
-    icon.className = 'hl-board__player-vote hl-board__player-vote--' +
-      (vote || 'waiting') + ' hl-board__player-vote--platform-' + platform;
+    icon.className = 'hl-players__vote hl-players__vote--' +
+      (vote || 'waiting') + ' hl-players__vote--platform-' + platform;
     icon.title = vote === 'higher' ? 'Higher' :
       vote === 'lower' ? 'Lower' : 'Waiting';
 
     const bet = document.createElement('span');
-    bet.className = 'hl-board__player-bet';
+    bet.className = 'hl-players__bet';
     bet.textContent = vote ? money(player.bet) : 'Waiting';
 
     row.append(name, icon, bet);
@@ -36,20 +36,19 @@
 
   function build(panel) {
     panel.setContent(
-      '<section class="hl-board__players-panel">' +
-        '<div class="hl-board__heading">' +
+      '<section class="hl-players">' +
+        '<div class="hl-players__heading">' +
           '<span>Players</span>' +
-          '<span class="hl-board__players-count">0/0</span>' +
+          '<span class="hl-players__count">0/0</span>' +
         '</div>' +
-        '<div class="hl-board__players"></div>' +
+        '<div class="hl-players__list"></div>' +
       '</section>'
     );
-    return panel.element.querySelector('.hl-board__players-panel');
+    return panel.element.querySelector('.hl-players');
   }
 
   function applyAppearance(panel, appearance = {}) {
-    const root = panel.element.querySelector('.hl-board__players-panel') ||
-      build(panel);
+    const root = panel.element.querySelector('.hl-players') || build(panel);
     const value = appearance.players || {};
     const angle = ((Number(value.gradientDirection) || 0) + 90) % 360;
     const color1 = value.color1 || '#20252a';
@@ -79,10 +78,9 @@
   }
 
   function update(panel, state = {}) {
-    const root = panel.element.querySelector('.hl-board__players-panel') ||
-      build(panel);
-    const list = root.querySelector('.hl-board__players');
-    const count = root.querySelector('.hl-board__players-count');
+    const root = panel.element.querySelector('.hl-players') || build(panel);
+    const list = root.querySelector('.hl-players__list');
+    const count = root.querySelector('.hl-players__count');
     const players = Array.isArray(state.players) ? state.players : [];
     const started = Number(state.startedPlayers) || players.length;
 
