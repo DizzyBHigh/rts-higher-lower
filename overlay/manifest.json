@@ -19,8 +19,7 @@
       "persistence.js",
       "recovery.js",
       "settings.js",
-      "extension.js",
-      "layout-runtime.js"
+      "extension.js"
     ],
     "css": [
       "extension.css",
@@ -29,8 +28,7 @@
     ],
     "dev": {
       "js": [
-        "dev/test.js",
-        "dev/game-settings.js"
+        "dev/test.js"
       ]
     }
   }
