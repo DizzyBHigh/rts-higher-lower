@@ -40,7 +40,6 @@
   section.appendChild(settings);
 
   const gameSettings = settings.querySelector('.rts-ui-section');
-  const defaultLayout = RTS.core.ui.dropdown({ options: ['default'], value: 'default' });
   const defaultBrand = RTS.core.ui.dropdown({ options: ['default'], value: 'default' });
   const showingLayout = RTS.core.ui.dropdown({ options: ['default'], value: 'default' });
   const hiddenLayout = RTS.core.ui.dropdown({ options: ['default'], value: 'default' });
@@ -55,28 +54,25 @@
       ));
       select.value = layouts.includes(selected) ? selected : layouts[0];
     };
-    setDropdown(defaultLayout, settingsValue.defaultLayout);
-    setDropdown(showingLayout, settingsValue.showingLayout || settingsValue.defaultLayout);
-    setDropdown(hiddenLayout, settingsValue.hiddenLayout || settingsValue.defaultLayout);
+    setDropdown(showingLayout, settingsValue.showingLayout);
+    setDropdown(hiddenLayout, settingsValue.hiddenLayout);
     defaultBrand.replaceChildren(...brands.map(name =>
       RTS.core.ui.el('option', { value: name, text: name })
     ));
     defaultBrand.value = brands.includes(settingsValue.defaultBrand) ? settingsValue.defaultBrand : brands[0];
   };
   if (gameSettings) {
-    gameSettings.insertBefore(RTS.core.ui.field('Default Layout', defaultLayout), gameSettings.lastElementChild);
     gameSettings.insertBefore(RTS.core.ui.field('Default Brand', defaultBrand), gameSettings.lastElementChild);
-    gameSettings.insertBefore(RTS.core.ui.field('Showing Layout', showingLayout), gameSettings.lastElementChild);
+    gameSettings.insertBefore(RTS.core.ui.field('Game Layout', showingLayout), gameSettings.lastElementChild);
     gameSettings.insertBefore(RTS.core.ui.field('Hidden Layout', hiddenLayout), gameSettings.lastElementChild);
   }
   const originalSave = RTSHigherLowerConfiguration.save;
   RTSHigherLowerConfiguration.save = configuration => {
     configuration.settings = {
       ...(configuration.settings || {}),
-      defaultLayout: defaultLayout.value || 'default',
       defaultBrand: defaultBrand.value || 'default',
-      showingLayout: showingLayout.value || defaultLayout.value || 'default',
-      hiddenLayout: hiddenLayout.value || defaultLayout.value || 'default'
+      showingLayout: showingLayout.value || 'default',
+      hiddenLayout: hiddenLayout.value || 'default'
     };
     return originalSave(configuration);
   };
