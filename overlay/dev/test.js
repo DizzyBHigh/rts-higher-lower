@@ -49,7 +49,7 @@
   };
 
   const layoutSection = RTS.core.ui.section('Overlay Layout');
-  settings.appendChild(layoutSection);
+  settings.insertBefore(layoutSection, settingsApi.brandSection);
 
   const layoutControls = document.createElement('div');
   layoutControls.className = 'hl-layout-controls';
@@ -86,8 +86,7 @@
     deleteButton.disabled = layoutSelect.options.length <= 1;
   };
 
-  const saveLayout = () =>
-    RTSHigherLowerConfiguration.saveLayout(extension.api.getLayout());
+  const saveLayout = () => RTSHigherLowerConfiguration.saveLayout(extension.api.getLayout());
 
   const newLayout = () => {
     const name = window.prompt('New layout name:', '');
@@ -106,9 +105,7 @@
     RTSHigherLowerConfiguration.deleteLayout(name);
   };
 
-  layoutSelect.addEventListener('change', () => {
-    RTSHigherLowerConfiguration.activateLayout(layoutSelect.value);
-  });
+  layoutSelect.addEventListener('change', () => RTSHigherLowerConfiguration.activateLayout(layoutSelect.value));
   newLayoutButton.addEventListener('click', newLayout);
   deleteButton.addEventListener('click', deleteLayout);
 
@@ -121,24 +118,15 @@
   refreshLayoutList();
 
   const targetLabels = {
-    board: 'Board',
-    players: 'Players Panel',
-    previous: 'Previous Card Position',
-    higher: 'Higher Card Position',
-    lower: 'Lower Card Position',
-    deck: 'Deck Position',
-    round: 'Current Round Title',
-    roundTimer: 'Round Timer',
-    roundTotalLabel: 'Round Total Label',
-    roundTotalValue: 'Round Total Value',
-    potTotalLabel: 'Pot Total Label',
-    potTotalValue: 'Pot Total Value'
+    board: 'Board', players: 'Players Panel', previous: 'Previous Card Position',
+    higher: 'Higher Card Position', lower: 'Lower Card Position', deck: 'Deck Position',
+    round: 'Current Round Title', roundTimer: 'Round Timer', roundTotalLabel: 'Round Total Label',
+    roundTotalValue: 'Round Total Value', potTotalLabel: 'Pot Total Label', potTotalValue: 'Pot Total Value'
   };
 
   const targetIds = [
-    'board', 'players', 'previous', 'higher', 'lower', 'deck',
-    'round', 'roundTimer', 'roundTotalLabel', 'roundTotalValue',
-    'potTotalLabel', 'potTotalValue'
+    'board', 'players', 'previous', 'higher', 'lower', 'deck', 'round', 'roundTimer',
+    'roundTotalLabel', 'roundTotalValue', 'potTotalLabel', 'potTotalValue'
   ];
 
   const targets = targetIds.map(id => ({
@@ -152,16 +140,11 @@
     }
   }));
 
-  editor = RTS.core.positionEditor.mount(layoutSection, {
-    title: '',
-    targets,
-    onSave: saveLayout
-  });
+  editor = RTS.core.positionEditor.mount(layoutSection, { title: '', targets, onSave: saveLayout });
 
   RTSOverlaySocket.onEvent(message => {
     const args = message?.data?.args ?? message?.args;
-    if (args?.rtsHigherLowerSaveStatus)
-      editor.setSaveStatus(args.rtsHigherLowerSaveStatus);
+    if (args?.rtsHigherLowerSaveStatus) editor.setSaveStatus(args.rtsHigherLowerSaveStatus);
   });
 
   section.addEventListener('click', async event => {
