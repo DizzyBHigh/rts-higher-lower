@@ -12,8 +12,10 @@ RTS - Higher Lower Game - Join : Execute Method(RTS - Higher Lower Game - Core, 
 Commands: !join
 
 RTS - Higher Lower Game - Start : Execute Method(RTS - Higher Lower Game - Core, Start Game)
-Commands: !start 
+Commands: !start
 
 RTS - Higher Lower Game - Vote : Execute Method(RTS - Higher Lower Game - Core, Vote)
 Commands: !vote <higher|lower> <amount>
 
+RTS - Higher Lower Game - Layout : Execute Code (RTS - Higher Lower Game - Layout) - streamerbot\RTSHigherLowerLayoutCommand.cs
+Commands: !rts-hl-layout <layoutname>
