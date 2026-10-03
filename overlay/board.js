@@ -45,10 +45,27 @@
     target.style.zIndex = String(value.z ?? 0);
   }
 
-  function applyTextStyle(stage, prefix, settings, fallback) {
+  function textScale(prefix, name, baseSize, element) {
+    const reference = RTSHigherLowerLayout.defaults.elements[name];
+    const referenceHeight = Number(reference?.height) || 1;
+    const height = Number(element?.style.height?.replace('px', '')) || referenceHeight;
+    return baseSize * (height / referenceHeight);
+  }
+
+  function applyTextStyle(stage, prefix, name, settings, fallback) {
     const value = settings || fallback;
     const shadow = shadowOffset(value.shadowDirection);
-    stage.style.setProperty('--hl-' + prefix + '-size', (Number(value.fontSize) || fallback.fontSize) + 'px');
+    const baseSize = Number(value.fontSize) || fallback.fontSize;
+    const element = stage.querySelector({
+      round: '.hl-board__round',
+      roundTimer: '.hl-board__round-timer',
+      roundTotalLabel: '.hl-board__round-total-label',
+      roundTotalValue: '.hl-board__round-total-value',
+      potTotalLabel: '.hl-board__pot-total-label',
+      potTotalValue: '.hl-board__pot-total-value'
+    }[name]);
+    stage.style.setProperty('--hl-' + prefix + '-base-size', baseSize + 'px');
+    stage.style.setProperty('--hl-' + prefix + '-size', textScale(prefix, name, baseSize, element) + 'px');
     stage.style.setProperty('--hl-' + prefix + '-color', value.color || fallback.color);
     stage.style.setProperty('--hl-' + prefix + '-shadow-color', value.shadowColor || fallback.shadowColor);
     stage.style.setProperty('--hl-' + prefix + '-shadow-x', shadow.x);
@@ -90,12 +107,12 @@
       boardElement.style.borderRadius = radius + 'px';
     }
 
-    applyTextStyle(stage, 'round', round, { fontSize: 34, color: '#30291f', shadowColor: '#000000', textAlign: 'center' });
-    applyTextStyle(stage, 'round-timer', roundTimer, { fontSize: 34, color: '#30291f', shadowColor: '#000000', textAlign: 'center' });
-    applyTextStyle(stage, 'round-total-label', roundTotalLabel, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
-    applyTextStyle(stage, 'round-total-value', roundTotalValue, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
-    applyTextStyle(stage, 'pot-total-label', potTotalLabel, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
-    applyTextStyle(stage, 'pot-total-value', potTotalValue, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
+    applyTextStyle(stage, 'round', 'round', round, { fontSize: 34, color: '#30291f', shadowColor: '#000000', textAlign: 'center' });
+    applyTextStyle(stage, 'round-timer', 'roundTimer', roundTimer, { fontSize: 34, color: '#30291f', shadowColor: '#000000', textAlign: 'center' });
+    applyTextStyle(stage, 'round-total-label', 'roundTotalLabel', roundTotalLabel, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
+    applyTextStyle(stage, 'round-total-value', 'roundTotalValue', roundTotalValue, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
+    applyTextStyle(stage, 'pot-total-label', 'potTotalLabel', potTotalLabel, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
+    applyTextStyle(stage, 'pot-total-value', 'potTotalValue', potTotalValue, { fontSize: 24, color: '#30291f', shadowColor: '#000000', textAlign: 'right' });
   }
 
   function applyLayout(panel, layout) {
