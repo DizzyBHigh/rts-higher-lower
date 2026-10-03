@@ -19,6 +19,7 @@
       extension.api.showCard = card => RTSHigherLowerPresentation.showCard(extension, card);
       extension.api.flipCard = () => RTSHigherLowerPresentation.flipCard(extension);
       extension.api.moveCard = position => RTSHigherLowerPresentation.moveCard(extension, position);
+      extension.api.resetGame = () => resetGame(extension);
       RTS.core.events?.on('RTS - Overlay - Extension Command', message => handleCommand(extension, message));
     }
   };
@@ -66,6 +67,18 @@
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(value));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
+    const game = value.game || {};
+    if (game.state === 'registration' && game.registrationStartedAt)
+      RTSHigherLowerTimer.startRegistration(extension, game.registrationStartedAt);
+  }
+
+  function resetGame(extension) {
+    RTSHigherLowerTimer.stop(extension);
+    extension.state.game.reset();
+    extension.state.card = null;
+    RTSHigherLowerPresentation.resetCards(extension);
+    updateBoard(extension, { round: 0, players: [], roundTotal: 0, potTotal: 0, startedPlayers: 0 });
+    return true;
   }
 
   async function drawCard(extension) {
@@ -88,7 +101,6 @@
       layoutValue = extension.state.configuration?.layouts?.[layoutName];
       if (!layoutValue) return extension.state.layout;
     }
-
     return RTSHigherLowerLayout.transition(extension, () => {
       extension.state.layout = RTSHigherLowerLayout.create(
         RTSHigherLowerLayout.merge(extension.state.layout, layoutValue)
@@ -132,6 +144,11 @@
     const rawData = args.rtsOverlayData || args.data;
     const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
     if (command === 'start') extension.api.startGame(data?.rounds ?? data ?? 10);
+    if (command === 'registration') {
+      const startedAt = data?.startedAt ?? data ?? Date.now();
+      RTSHigherLowerTimer.startRegistration(extension, startedAt);
+    }
+    if (command === 'reset') extension.api.resetGame();
     if (command === 'state' || command === 'update') extension.api.updateState(data);
     if (command === 'layout') extension.api.setLayout(data);
     if (command === 'draw') extension.api.drawCard();
