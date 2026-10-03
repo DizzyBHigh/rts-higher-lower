@@ -26,25 +26,43 @@
     render(extension, remaining);
   }
 
-  function start(extension) {
-    const length = Math.max(
-      1000,
-      Number(extension?.state?.configuration?.settings?.roundLength) || DEFAULT_LENGTH
-    );
-
+  function run(extension, endTime, onComplete) {
     if (interval) clearInterval(interval);
-    deadline = Date.now() + length;
-    render(extension, length);
-
-    interval = setInterval(() => {
+    deadline = endTime;
+    const tick = () => {
       const remaining = Math.max(0, deadline - Date.now());
       render(extension, remaining);
       if (!remaining) {
         clearInterval(interval);
         interval = null;
+        deadline = 0;
+        if (onComplete) onComplete();
       }
-    }, 100);
+    };
+    tick();
+    if (deadline) interval = setInterval(tick, 100);
   }
 
-  window.RTSHigherLowerTimer = { start, stop, format };
+  function start(extension) {
+    const length = Math.max(
+      1000,
+      Number(extension?.state?.configuration?.settings?.roundLength) || DEFAULT_LENGTH
+    );
+    run(extension, Date.now() + length);
+  }
+
+  function startRegistration(extension, startedAt) {
+    const length = Math.max(
+      1000,
+      Number(extension?.state?.configuration?.settings?.roundLength) || DEFAULT_LENGTH
+    );
+    const startTime = Number(startedAt) || Date.now();
+    run(extension, startTime + length, () => {
+      RTSOverlaySocket.requestAction('RTS - Higher Lower - Game', {
+        rtsHigherLowerOperation: 'begin'
+      });
+    });
+  }
+
+  window.RTSHigherLowerTimer = { start, startRegistration, stop, format };
 })();
