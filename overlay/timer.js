@@ -36,6 +36,7 @@
         clearInterval(interval);
         interval = null;
         deadline = 0;
+        RTS.core.log?.info('Higher Lower timer completed');
         if (onComplete) onComplete();
       }
     };
@@ -48,6 +49,7 @@
       1000,
       Number(extension?.state?.configuration?.settings?.roundLength) || DEFAULT_LENGTH
     );
+    RTS.core.log?.info('Higher Lower round timer started', { length });
     run(extension, Date.now() + length);
   }
 
@@ -57,7 +59,9 @@
       Number(extension?.state?.configuration?.settings?.roundLength) || DEFAULT_LENGTH
     );
     const startTime = Number(startedAt) || Date.now();
+    RTS.core.log?.info('Higher Lower registration timer started', { startTime, length });
     run(extension, startTime + length, () => {
+      RTS.core.log?.info('Higher Lower registration ended; requesting begin');
       RTSOverlaySocket.requestAction('RTS - Higher Lower - Game', {
         rtsHigherLowerOperation: 'begin'
       });
