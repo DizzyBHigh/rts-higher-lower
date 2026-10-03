@@ -21,12 +21,29 @@ public class CPHInline
             case "savegame": return SaveGame();
             case "result": return Result();
             case "layout": return Layout();
+            case "load": return LoadExtension();
             case "get": return GetConfiguration();
             case "save": return SaveConfiguration();
             default: return false;
         }
     }
 
+    public bool LoadExtension()
+    {
+        CPH.SetArgument(
+            "rtsOverlayExtension",
+            "rts-higher-lower");
+
+        CPH.SetArgument(
+            "rtsOverlayManifestUrl",
+            "https://dizzybhigh.github.io/rts-higher-lower/overlay/manifest.json");
+
+        CPH.TriggerEvent(
+            "RTS - Overlay - Load Extension",
+            true);
+
+        return true;
+    }
     public bool Layout()
     {
         string layout = CPH.TryGetArg("rawInput", out string value) ? value.Trim() : "";
