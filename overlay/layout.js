@@ -35,6 +35,22 @@
     };
   }
 
+  function merge(base, value) {
+    const source = value || {};
+    return {
+      board: { ...(base?.board || {}), ...(source.board || {}) },
+      players: { ...(base?.players || {}), ...(source.players || {}) },
+      cards: Object.keys(defaults.cards).reduce((result, key) => {
+        result[key] = { ...(base?.cards?.[key] || {}), ...(source.cards?.[key] || {}) };
+        return result;
+      }, {}),
+      elements: Object.keys(defaults.elements).reduce((result, key) => {
+        result[key] = { ...(base?.elements?.[key] || {}), ...(source.elements?.[key] || {}) };
+        return result;
+      }, {})
+    };
+  }
+
   function fromConfiguration(configuration) {
     const value = configuration || {};
     const name = value.activeLayout || 'default';
@@ -81,7 +97,9 @@
 
   window.RTSHigherLowerLayout = {
     defaults,
+    clone,
     create,
+    merge,
     fromConfiguration,
     transition(extension, apply) {
       const before = snapshot(extension);
