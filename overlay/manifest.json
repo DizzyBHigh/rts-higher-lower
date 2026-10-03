@@ -19,6 +19,7 @@
       "persistence.js",
       "recovery.js",
       "settings.js",
+      "commands.js",
       "runtime.js",
       "core.js"
     ],
