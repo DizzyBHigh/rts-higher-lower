@@ -95,17 +95,32 @@ public class CPHInline
         if (game.Value<bool?>("active") != true) return false;
         var player = Find(GetPlayers(game), id, platform);
         if (player == null || player["vote"]?.Type != JTokenType.Null) return false;
-        string direction = CPH.TryGetArg("rtsHigherLowerVote", out string vote) ? vote : "";
-        if (direction != "Higher" && direction != "Lower") return false;
-        int points = GetVar(id, platform, "points");
+
         string raw = CPH.TryGetArg("rawInput", out string input) ? input.Trim() : "";
-        int amount = 0;
+        string[] parts = raw.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 2) return false;
+
+        string direction;
+        if (parts[0].Equals("higher", StringComparison.OrdinalIgnoreCase))
+            direction = "Higher";
+        else if (parts[0].Equals("lower", StringComparison.OrdinalIgnoreCase))
+            direction = "Lower";
+        else
+            return false;
+
+        if (!int.TryParse(parts[1], out int amount) || amount < 0) return false;
+
+        int points = GetVar(id, platform, "points");
         if (points > 0)
         {
-            if (!int.TryParse(raw, out amount) || amount <= 0 || amount > points) return false;
+            if (amount <= 0 || amount > points) return false;
             SetVar(id, platform, "points", points - amount);
         }
-        else if (!string.IsNullOrWhiteSpace(raw) && (!int.TryParse(raw, out amount) || amount != 0)) return false;
+        else if (amount != 0)
+        {
+            return false;
+        }
+
         player["vote"] = direction;
         player["bet"] = amount;
         Save(configuration);
