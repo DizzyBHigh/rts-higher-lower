@@ -21,7 +21,6 @@ const RTSHigherLowerCommands = {
     if (command === 'start') extension.api.startGame(data?.rounds ?? data ?? 10);
     if (command === 'registration') {
       const startedAt = data?.startedAt ?? data ?? Date.now();
-      RTSHigherLowerPresentation.hide(extension);
       RTSHigherLowerTimer.startRegistration(extension, startedAt);
     }
     if (command === 'reset') extension.api.resetGame();
