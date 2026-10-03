@@ -14,7 +14,8 @@
     },
     players: {
       color1: '#20252a', color2: '#20252a', gradientDirection: 90,
-      borderWidth: 4, borderColor: '#0384CB', cornerRadius: 12
+      borderWidth: 4, borderColor: '#0384CB', cornerRadius: 12,
+      title: { color: '#ffffff', shadowColor: '#000000', shadowDirection: { angle: 0, distance: 3 } }
     },
     round: { color: '#30291f', shadowColor: '#000000', shadowDirection: { angle: 0, distance: 3 } },
     roundTimer: { color: '#30291f', shadowColor: '#000000', shadowDirection: { angle: 0, distance: 3 }, textAlign: 'center' },
@@ -147,6 +148,12 @@
       const playersBorderWidth = RTS.core.ui.number({ value: 4, min: 0, max: 100, step: 1, onInput: () => previewBrand() });
       const playersBorderColor = RTS.core.ui.color({ value: '#0384CB', onInput: () => previewBrand() });
       const playersCornerRadius = RTS.core.ui.number({ value: 12, min: 0, max: 200, step: 1, onInput: () => previewBrand() });
+      const playersTitleColor = RTS.core.ui.color({ value: '#ffffff', onInput: () => previewBrand() });
+      const playersTitleShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
+      const playersTitleShadowDirection = RTS.core.ui.angle({
+        value: defaultBrand.players.title.shadowDirection,
+        onInput: () => previewBrand()
+      });
 
       const round = RTS.core.ui.section('Round Information');
       const roundColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
@@ -217,7 +224,12 @@
           gradientDirection: playersGradientDirection.getValue(),
           borderWidth: number(playersBorderWidth.value, 4, 0, 100),
           borderColor: playersBorderColor.value,
-          cornerRadius: number(playersCornerRadius.value, 12, 0, 200)
+          cornerRadius: number(playersCornerRadius.value, 12, 0, 200),
+          title: {
+            color: playersTitleColor.value,
+            shadowColor: playersTitleShadow.value,
+            shadowDirection: playersTitleShadowDirection.getValue()
+          }
         },
         round: {
           color: roundColor.value,
@@ -261,7 +273,10 @@
         RTS.core.ui.field('Gradient Direction', playersGradientDirection),
         RTS.core.ui.field('Border Width', playersBorderWidth),
         RTS.core.ui.field('Border Colour', playersBorderColor),
-        RTS.core.ui.field('Corner Radius', playersCornerRadius)
+        RTS.core.ui.field('Corner Radius', playersCornerRadius),
+        RTS.core.ui.field('Title Colour', playersTitleColor),
+        RTS.core.ui.field('Title Shadow Colour', playersTitleShadow),
+        RTS.core.ui.field('Title Shadow Direction', playersTitleShadowDirection)
       );
       round.append(
         RTS.core.ui.field('Colour', roundColor),
@@ -283,6 +298,7 @@
         const appearance = brands[activeBrand] || defaultBrand;
         const boardSettings = appearance.board || defaultBrand.board;
         const playersSettings = appearance.players || defaultBrand.players;
+        const playerTitleSettings = playersSettings.title || defaultBrand.players.title;
         const roundSettings = appearance.round || defaultBrand.round;
         const roundTimerSettings = appearance.roundTimer || defaultBrand.roundTimer;
         const roundTotalSettings = getText(appearance, 'roundTotal');
@@ -306,6 +322,9 @@
         playersBorderWidth.value = number(playersSettings.borderWidth, 4, 0, 100);
         playersBorderColor.value = playersSettings.borderColor || '#0384CB';
         playersCornerRadius.value = number(playersSettings.cornerRadius, 12, 0, 200);
+        playersTitleColor.value = playerTitleSettings.color || '#ffffff';
+        playersTitleShadow.value = playerTitleSettings.shadowColor || '#000000';
+        playersTitleShadowDirection.setValue(playerTitleSettings.shadowDirection ?? { angle: 0, distance: 3 });
         roundColor.value = roundSettings.color || '#30291f';
         roundShadow.value = roundSettings.shadowColor || '#000000';
         roundShadowDirection.setValue(roundSettings.shadowDirection ?? 0);
