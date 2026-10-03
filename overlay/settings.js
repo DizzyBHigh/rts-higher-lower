@@ -126,9 +126,9 @@
       });
       brand.addEventListener('change', () => RTSHigherLowerConfiguration.activateBrand(brand.value));
 
+      const elementStyles = RTS.core.ui.section('Element Styles');
       const font = RTS.core.ui.fontPicker({ value: 'Arial', variant: '400', onChange: () => previewBrand() });
 
-      const elementStyles = RTS.core.ui.section('Element Styles');
       const board = RTS.core.ui.section('Game Background');
       const boardColor1 = RTS.core.ui.color({ value: '#d8c79e', onInput: () => previewBrand() });
       const boardColor2 = RTS.core.ui.color({ value: '#d8c79e', onInput: () => previewBrand() });
@@ -265,34 +265,10 @@
         RTS.core.ui.field('Brand', brand),
         newBrand,
         saveBrand,
-        deleteBrand,
-        RTS.core.ui.field('Font Selector', font)
-      );
-      board.append(
-        RTS.core.ui.field('Colour 1', boardColor1),
-        RTS.core.ui.field('Colour 2', boardColor2),
-        RTS.core.ui.field('Gradient Direction', gradientDirection),
-        RTS.core.ui.field('Border Width', borderWidth),
-        RTS.core.ui.field('Border Colour', borderColor),
-        RTS.core.ui.field('Corner Radius', cornerRadius)
-      );
-      players.append(
-        RTS.core.ui.field('Colour 1', playersColor1),
-        RTS.core.ui.field('Colour 2', playersColor2),
-        RTS.core.ui.field('Gradient Direction', playersGradientDirection),
-        RTS.core.ui.field('Border Width', playersBorderWidth),
-        RTS.core.ui.field('Border Colour', playersBorderColor),
-        RTS.core.ui.field('Corner Radius', playersCornerRadius),
-        RTS.core.ui.field('Title Colour', playersTitleColor),
-        RTS.core.ui.field('Title Shadow Colour', playersTitleShadow),
-        RTS.core.ui.field('Title Shadow Direction', playersTitleShadowDirection)
-      );
-      round.append(
-        RTS.core.ui.field('Colour', roundColor),
-        RTS.core.ui.field('Shadow Colour', roundShadow),
-        RTS.core.ui.field('Shadow Direction', roundShadowDirection)
+        deleteBrand
       );
       elementStyles.append(
+        RTS.core.ui.field('Font', font),
         board,
         players,
         round,
@@ -302,7 +278,8 @@
         potTotalLabel.section,
         potTotalValue.section
       );
-      host.append(game, brandSection, elementStyles);
+      brandSection.append(elementStyles);
+      host.append(game, brandSection);
 
       const apply = configuration => {
         const value = normaliseBrands(clone(configuration || defaults));
@@ -374,7 +351,7 @@
       };
 
       RTSHigherLowerConfiguration.onReady(apply);
-      return { apply, elementStyles };
+      return { apply, elementStyles, brandSection };
     }
   };
 
