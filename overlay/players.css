@@ -1,0 +1,72 @@
+.hl-board__players {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hl-board__player {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 36px 96px;
+  align-items: center;
+  gap: 12px;
+  min-height: 38px;
+}
+
+.hl-board__player-name,
+.hl-board__player-bet {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hl-board__player-bet {
+  text-align: right;
+}
+
+.hl-board__player-vote {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  justify-self: center;
+  border-radius: 50%;
+  background: #666;
+}
+
+.hl-board__player-vote::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+}
+
+.hl-board__player-vote--higher::after {
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 9px solid #fff;
+}
+
+.hl-board__player-vote--lower::after {
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 9px solid #fff;
+}
+
+.hl-board__player-vote--platform-twitch {
+  background: #9146ff;
+}
+
+.hl-board__player-vote--platform-youtube {
+  background: #ff0000;
+}
+
+.hl-board__player-vote--platform-kick {
+  background: #53fc18;
+}
+
+.hl-board__player-vote--platform-unknown,
+.hl-board__player-vote--waiting {
+  background: #777;
+}
