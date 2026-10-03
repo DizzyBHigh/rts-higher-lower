@@ -18,19 +18,26 @@
 
   const section = document.createElement('section');
   section.className = 'extension-dev-tools';
-  section.innerHTML = '<strong>RTS Higher Lower</strong>' +
-    '<div class="actions">' +
-    '<button data-action="state">Show Test State</button>' +
-    '<button data-action="start">Start Game</button>' +
-    '<button data-action="draw">Draw Card</button>' +
-    '<button data-action="reset">Reset Layout</button>' +
-    '</div>';
+  section.innerHTML = '<strong>RTS Higher Lower</strong>';
   host.appendChild(section);
+
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  const testStateButton = RTS.core.ui.button('Show Test State', { variant: 'blue' });
+  const startButton = RTS.core.ui.button('Start Game', { variant: 'blue' });
+  const drawButton = RTS.core.ui.button('Draw Card', { variant: 'blue' });
+  const resetButton = RTS.core.ui.button('Reset Layout', { variant: 'blue' });
+  testStateButton.dataset.action = 'state';
+  startButton.dataset.action = 'start';
+  drawButton.dataset.action = 'draw';
+  resetButton.dataset.action = 'reset';
+  actions.append(testStateButton, startButton, drawButton, resetButton);
+  section.appendChild(actions);
 
   const settings = document.createElement('div');
   settings.className = 'hl-settings-editor';
+  const settingsApi = RTSHigherLowerSettings.render(settings);
   section.appendChild(settings);
-  RTSHigherLowerSettings.render(settings);
 
   let current = extension.api.getLayout();
   let editor = null;
@@ -42,7 +49,7 @@
   };
 
   const layoutSection = RTS.core.ui.section('Overlay Layout');
-  section.appendChild(layoutSection);
+  settings.insertBefore(layoutSection, settingsApi.elementStyles);
 
   const layoutControls = document.createElement('div');
   layoutControls.className = 'hl-layout-controls';
