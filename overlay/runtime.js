@@ -37,16 +37,18 @@ const RTSHigherLowerRuntime = (() => {
     const previousState = extension.state.configuration?.game?.state;
     const isRegistration = value.game?.state === 'registration';
     const wasRegistration = previousState === 'registration';
+    const enteringRegistration = isRegistration && !wasRegistration;
     RTS.core.log?.info('Higher Lower configure', { state: value.game?.state, activeLayout: value.activeLayout });
     extension.state.configuration = value;
     RTSHigherLowerTimer.stop(extension);
 
-    if (!isRegistration || !wasRegistration)
+    if (!isRegistration || enteringRegistration)
       extension.state.layout = RTSHigherLowerLayout.fromConfiguration(value);
 
     RTSHigherLowerRecovery.apply(extension, value);
     const panel = RTSHigherLowerPresentation.getPanel(extension);
-    RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+    if (!wasRegistration || !isRegistration)
+      RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(value));
     const game = value.game || {};
     if (game.state === 'playing' || game.state === 'registration')
@@ -56,6 +58,12 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(value));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
+
+    if (enteringRegistration) {
+      void startRegistration(extension, game.registrationStartedAt || Date.now());
+      return;
+    }
+
     if (game.state === 'registration' && game.registrationStartedAt)
       RTSHigherLowerTimer.startRegistration(extension, game.registrationStartedAt);
   }
@@ -75,6 +83,7 @@ const RTSHigherLowerRuntime = (() => {
     extension.state.layout = showingLayout;
     applyLayout(extension);
     RTSHigherLowerTimer.startRegistration(extension, startedAt);
+    RTS.core.log?.info('Higher Lower registration layout visible');
     return true;
   }
 
