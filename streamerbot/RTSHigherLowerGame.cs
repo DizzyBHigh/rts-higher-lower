@@ -75,7 +75,9 @@ public class CPHInline
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "start");
         CPH.SetArgument("rtsOverlayData", rounds);
-        return CPH.RunAction("RTS - Overlay - Extension Command", true);
+        bool started = CPH.RunAction("RTS - Overlay - Extension Command", true);
+        if (started) SetStartCommandEnabled(false);
+        return started;
     }
 
     private bool Draw()
@@ -113,7 +115,8 @@ public class CPHInline
         int points = GetVar(id, platform, "points");
         if (points > 0)
         {
-            if (amount <= 0 || amount > points) return false;
+            if (amount <= 0) return false;
+            amount = Math.Min(amount, points);
             SetVar(id, platform, "points", points - amount);
         }
         else if (amount != 0)
@@ -233,6 +236,21 @@ public class CPHInline
         game["bonusPot"] = players.Count > 0 ? bonusPot % players.Count : bonusPot;
         game["active"] = false;
         game["players"] = new JArray();
+        SetStartCommandEnabled(true);
+    }
+
+    private void SetStartCommandEnabled(bool enabled)
+    {
+        foreach (var command in CPH.GetCommands())
+        {
+            if (!string.Equals(command.Name?.TrimStart('!'), "start", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (enabled)
+                CPH.EnableCommand(command.Id.ToString());
+            else
+                CPH.DisableCommand(command.Id.ToString());
+        }
     }
 
     private void Save(JObject configuration) { SaveConfiguration(configuration, false); }
