@@ -18,6 +18,8 @@
   margin-bottom: 8px;
   font-size: 20px;
   font-weight: 700;
+  color: var(--hl-players-title-color, #fff);
+  text-shadow: var(--hl-players-title-shadow-x, 0px) var(--hl-players-title-shadow-y, 3px) 0 var(--hl-players-title-shadow-color, #000);
 }
 
 .hl-board__players {
