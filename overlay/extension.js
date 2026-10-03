@@ -40,9 +40,7 @@
       : settings.hiddenLayout;
     return preferred && layouts[preferred]
       ? preferred
-      : settings.defaultLayout && layouts[settings.defaultLayout]
-        ? settings.defaultLayout
-        : value.activeLayout || Object.keys(layouts)[0] || 'default';
+      : value.activeLayout || Object.keys(layouts)[0] || 'default';
   }
 
   function applyDefaults(configuration) {
