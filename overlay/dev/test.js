@@ -39,6 +39,39 @@
   const settingsApi = RTSHigherLowerSettings.render(settings);
   section.appendChild(settings);
 
+  const gameSettings = settings.querySelector('.rts-ui-section');
+  const defaultLayout = RTS.core.ui.dropdown({ options: ['default'], value: 'default' });
+  const defaultBrand = RTS.core.ui.dropdown({ options: ['default'], value: 'default' });
+  const refreshDefaults = configuration => {
+    const value = configuration || {};
+    const layouts = Object.keys(value.layouts || { default: {} });
+    const brands = Object.keys(value.brands || { default: {} });
+    const settingsValue = value.settings || {};
+    defaultLayout.replaceChildren(...layouts.map(name =>
+      RTS.core.ui.el('option', { value: name, text: name })
+    ));
+    defaultBrand.replaceChildren(...brands.map(name =>
+      RTS.core.ui.el('option', { value: name, text: name })
+    ));
+    defaultLayout.value = layouts.includes(settingsValue.defaultLayout) ? settingsValue.defaultLayout : layouts[0];
+    defaultBrand.value = brands.includes(settingsValue.defaultBrand) ? settingsValue.defaultBrand : brands[0];
+  };
+  if (gameSettings) {
+    gameSettings.insertBefore(RTS.core.ui.field('Default Layout', defaultLayout), gameSettings.lastElementChild);
+    gameSettings.insertBefore(RTS.core.ui.field('Default Brand', defaultBrand), gameSettings.lastElementChild);
+  }
+  const originalSave = RTSHigherLowerConfiguration.save;
+  RTSHigherLowerConfiguration.save = configuration => {
+    configuration.settings = {
+      ...(configuration.settings || {}),
+      defaultLayout: defaultLayout.value || 'default',
+      defaultBrand: defaultBrand.value || 'default'
+    };
+    return originalSave(configuration);
+  };
+  RTSHigherLowerConfiguration.onChange(refreshDefaults);
+  RTSHigherLowerConfiguration.onReady(refreshDefaults);
+
   let current = extension.api.getLayout();
   let editor = null;
   let labelsVisible = true;
@@ -53,19 +86,14 @@
 
   const layoutControls = document.createElement('div');
   layoutControls.className = 'hl-layout-controls';
-  const layoutLabel = RTS.core.ui.el('span', {
-    className: 'rts-position-control-title',
-    text: 'Layout'
-  });
+  const layoutLabel = RTS.core.ui.el('span', { className: 'rts-position-control-title', text: 'Layout' });
   const layoutSelect = RTS.core.ui.positionSelector({ options: [], value: '' });
   const newLayoutButton = RTS.core.ui.button('New Layout');
   const deleteButton = RTS.core.ui.button('Delete');
   const labelButton = RTS.core.ui.button('Hide Labels', {
     onClick: () => {
       labelsVisible = !labelsVisible;
-      document.querySelectorAll('.rts-position-marker').forEach(marker =>
-        marker.classList.toggle('hide-label', !labelsVisible)
-      );
+      document.querySelectorAll('.rts-position-marker').forEach(marker => marker.classList.toggle('hide-label', !labelsVisible));
       labelButton.textContent = labelsVisible ? 'Hide Labels' : 'Show Labels';
     }
   });
@@ -87,7 +115,6 @@
   };
 
   const saveLayout = () => RTSHigherLowerConfiguration.saveLayout(extension.api.getLayout());
-
   const newLayout = () => {
     const name = window.prompt('New layout name:', '');
     if (!name?.trim()) return;
@@ -98,7 +125,6 @@
     }
     RTSHigherLowerConfiguration.createLayout(extension.api.getLayout(), layoutName);
   };
-
   const deleteLayout = () => {
     const name = layoutSelect.value;
     if (!name || !window.confirm('Delete layout "' + name + '"?')) return;
@@ -123,12 +149,7 @@
     round: 'Current Round Title', roundTimer: 'Round Timer', roundTotalLabel: 'Round Total Label',
     roundTotalValue: 'Round Total Value', potTotalLabel: 'Pot Total Label', potTotalValue: 'Pot Total Value'
   };
-
-  const targetIds = [
-    'board', 'players', 'previous', 'higher', 'lower', 'deck', 'round', 'roundTimer',
-    'roundTotalLabel', 'roundTotalValue', 'potTotalLabel', 'potTotalValue'
-  ];
-
+  const targetIds = ['board', 'players', 'previous', 'higher', 'lower', 'deck', 'round', 'roundTimer', 'roundTotalLabel', 'roundTotalValue', 'potTotalLabel', 'potTotalValue'];
   const targets = targetIds.map(id => ({
     id,
     label: targetLabels[id],
