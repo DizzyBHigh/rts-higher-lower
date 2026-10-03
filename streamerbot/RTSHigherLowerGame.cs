@@ -20,39 +20,45 @@ public class CPHInline
             case "draw": return Draw();
             case "savegame": return SaveGame();
             case "result": return Result();
+            case "layout": return Layout();
             case "get": return GetConfiguration();
             case "save": return SaveConfiguration();
             default: return false;
         }
     }
 
-    public bool Join()
+    public bool Layout()
     {
-        if (!ReadUser(out string id, out Platform platform))
+        string layout = CPH.TryGetArg("rawInput", out string value)
+            ? value.Trim() : "";
+
+        if (string.IsNullOrWhiteSpace(layout))
             return false;
 
         var configuration = ReadConfiguration();
-        var game = GetGame(configuration);
-        if (game.Value<bool?>("active") == true)
+        if (configuration["layouts"]?[layout] == null)
             return false;
 
+        CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
+        CPH.SetArgument("rtsOverlayCommand", "layout");
+        CPH.SetArgument("rtsOverlayData", layout);
+        return CPH.RunAction("RTS - Overlay - Extension Command", true);
+    }
+
+    public bool Join()
+    {
+        if (!ReadUser(out string id, out Platform platform)) return false;
+        var configuration = ReadConfiguration();
+        var game = GetGame(configuration);
+        if (game.Value<bool?>("active") == true) return false;
         var players = GetPlayers(game);
-        if (Find(players, id, platform) != null)
-            return true;
-
-        string name = CPH.TryGetArg("userName", out string userName)
-            ? userName : id;
-
+        if (Find(players, id, platform) != null) return true;
+        string name = CPH.TryGetArg("userName", out string userName) ? userName : id;
         players.Add(new JObject
         {
-            ["id"] = id,
-            ["platform"] = PlatformName(platform),
-            ["name"] = name,
-            ["vote"] = null,
-            ["bet"] = 0,
-            ["pot"] = 0
+            ["id"] = id, ["platform"] = PlatformName(platform), ["name"] = name,
+            ["vote"] = null, ["bet"] = 0, ["pot"] = 0
         });
-
         game["players"] = players;
         Save(configuration);
         return true;
@@ -62,79 +68,44 @@ public class CPHInline
     {
         var configuration = ReadConfiguration();
         var game = GetGame(configuration);
-
-        if (game.Value<bool?>("active") == true)
-            return false;
-
-        if (GetPlayers(game).Count == 0)
-            return false;
-
+        if (game.Value<bool?>("active") == true || GetPlayers(game).Count == 0) return false;
         int rounds = configuration["settings"]?.Value<int?>("defaultRounds") ?? 10;
-
-        if (CPH.TryGetArg("rtsHigherLowerRounds", out int requestedRounds))
-            rounds = requestedRounds;
-
-        if (rounds < 1)
-            return false;
-
+        if (CPH.TryGetArg("rtsHigherLowerRounds", out int requestedRounds)) rounds = requestedRounds;
+        if (rounds < 1) return false;
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "start");
         CPH.SetArgument("rtsOverlayData", rounds);
-
         return CPH.RunAction("RTS - Overlay - Extension Command", true);
     }
 
     private bool Draw()
     {
         var configuration = ReadConfiguration();
-        var game = GetGame(configuration);
-
-        if (game.Value<bool?>("active") != true)
-            return false;
-
+        if (GetGame(configuration).Value<bool?>("active") != true) return false;
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "draw");
-
         return CPH.RunAction("RTS - Overlay - Extension Command", true);
     }
 
     public bool Vote()
     {
-        if (!ReadUser(out string id, out Platform platform))
-            return false;
-
+        if (!ReadUser(out string id, out Platform platform)) return false;
         var configuration = ReadConfiguration();
         var game = GetGame(configuration);
-        if (game.Value<bool?>("active") != true)
-            return false;
-
+        if (game.Value<bool?>("active") != true) return false;
         var player = Find(GetPlayers(game), id, platform);
-        if (player == null || player["vote"]?.Type != JTokenType.Null)
-            return false;
-
-        string direction = CPH.TryGetArg(
-            "rtsHigherLowerVote", out string vote) ? vote : "";
-        if (direction != "Higher" && direction != "Lower")
-            return false;
-
+        if (player == null || player["vote"]?.Type != JTokenType.Null) return false;
+        string direction = CPH.TryGetArg("rtsHigherLowerVote", out string vote) ? vote : "";
+        if (direction != "Higher" && direction != "Lower") return false;
         int points = GetVar(id, platform, "points");
-        string raw = CPH.TryGetArg("rawInput", out string input)
-            ? input.Trim() : "";
+        string raw = CPH.TryGetArg("rawInput", out string input) ? input.Trim() : "";
         int amount = 0;
-
         if (points > 0)
         {
-            if (!int.TryParse(raw, out amount) ||
-                amount <= 0 || amount > points)
-                return false;
+            if (!int.TryParse(raw, out amount) || amount <= 0 || amount > points) return false;
             SetVar(id, platform, "points", points - amount);
         }
-        else if (!string.IsNullOrWhiteSpace(raw) &&
-                 (!int.TryParse(raw, out amount) || amount != 0))
-        {
-            return false;
-        }
-
+        else if (!string.IsNullOrWhiteSpace(raw) && (!int.TryParse(raw, out amount) || amount != 0)) return false;
         player["vote"] = direction;
         player["bet"] = amount;
         Save(configuration);
@@ -143,19 +114,13 @@ public class CPHInline
 
     public bool Bank()
     {
-        if (!ReadUser(out string id, out Platform platform))
-            return false;
-
+        if (!ReadUser(out string id, out Platform platform)) return false;
         var configuration = ReadConfiguration();
         var game = GetGame(configuration);
-        if (game.Value<bool?>("active") != true)
-            return false;
-
+        if (game.Value<bool?>("active") != true) return false;
         var players = GetPlayers(game);
         var player = Find(players, id, platform);
-        if (player == null || player["vote"]?.Type != JTokenType.Null)
-            return false;
-
+        if (player == null || player["vote"]?.Type != JTokenType.Null) return false;
         int pot = player.Value<int?>("pot") ?? 0;
         AddPoints(id, platform, pot);
         Increment(id, platform, "pointsBanked", pot);
@@ -167,69 +132,49 @@ public class CPHInline
 
     private bool SaveGame()
     {
-        if (!CPH.TryGetArg("rtsHigherLowerGame", out string raw) ||
-            string.IsNullOrWhiteSpace(raw))
-            return false;
-
+        if (!CPH.TryGetArg("rtsHigherLowerGame", out string raw) || string.IsNullOrWhiteSpace(raw)) return false;
         try
         {
             var game = JObject.Parse(raw);
             var configuration = ReadConfiguration();
-            configuration["game"] =
-                game.Value<bool?>("active") == true ? game : new JObject();
-
+            configuration["game"] = game.Value<bool?>("active") == true ? game : new JObject();
             Save(configuration);
             return true;
         }
         catch (Exception ex)
         {
-            CPH.LogWarn(
-                "RTS Higher Lower: game state save failed: " + ex.Message);
+            CPH.LogWarn("RTS Higher Lower: game state save failed: " + ex.Message);
             return false;
         }
     }
 
     private bool Result()
     {
-        if (!CPH.TryGetArg("rtsOverlayData", out string raw))
-            return false;
-
+        if (!CPH.TryGetArg("rtsOverlayData", out string raw)) return false;
         var result = JObject.Parse(raw);
         string outcome = result.Value<string>("result");
-        if (outcome != "higher" && outcome != "lower" && outcome != "equal")
-            return false;
-
+        if (outcome != "higher" && outcome != "lower" && outcome != "equal") return false;
         var configuration = ReadConfiguration();
         var game = GetGame(configuration);
         var players = GetPlayers(game);
         int bonusDelta = 0;
-
         for (int i = players.Count - 1; i >= 0; i--)
         {
             var player = (JObject)players[i];
             string vote = player.Value<string>("vote");
-
             if (string.IsNullOrWhiteSpace(vote))
             {
                 int forfeitedPot = player.Value<int?>("pot") ?? 0;
                 var identity = Identity(player);
                 bonusDelta += forfeitedPot;
-                if (forfeitedPot > 0)
-                    Increment(
-                        identity.id,
-                        identity.platform,
-                        "pointsLost",
-                        forfeitedPot);
+                if (forfeitedPot > 0) Increment(identity.id, identity.platform, "pointsLost", forfeitedPot);
                 players.RemoveAt(i);
                 continue;
             }
-
-            bool wins = outcome == "equal" ||
-                vote.ToLowerInvariant() == outcome;
+            bool wins = outcome == "equal" || vote.ToLowerInvariant() == outcome;
             int bet = player.Value<int?>("bet") ?? 0;
             int pot = player.Value<int?>("pot") ?? 0;
             var user = Identity(player);
-
             if (wins)
             {
                 player["pot"] = pot + (bet * 2);
@@ -241,26 +186,16 @@ public class CPHInline
             {
                 bonusDelta += bet + pot;
                 Increment(user.id, user.platform, "wrong");
-                Increment(
-                    user.id, user.platform,
-                    "pointsLost", bet + pot);
+                Increment(user.id, user.platform, "pointsLost", bet + pot);
                 players.RemoveAt(i);
             }
         }
-
         game["players"] = players;
-        game["bonusPot"] =
-            (game.Value<int?>("bonusPot") ?? 0) + bonusDelta;
-        game["round"] =
-            result.Value<int?>("round") ??
-            game.Value<int?>("round") ?? 0;
-        game["currentCard"] =
-            result["currentCard"] ?? game["currentCard"];
-
+        game["bonusPot"] = (game.Value<int?>("bonusPot") ?? 0) + bonusDelta;
+        game["round"] = result.Value<int?>("round") ?? game.Value<int?>("round") ?? 0;
+        game["currentCard"] = result["currentCard"] ?? game["currentCard"];
         int rounds = game.Value<int?>("rounds") ?? 10;
-        if ((game.Value<int?>("round") ?? 0) >= rounds)
-            Complete(game, players);
-
+        if ((game.Value<int?>("round") ?? 0) >= rounds) Complete(game, players);
         CPH.SetArgument("rtsHigherLowerBonusPotDelta", bonusDelta);
         CPH.SetArgument("rtsOverlayData", raw);
         Save(configuration);
@@ -271,88 +206,52 @@ public class CPHInline
     {
         int bonusPot = game.Value<int?>("bonusPot") ?? 0;
         int share = players.Count > 0 ? bonusPot / players.Count : 0;
-
         foreach (JObject player in players)
         {
             int pot = player.Value<int?>("pot") ?? 0;
             var user = Identity(player);
             int payout = pot + share;
-
-            if (payout > 0)
-                AddPoints(user.id, user.platform, payout);
-            if (share > 0)
-                Increment(user.id, user.platform, "pointsWon", share);
-
+            if (payout > 0) AddPoints(user.id, user.platform, payout);
+            if (share > 0) Increment(user.id, user.platform, "pointsWon", share);
             Increment(user.id, user.platform, "fullSweeps");
         }
-
-        game["bonusPot"] =
-            players.Count > 0 ? bonusPot % players.Count : bonusPot;
+        game["bonusPot"] = players.Count > 0 ? bonusPot % players.Count : bonusPot;
         game["active"] = false;
         game["players"] = new JArray();
     }
 
-    private void Save(JObject configuration)
-    {
-        SaveConfiguration(configuration, false);
-    }
+    private void Save(JObject configuration) { SaveConfiguration(configuration, false); }
 
     private bool GetConfiguration()
     {
         var configuration = ReadConfiguration();
-        CPH.SetArgument(
-            "rtsHigherLowerConfiguration",
-            configuration.ToString(Newtonsoft.Json.Formatting.None));
+        CPH.SetArgument("rtsHigherLowerConfiguration", configuration.ToString(Newtonsoft.Json.Formatting.None));
         CPH.TriggerEvent(EventName, true);
         return true;
     }
 
     private bool SaveConfiguration()
     {
-        if (!CPH.TryGetArg("rtsHigherLowerConfiguration", out string raw) ||
-            string.IsNullOrWhiteSpace(raw))
-            return false;
-
-        try
-        {
-            SaveConfiguration(JObject.Parse(raw), true);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            CPH.LogWarn(
-                "RTS Higher Lower: configuration save failed: " + ex.Message);
-            return false;
-        }
+        if (!CPH.TryGetArg("rtsHigherLowerConfiguration", out string raw) || string.IsNullOrWhiteSpace(raw)) return false;
+        try { SaveConfiguration(JObject.Parse(raw), true); return true; }
+        catch (Exception ex) { CPH.LogWarn("RTS Higher Lower: configuration save failed: " + ex.Message); return false; }
     }
 
     private void SaveConfiguration(JObject configuration, bool layoutSaved)
     {
-        string raw = configuration.ToString(
-            Newtonsoft.Json.Formatting.None);
-
+        string raw = configuration.ToString(Newtonsoft.Json.Formatting.None);
         CPH.SetGlobalVar(Key, raw, true);
         CPH.SetArgument("rtsHigherLowerConfiguration", raw);
-
-        if (layoutSaved)
-            CPH.SetArgument("rtsHigherLowerSaveStatus", "Layout saved");
-
+        if (layoutSaved) CPH.SetArgument("rtsHigherLowerSaveStatus", "Layout saved");
         CPH.TriggerEvent(EventName, true);
     }
 
     private JObject ReadConfiguration()
     {
         var raw = CPH.GetGlobalVar<string>(Key, true);
-        if (string.IsNullOrWhiteSpace(raw))
-            return CreateDefaults();
-
+        if (string.IsNullOrWhiteSpace(raw)) return CreateDefaults();
         try { return JObject.Parse(raw); }
-        catch
-        {
-            CPH.LogWarn(
-                "RTS Higher Lower: stored configuration was invalid; using defaults.");
-            return CreateDefaults();
-        }
+        catch { CPH.LogWarn("RTS Higher Lower: stored configuration was invalid; using defaults."); return CreateDefaults(); }
     }
 
     private JObject CreateDefaults()
@@ -361,18 +260,12 @@ public class CPHInline
         {
             ["settings"] = new JObject
             {
-                ["defaultRounds"] = 10,
-                ["roundLength"] = 60000
+                ["defaultRounds"] = 10, ["roundLength"] = 60000,
+                ["defaultLayout"] = "default", ["defaultBrand"] = "default"
             },
-            ["layouts"] = new JObject
-            {
-                ["default"] = new JObject()
-            },
+            ["layouts"] = new JObject { ["default"] = new JObject() },
             ["activeLayout"] = "default",
-            ["brands"] = new JObject
-            {
-                ["default"] = CreateDefaultBrand()
-            },
+            ["brands"] = new JObject { ["default"] = CreateDefaultBrand() },
             ["activeBrand"] = "default",
             ["game"] = new JObject()
         };
@@ -383,78 +276,35 @@ public class CPHInline
         return new JObject
         {
             ["fontFamily"] = "Arial",
-            ["board"] = new JObject
-            {
-                ["color1"] = "#d8c79e",
-                ["color2"] = "#d8c79e",
-                ["gradientDirection"] = 90,
-                ["borderWidth"] = 10,
-                ["borderColor"] = "#6f5a3c",
-                ["cornerRadius"] = 28
-            },
-            ["round"] = new JObject
-            {
-                ["fontSize"] = 34,
-                ["color"] = "#30291f",
-                ["shadowColor"] = "#000000",
-                ["shadowDirection"] = 0
-            },
-            ["roundTotal"] = new JObject
-            {
-                ["fontSize"] = 24,
-                ["color"] = "#30291f",
-                ["shadowColor"] = "#000000",
-                ["shadowDirection"] = 0
-            },
-            ["potTotal"] = new JObject
-            {
-                ["fontSize"] = 24,
-                ["color"] = "#30291f",
-                ["shadowColor"] = "#000000",
-                ["shadowDirection"] = 0
-            }
+            ["board"] = new JObject { ["color1"] = "#d8c79e", ["color2"] = "#d8c79e", ["gradientDirection"] = 90, ["borderWidth"] = 10, ["borderColor"] = "#6f5a3c", ["cornerRadius"] = 28 },
+            ["round"] = new JObject { ["fontSize"] = 34, ["color"] = "#30291f", ["shadowColor"] = "#000000", ["shadowDirection"] = 0 },
+            ["roundTotal"] = new JObject { ["fontSize"] = 24, ["color"] = "#30291f", ["shadowColor"] = "#000000", ["shadowDirection"] = 0 },
+            ["potTotal"] = new JObject { ["fontSize"] = 24, ["color"] = "#30291f", ["shadowColor"] = "#000000", ["shadowDirection"] = 0 }
         };
     }
 
-    private JObject GetGame(JObject configuration)
-    {
-        return configuration["game"] as JObject ?? new JObject();
-    }
-
-    private JArray GetPlayers(JObject game)
-    {
-        return game["players"] as JArray ?? new JArray();
-    }
+    private JObject GetGame(JObject configuration) => configuration["game"] as JObject ?? new JObject();
+    private JArray GetPlayers(JObject game) => game["players"] as JArray ?? new JArray();
 
     private bool ReadUser(out string id, out Platform platform)
     {
-        id = "";
-        platform = Platform.Twitch;
-
-        return CPH.TryGetArg("userId", out id) &&
-            CPH.TryGetArg("userType", out string type) &&
-            Enum.TryParse(type, true, out platform);
+        id = ""; platform = Platform.Twitch;
+        return CPH.TryGetArg("userId", out id) && CPH.TryGetArg("userType", out string type) && Enum.TryParse(type, true, out platform);
     }
 
     private JObject Find(JArray players, string id, Platform platform)
     {
         string name = PlatformName(platform);
-
         foreach (JObject player in players)
         {
-            if (player.Value<string>("id") != id)
-                continue;
-
+            if (player.Value<string>("id") != id) continue;
             string stored = player.Value<string>("platform");
-            if (stored == name ||
-                (string.IsNullOrWhiteSpace(stored) &&
-                 platform == Platform.Twitch))
+            if (stored == name || (string.IsNullOrWhiteSpace(stored) && platform == Platform.Twitch))
             {
                 player["platform"] = name;
                 return player;
             }
         }
-
         return null;
     }
 
@@ -462,57 +312,39 @@ public class CPHInline
     {
         string id = player.Value<string>("id");
         string name = player.Value<string>("platform") ?? "twitch";
-        Platform platform = Enum.TryParse(
-            name, true, out Platform parsed)
-            ? parsed : Platform.Twitch;
+        Platform platform = Enum.TryParse(name, true, out Platform parsed) ? parsed : Platform.Twitch;
         return (id, platform);
     }
 
-    private string PlatformName(Platform platform)
-    {
-        return platform.ToString().ToLowerInvariant();
-    }
+    private string PlatformName(Platform platform) => platform.ToString().ToLowerInvariant();
 
-    private void Increment(
-        string id, Platform platform, string name, int amount = 1)
-    {
-        SetVar(id, platform, name, GetVar(id, platform, name) + amount);
-    }
-
-    private void AddPoints(string id, Platform platform, int amount)
-    {
-        SetVar(
-            id, platform, "points",
-            GetVar(id, platform, "points") + amount);
-    }
+    private void Increment(string id, Platform platform, string name, int amount = 1) => SetVar(id, platform, name, GetVar(id, platform, name) + amount);
+    private void AddPoints(string id, Platform platform, int amount) => SetVar(id, platform, "points", GetVar(id, platform, "points") + amount);
 
     private int GetVar(string id, Platform platform, string name)
     {
         switch (platform)
         {
-            case Platform.YouTube:
-                return CPH.GetYouTubeUserVarById<int?>(id, name, true) ?? 0;
-            case Platform.Kick:
-                return CPH.GetKickUserVarById<int?>(id, name, true) ?? 0;
-            default:
-                return CPH.GetTwitchUserVarById<int?>(id, name, true) ?? 0;
+            case Platform.YouTube: return CPH.GetYouTubeUserVarById<int?>(id, name, true) ?? 0;
+            case Platform.Kick: return CPH.GetKickUserVarById<int?>(id, name, true) ?? 0;
+            default: return CPH.GetTwitchUserVarById<int?>(id, name, true) ?? 0;
         }
     }
 
-    private void SetVar(
-        string id, Platform platform, string name, int value)
+    private void SetVar(string id, Platform platform, string name, int value)
     {
         switch (platform)
         {
-            case Platform.YouTube:
-                CPH.SetYouTubeUserVarById(id, name, value, true);
-                break;
-            case Platform.Kick:
-                CPH.SetKickUserVarById(id, name, value, true);
-                break;
-            default:
-                CPH.SetTwitchUserVarById(id, name, value, true);
-                break;
+            case Platform.YouTube: CPH.SetYouTubeUserVarById(id, name, value, true); break;
+            case Platform.Kick: CPH.SetKickUserVarById(id, name, value, true); break;
+            default: CPH.SetTwitchUserVarById(id, name, value, true); break;
         }
     }
+}
+
+public enum Platform
+{
+    Twitch,
+    YouTube,
+    Kick
 }
