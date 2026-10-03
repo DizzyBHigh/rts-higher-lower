@@ -94,6 +94,12 @@
     render(host) {
       if (!host || !RTS.core.ui) return null;
 
+      const game = RTS.core.ui.section('Game Settings');
+      const rounds = RTS.core.ui.number({ value: 10, min: 1, step: 1 });
+      const length = RTS.core.ui.dropdown({ options: ['1 Minute', '30 Seconds'], value: '1 Minute' });
+      const duration = RTS.core.ui.number({ value: 500, min: 0, step: 50 });
+      const easing = RTS.core.ui.dropdown({ options: ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'], value: 'ease-in-out' });
+
       const brandSection = RTS.core.ui.section('Brand Presets');
       const brand = RTS.core.ui.dropdown({ options: ['default'], value: 'default' });
       const newBrand = RTS.core.ui.button('New Brand', {
@@ -119,21 +125,11 @@
         onClick: () => RTSHigherLowerConfiguration.deleteBrand(brand.value)
       });
       brand.addEventListener('change', () => RTSHigherLowerConfiguration.activateBrand(brand.value));
-      brandSection.append(RTS.core.ui.field('Brand', brand), newBrand, saveBrand, deleteBrand);
 
-      const game = RTS.core.ui.section('Game Settings');
-      const rounds = RTS.core.ui.number({ value: 10, min: 1, step: 1 });
-      const length = RTS.core.ui.dropdown({ options: ['1 Minute', '30 Seconds'], value: '1 Minute' });
-
-      const overlay = RTS.core.ui.section('Overlay Settings');
-      const duration = RTS.core.ui.number({ value: 500, min: 0, step: 50 });
-      const easing = RTS.core.ui.dropdown({ options: ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'], value: 'ease-in-out' });
-
-      const fontSettings = RTS.core.ui.section('Font Settings');
       const font = RTS.core.ui.fontPicker({ value: 'Arial', variant: '400', onChange: () => previewBrand() });
-      fontSettings.append(RTS.core.ui.field('Font Selector', font));
 
-      const board = RTS.core.ui.section('Background Board');
+      const elementStyles = RTS.core.ui.section('Element Styles');
+      const board = RTS.core.ui.section('Game Background');
       const boardColor1 = RTS.core.ui.color({ value: '#d8c79e', onInput: () => previewBrand() });
       const boardColor2 = RTS.core.ui.color({ value: '#d8c79e', onInput: () => previewBrand() });
       const gradientDirection = RTS.core.ui.angle({ value: 90, onInput: () => previewBrand() });
@@ -257,8 +253,21 @@
         });
       }
 
-      game.append(RTS.core.ui.field('Default Rounds', rounds), RTS.core.ui.field('Round Length', length));
-      overlay.append(RTS.core.ui.field('Card Duration', duration), RTS.core.ui.field('Card Easing', easing), save, status);
+      game.append(
+        RTS.core.ui.field('Default Rounds', rounds),
+        RTS.core.ui.field('Round Length', length),
+        RTS.core.ui.field('Card Duration', duration),
+        RTS.core.ui.field('Card Easing', easing),
+        save,
+        status
+      );
+      brandSection.append(
+        RTS.core.ui.field('Brand', brand),
+        newBrand,
+        saveBrand,
+        deleteBrand,
+        RTS.core.ui.field('Font Selector', font)
+      );
       board.append(
         RTS.core.ui.field('Colour 1', boardColor1),
         RTS.core.ui.field('Colour 2', boardColor2),
@@ -283,11 +292,17 @@
         RTS.core.ui.field('Shadow Colour', roundShadow),
         RTS.core.ui.field('Shadow Direction', roundShadowDirection)
       );
-      host.append(
-        game, overlay, brandSection, fontSettings, board, players, round,
-        roundTimer.section, roundTotalLabel.section, roundTotalValue.section,
-        potTotalLabel.section, potTotalValue.section
+      elementStyles.append(
+        board,
+        players,
+        round,
+        roundTimer.section,
+        roundTotalLabel.section,
+        roundTotalValue.section,
+        potTotalLabel.section,
+        potTotalValue.section
       );
+      host.append(game, brandSection, elementStyles);
 
       const apply = configuration => {
         const value = normaliseBrands(clone(configuration || defaults));
@@ -359,7 +374,7 @@
       };
 
       RTSHigherLowerConfiguration.onReady(apply);
-      return { apply };
+      return { apply, elementStyles };
     }
   };
 
