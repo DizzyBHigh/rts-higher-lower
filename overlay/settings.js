@@ -2,7 +2,7 @@
   const defaultText = {
     color: '#30291f',
     shadowColor: '#000000',
-    shadowDirection: 0,
+    shadowDirection: { angle: 0, distance: 3 },
     textAlign: 'right'
   };
 
@@ -16,8 +16,8 @@
       color1: '#20252a', color2: '#20252a', gradientDirection: 90,
       borderWidth: 4, borderColor: '#0384CB', cornerRadius: 12
     },
-    round: { color: '#30291f', shadowColor: '#000000', shadowDirection: 0 },
-    roundTimer: { color: '#30291f', shadowColor: '#000000', shadowDirection: 0, textAlign: 'center' },
+    round: { color: '#30291f', shadowColor: '#000000', shadowDirection: { angle: 0, distance: 3 } },
+    roundTimer: { color: '#30291f', shadowColor: '#000000', shadowDirection: { angle: 0, distance: 3 }, textAlign: 'center' },
     roundTotal: { label: { ...defaultText }, value: { ...defaultText } },
     potTotal: { label: { ...defaultText }, value: { ...defaultText } }
   };
@@ -40,12 +40,22 @@
 
   const clone = value => JSON.parse(JSON.stringify(value));
 
+  const normaliseShadowDirection = value => {
+    if (value && typeof value === 'object') {
+      return {
+        angle: Number(value.angle) || 0,
+        distance: Math.min(19, Math.max(0, Number(value.distance) || 0))
+      };
+    }
+    return { angle: Number(value) || 0, distance: 3 };
+  };
+
   const normaliseText = (value, fallback = defaultText) => {
     const source = value || {};
     return {
       color: source.color || fallback.color,
       shadowColor: source.shadowColor || fallback.shadowColor,
-      shadowDirection: Number(source.shadowDirection) || 0,
+      shadowDirection: normaliseShadowDirection(source.shadowDirection),
       textAlign: ['left', 'center', 'right'].includes(source.textAlign) ? source.textAlign : fallback.textAlign
     };
   };
@@ -141,7 +151,7 @@
       const round = RTS.core.ui.section('Round Information');
       const roundColor = RTS.core.ui.color({ value: '#30291f', onInput: () => previewBrand() });
       const roundShadow = RTS.core.ui.color({ value: '#000000', onInput: () => previewBrand() });
-      const roundShadowDirection = RTS.core.ui.angle({ value: 0, onInput: () => previewBrand() });
+      const roundShadowDirection = RTS.core.ui.angle({ value: defaultBrand.round.shadowDirection, onInput: () => previewBrand() });
 
       const textControls = (title, defaultsValue) => {
         const section = RTS.core.ui.section(title);
