@@ -22,26 +22,37 @@
       RTS.core.events?.on('RTS - Overlay - Extension Command', message => handleCommand(extension, message));
     }
   };
+
   const getBrand = configuration => {
     const brands = configuration?.brands || {};
     const name = configuration?.activeBrand || Object.keys(brands)[0] || 'default';
     return brands[name] || configuration?.appearance || {};
   };
+
+  function applyDefaults(configuration) {
+    const value = { ...(configuration || {}) };
+    const settings = value.settings || {};
+    const layouts = value.layouts || {};
+    const brands = value.brands || {};
+    if (settings.defaultLayout && layouts[settings.defaultLayout]) value.activeLayout = settings.defaultLayout;
+    if (settings.defaultBrand && brands[settings.defaultBrand]) value.activeBrand = settings.defaultBrand;
+    return value;
+  }
+
   async function startGame(extension, rounds) {
+    if (extension.state.configuration)
+      configure(extension, applyDefaults(extension.state.configuration));
     const players = extension.state.configuration?.game?.players || [];
     const bonusPot = extension.state.configuration?.game?.bonusPot || 0;
     const state = extension.state.game.start(rounds, players, bonusPot);
     RTSHigherLowerTimer.stop(extension);
     RTSHigherLowerPresentation.resetCards(extension);
-    updateBoard(extension, {
-      round: 0,
-      players: state.players,
-      startedPlayers: state.startedPlayers
-    });
+    updateBoard(extension, { round: 0, players: state.players, startedPlayers: state.startedPlayers });
     await drawCard(extension);
     RTSHigherLowerPersistence.save(extension.state.game);
     return extension.state.game.state();
   }
+
   function configure(extension, configuration) {
     const value = configuration || {};
     extension.state.configuration = value;
@@ -56,13 +67,11 @@
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(value));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
   }
+
   async function drawCard(extension) {
     const result = extension.state.game.draw();
     extension.state.card = result.card || null;
-    if (!result.card) {
-      RTSHigherLowerTimer.stop(extension);
-      return result;
-    }
+    if (!result.card) { RTSHigherLowerTimer.stop(extension); return result; }
     updateBoard(extension, { round: result.round });
     await RTSHigherLowerPresentation.presentDraw(extension, result);
     RTSHigherLowerTimer.start(extension);
@@ -70,17 +79,33 @@
     if (result.type !== 'first-card') reportResult(extension, result);
     return result;
   }
+
   function setLayout(extension, value) {
-    extension.state.layout = RTSHigherLowerLayout.create(RTSHigherLowerLayout.merge(extension.state.layout, value));
-    const panel = RTSHigherLowerPresentation.getPanel(extension);
-    RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
-    RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
-    panel.show();
-    RTSHigherLowerPlayersPresentation.applyLayout(extension);
-    RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(extension.state.configuration));
-    RTSHigherLowerCardsPresentation.applyLayout(extension);
-    return extension.state.layout;
+    let layoutName = null;
+    let layoutValue = value;
+    if (typeof value === 'string') {
+      layoutName = value.trim();
+      layoutValue = extension.state.configuration?.layouts?.[layoutName];
+      if (!layoutValue) return extension.state.layout;
+    }
+
+    return RTSHigherLowerLayout.transition(extension, () => {
+      extension.state.layout = RTSHigherLowerLayout.create(
+        RTSHigherLowerLayout.merge(extension.state.layout, layoutValue)
+      );
+      if (layoutName && extension.state.configuration)
+        extension.state.configuration.activeLayout = layoutName;
+      const panel = RTSHigherLowerPresentation.getPanel(extension);
+      RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
+      RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
+      panel.show();
+      RTSHigherLowerPlayersPresentation.applyLayout(extension);
+      RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(extension.state.configuration));
+      RTSHigherLowerCardsPresentation.applyLayout(extension);
+      return extension.state.layout;
+    });
   }
+
   function updateBoard(extension, data) {
     extension.state.board = { ...extension.state.board, ...(data || {}) };
     const panel = RTSHigherLowerPresentation.getPanel(extension);
@@ -91,6 +116,7 @@
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(extension.state.configuration));
   }
+
   function reportResult(extension, result) {
     RTSOverlaySocket.requestAction('RTS - Overlay - Extension Result', {
       rtsOverlayExtension: manifest.id,
@@ -98,6 +124,7 @@
       rtsOverlayData: JSON.stringify({ round: result.round, previousCard: result.previous, currentCard: result.card, result: result.result })
     });
   }
+
   function handleCommand(extension, message) {
     const args = message?.data?.args || message?.args || {};
     if (args.rtsOverlayExtension !== manifest.id) return;
@@ -112,5 +139,6 @@
     if (command === 'flip') extension.api.flipCard();
     if (command === 'move') extension.api.moveCard(data?.position || data);
   }
+
   RTS.core.extensions.registerSource(manifest.id, source);
 })();
