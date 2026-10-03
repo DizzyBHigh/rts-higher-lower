@@ -5,6 +5,11 @@
     return Number.isFinite(amount) ? amount.toLocaleString('en-US') : '0';
   };
 
+  const platformName = value => {
+    const name = String(value || 'unknown').toLowerCase();
+    return ['twitch', 'youtube', 'kick'].includes(name) ? name : 'unknown';
+  };
+
   function playerRow(player) {
     const row = document.createElement('div');
     row.className = 'hl-board__player';
@@ -14,9 +19,10 @@
     name.textContent = player.name || '';
 
     const vote = String(player.vote || '').toLowerCase();
+    const platform = platformName(player.platform);
     const icon = document.createElement('span');
     icon.className = 'hl-board__player-vote hl-board__player-vote--' +
-      (vote || 'waiting');
+      (vote || 'waiting') + ' hl-board__player-vote--platform-' + platform;
     icon.title = vote === 'higher' ? 'Higher' :
       vote === 'lower' ? 'Lower' : 'Waiting';
 
