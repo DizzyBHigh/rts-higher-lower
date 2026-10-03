@@ -1,15 +1,15 @@
 .hl-board__players {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .hl-board__player {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 36px 96px;
+  grid-template-columns: minmax(0, 1fr) 30px 80px;
   align-items: center;
-  gap: 12px;
-  min-height: 38px;
+  gap: 8px;
+  min-height: 30px;
 }
 
 .hl-board__player-name,
@@ -18,6 +18,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 18px;
 }
 
 .hl-board__player-bet {
@@ -28,8 +29,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   justify-self: center;
   border-radius: 50%;
   background: #666;
@@ -43,15 +44,15 @@
 }
 
 .hl-board__player-vote--higher::after {
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-bottom: 9px solid #fff;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid #fff;
 }
 
 .hl-board__player-vote--lower::after {
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 9px solid #fff;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 8px solid #fff;
 }
 
 .hl-board__player-vote--platform-twitch {
@@ -69,4 +70,10 @@
 .hl-board__player-vote--platform-unknown,
 .hl-board__player-vote--waiting {
   background: #777;
+}
+
+.hl-board__players-count {
+  margin-left: 10px;
+  font-size: 18px;
+  font-weight: normal;
 }
