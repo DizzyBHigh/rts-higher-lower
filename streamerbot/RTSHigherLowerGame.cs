@@ -8,13 +8,13 @@ public class CPHInline
 
     public bool Execute()
     {
-        if (!CPH.TryGetArg("rtsHigherLowerOperation", out string operation))
-            return true;
-
+        if (!CPH.TryGetArg("rtsHigherLowerOperation", out string operation)) return true;
         switch (operation.ToLowerInvariant())
         {
             case "join": return Join();
             case "start": return StartGame();
+            case "begin": return BeginGame();
+            case "reset": return Reset();
             case "vote": return Vote();
             case "bank": return Bank();
             case "draw": return Draw();
@@ -29,16 +29,10 @@ public class CPHInline
 
     public bool Layout()
     {
-        string layout = CPH.TryGetArg("rawInput", out string value)
-            ? value.Trim() : "";
-
-        if (string.IsNullOrWhiteSpace(layout))
-            return false;
-
+        string layout = CPH.TryGetArg("rawInput", out string value) ? value.Trim() : "";
+        if (string.IsNullOrWhiteSpace(layout)) return false;
         var configuration = ReadConfiguration();
-        if (configuration["layouts"]?[layout] == null)
-            return false;
-
+        if (configuration["layouts"]?[layout] == null) return false;
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "layout");
         CPH.SetArgument("rtsOverlayData", layout);
@@ -50,7 +44,7 @@ public class CPHInline
         if (!ReadUser(out string id, out Platform platform)) return false;
         var configuration = ReadConfiguration();
         var game = GetGame(configuration);
-        if (game.Value<bool?>("active") == true) return false;
+        if (game.Value<string>("state") != "registration") return false;
         var players = GetPlayers(game);
         if (Find(players, id, platform) != null) return true;
         string name = CPH.TryGetArg("userName", out string userName) ? userName : id;
@@ -67,23 +61,85 @@ public class CPHInline
     public bool StartGame()
     {
         var configuration = ReadConfiguration();
-        var game = GetGame(configuration);
-        if (game.Value<bool?>("active") == true || GetPlayers(game).Count == 0) return false;
+        var existing = GetGame(configuration);
+        if (existing.Value<string>("state") == "registration" || existing.Value<string>("state") == "playing") return false;
         int rounds = configuration["settings"]?.Value<int?>("defaultRounds") ?? 10;
         if (CPH.TryGetArg("rtsHigherLowerRounds", out int requestedRounds)) rounds = requestedRounds;
         if (rounds < 1) return false;
+
+        var game = new JObject
+        {
+            ["state"] = "registration",
+            ["active"] = false,
+            ["rounds"] = rounds,
+            ["round"] = 0,
+            ["players"] = new JArray(),
+            ["bonusPot"] = 0,
+            ["registrationStartedAt"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        };
+        configuration["game"] = game;
+        Save(configuration);
+        SetStartCommandEnabled(false);
+
+        CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
+        CPH.SetArgument("rtsOverlayCommand", "registration");
+        CPH.SetArgument("rtsOverlayData", game["registrationStartedAt"]);
+        if (CPH.RunAction("RTS - Overlay - Extension Command", true)) return true;
+
+        configuration["game"] = new JObject();
+        Save(configuration);
+        SetStartCommandEnabled(true);
+        return false;
+    }
+
+    private bool BeginGame()
+    {
+        var configuration = ReadConfiguration();
+        var game = GetGame(configuration);
+        if (game.Value<string>("state") != "registration") return false;
+        var players = GetPlayers(game);
+        if (players.Count == 0)
+        {
+            configuration["game"] = new JObject();
+            Save(configuration);
+            SetStartCommandEnabled(true);
+            ResetOverlay();
+            return false;
+        }
+
+        game["state"] = "playing";
+        game["active"] = true;
+        game.Remove("registrationStartedAt");
+        Save(configuration);
+
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "start");
-        CPH.SetArgument("rtsOverlayData", rounds);
-        bool started = CPH.RunAction("RTS - Overlay - Extension Command", true);
-        if (started) SetStartCommandEnabled(false);
-        return started;
+        CPH.SetArgument("rtsOverlayData", game.Value<int?>("rounds") ?? 10);
+        return CPH.RunAction("RTS - Overlay - Extension Command", true);
+    }
+
+    public bool Reset()
+    {
+        var configuration = ReadConfiguration();
+        configuration["game"] = new JObject();
+        Save(configuration);
+        SetStartCommandEnabled(true);
+        ResetOverlay();
+        return true;
+    }
+
+    private void ResetOverlay()
+    {
+        CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
+        CPH.SetArgument("rtsOverlayCommand", "reset");
+        CPH.SetArgument("rtsOverlayData", null);
+        CPH.RunAction("RTS - Overlay - Extension Command", true);
     }
 
     private bool Draw()
     {
         var configuration = ReadConfiguration();
-        if (GetGame(configuration).Value<bool?>("active") != true) return false;
+        if (GetGame(configuration).Value<string>("state") != "playing") return false;
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "draw");
         return CPH.RunAction("RTS - Overlay - Extension Command", true);
@@ -94,24 +150,17 @@ public class CPHInline
         if (!ReadUser(out string id, out Platform platform)) return false;
         var configuration = ReadConfiguration();
         var game = GetGame(configuration);
-        if (game.Value<bool?>("active") != true) return false;
+        if (game.Value<string>("state") != "playing") return false;
         var player = Find(GetPlayers(game), id, platform);
         if (player == null || player["vote"]?.Type != JTokenType.Null) return false;
-
         string raw = CPH.TryGetArg("rawInput", out string input) ? input.Trim() : "";
         string[] parts = raw.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 2) return false;
-
         string direction;
-        if (parts[0].Equals("higher", StringComparison.OrdinalIgnoreCase))
-            direction = "Higher";
-        else if (parts[0].Equals("lower", StringComparison.OrdinalIgnoreCase))
-            direction = "Lower";
-        else
-            return false;
-
+        if (parts[0].Equals("higher", StringComparison.OrdinalIgnoreCase)) direction = "Higher";
+        else if (parts[0].Equals("lower", StringComparison.OrdinalIgnoreCase)) direction = "Lower";
+        else return false;
         if (!int.TryParse(parts[1], out int amount) || amount < 0) return false;
-
         int points = GetVar(id, platform, "points");
         if (points > 0)
         {
@@ -119,11 +168,7 @@ public class CPHInline
             amount = Math.Min(amount, points);
             SetVar(id, platform, "points", points - amount);
         }
-        else if (amount != 0)
-        {
-            return false;
-        }
-
+        else if (amount != 0) return false;
         player["vote"] = direction;
         player["bet"] = amount;
         Save(configuration);
@@ -135,7 +180,7 @@ public class CPHInline
         if (!ReadUser(out string id, out Platform platform)) return false;
         var configuration = ReadConfiguration();
         var game = GetGame(configuration);
-        if (game.Value<bool?>("active") != true) return false;
+        if (game.Value<string>("state") != "playing") return false;
         var players = GetPlayers(game);
         var player = Find(players, id, platform);
         if (player == null || player["vote"]?.Type != JTokenType.Null) return false;
@@ -155,8 +200,12 @@ public class CPHInline
         {
             var game = JObject.Parse(raw);
             var configuration = ReadConfiguration();
-            configuration["game"] = game.Value<bool?>("active") == true ? game : new JObject();
-            Save(configuration);
+            if (game.Value<bool?>("active") == true)
+            {
+                game["state"] = "playing";
+                configuration["game"] = game;
+                Save(configuration);
+            }
             return true;
         }
         catch (Exception ex)
@@ -235,6 +284,7 @@ public class CPHInline
         }
         game["bonusPot"] = players.Count > 0 ? bonusPot % players.Count : bonusPot;
         game["active"] = false;
+        game["state"] = "completed";
         game["players"] = new JArray();
         SetStartCommandEnabled(true);
     }
@@ -243,13 +293,9 @@ public class CPHInline
     {
         foreach (var command in CPH.GetCommands())
         {
-            if (!string.Equals(command.Name?.TrimStart('!'), "start", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            if (enabled)
-                CPH.EnableCommand(command.Id.ToString());
-            else
-                CPH.DisableCommand(command.Id.ToString());
+            if (!string.Equals(command.Name?.TrimStart('!'), "start", StringComparison.OrdinalIgnoreCase)) continue;
+            if (enabled) CPH.EnableCommand(command.Id.ToString());
+            else CPH.DisableCommand(command.Id.ToString());
         }
     }
 
@@ -350,7 +396,6 @@ public class CPHInline
     }
 
     private string PlatformName(Platform platform) => platform.ToString().ToLowerInvariant();
-
     private void Increment(string id, Platform platform, string name, int amount = 1) => SetVar(id, platform, name, GetVar(id, platform, name) + amount);
     private void AddPoints(string id, Platform platform, int amount) => SetVar(id, platform, "points", GetVar(id, platform, "points") + amount);
 
