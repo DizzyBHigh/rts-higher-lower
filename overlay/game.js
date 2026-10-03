@@ -8,6 +8,7 @@
         round: 0,
         rounds: Number(options.rounds) || 10,
         players: [],
+        startedPlayers: 0,
         roundHistory: [],
         bonusPot: 0,
         started: false
@@ -19,6 +20,7 @@
         state.currentCard = null;
         state.round = 0;
         state.players = [];
+        state.startedPlayers = 0;
         state.roundHistory = [];
         state.bonusPot = 0;
         state.started = false;
@@ -31,6 +33,7 @@
         state.players = Array.isArray(players)
           ? players.map(player => ({ ...player, vote: null, bet: 0 }))
           : [];
+        state.startedPlayers = state.players.length;
         state.deck = RTS.core.higherLowerDeck.shuffle(
           RTS.core.higherLowerDeck.create()
         );
@@ -48,6 +51,8 @@
         state.currentCard = saved.currentCard || null;
         state.round = Number(saved.round) || 0;
         state.rounds = Math.max(1, Number(saved.rounds) || 10);
+        state.startedPlayers = Number(saved.startedPlayers) ||
+          (Array.isArray(saved.players) ? saved.players.length : 0);
         state.bonusPot = Math.max(0, Number(saved.bonusPot) || 0);
         state.players = Array.isArray(saved.players)
           ? saved.players.slice()
@@ -121,6 +126,7 @@
         deck: state.deck.slice(),
         currentCard: state.currentCard,
         players: state.players.slice(),
+        startedPlayers: state.startedPlayers,
         bonusPot: state.bonusPot,
         roundHistory: state.roundHistory.slice()
       });
