@@ -4,7 +4,7 @@ public class CPHInline
 {
     private const string Extension = "rts-higher-lower";
     private const string EventName = "higher-lower-result";
-    private const string SettlementAction = "RTS - Higher Lower - Game";
+    private const string SettlementAction = "RTS - Higher Lower Game - Core";
 
     public bool Execute()
     {
