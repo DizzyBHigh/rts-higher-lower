@@ -8,7 +8,7 @@
       if (!state) return false;
 
       return RTSOverlaySocket.requestAction(
-        'RTS - Higher Lower - Game',
+        'RTS - Higher Lower Game - Core',
         {
           rtsHigherLowerOperation: 'saveGame',
           rtsHigherLowerGame: JSON.stringify(state)
