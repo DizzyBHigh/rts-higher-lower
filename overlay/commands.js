@@ -18,7 +18,13 @@ const RTSHigherLowerCommands = {
     RTS.core.log?.info('Higher Lower command received', args);
     if (args.rtsOverlayExtension !== 'rts-higher-lower') return;
     const command = args.rtsOverlayCommand || args.command;
-    if (!command) return;
+    if (!command) {
+      if (args.rtsHigherLowerOperation === 'start') {
+        RTS.core.log?.info('Higher Lower start operation received');
+        void extension.api.startGame();
+      }
+      return;
+    }
     const rawData = args.rtsOverlayData ?? args.data;
     const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
     RTS.core.log?.info('Higher Lower command dispatch', { command, data });
