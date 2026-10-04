@@ -125,8 +125,7 @@
     if (!name) return;
     const layouts = RTSHigherLowerConfiguration.getLayouts();
     if (!layouts[name]) return;
-    const selectedLayout = RTSHigherLowerLayout.create(layouts[name]);
-    current = extension.api.setLayout(selectedLayout);
+    current = extension.api.setLayout(name);
     editor?.refresh();
   });
   newLayoutButton.addEventListener('click', newLayout);
