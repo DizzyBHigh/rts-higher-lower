@@ -1,15 +1,18 @@
 const RTSHigherLowerCommands = {
   reportResult(extension, result) {
-    RTS.core.log?.info('Higher Lower result', result);
-    RTSOverlaySocket.requestAction('RTS - Overlay - Extension Result', {
-      rtsOverlayExtension: 'rts-higher-lower',
-      rtsOverlayEvent: 'higher-lower-result',
-      rtsOverlayData: JSON.stringify({
-        round: result.round,
-        previousCard: result.previous,
-        currentCard: result.card,
-        result: result.result
-      })
+    const game = extension.state.game?.state?.() || {};
+    const data = {
+      round: result.round,
+      previousCard: result.previous,
+      currentCard: result.card,
+      result: result.result,
+      deck: game.deck,
+      roundHistory: game.roundHistory
+    };
+    RTS.core.log?.info('Higher Lower result', data);
+    RTSOverlaySocket.requestAction('RTS - Higher Lower Game - Core', {
+      rtsHigherLowerOperation: 'result',
+      rtsOverlayData: JSON.stringify(data)
     });
   },
 
