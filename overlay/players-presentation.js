@@ -25,16 +25,11 @@
     panel.show(position(extension));
     return panel;
   }
-  function hide(extension) {
-    const panel = getPanel(extension);
-    panel.hide();
-    return panel;
-  }
   function update(extension, state = {}) {
     const panel = getPanel(extension);
     RTSHigherLowerPlayers.update(panel, state);
     applyLayout(extension);
     return panel;
   }
-  window.RTSHigherLowerPlayersPresentation = { getPanel, applyLayout, show, hide, update };
+  window.RTSHigherLowerPlayersPresentation = { getPanel, applyLayout, show, update };
 })();
