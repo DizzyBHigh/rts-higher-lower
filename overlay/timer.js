@@ -60,8 +60,12 @@
     );
     const startTime = Number(startedAt) || Date.now();
     RTS.core.log?.info('Higher Lower registration timer started', { startTime, length });
-    run(extension, startTime + length, () => {
-      RTS.core.log?.info('Higher Lower registration ended; requesting StartGame operation');
+    run(extension, startTime + length, async () => {
+      RTS.core.log?.info('Higher Lower registration ended; starting local game');
+      const state = await extension.api.startGame();
+      RTS.core.log?.info('Higher Lower local game started', { state });
+      if (state !== 'playing') return;
+      RTS.core.log?.info('Higher Lower registration ended; notifying Streamer.bot');
       RTSOverlaySocket.requestAction('RTS - Higher Lower Game - Core', {
         rtsHigherLowerOperation: 'start'
       });
