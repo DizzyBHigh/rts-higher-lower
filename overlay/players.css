@@ -91,8 +91,11 @@
   background: #53fc18;
 }
 
-.hl-players__vote--platform-unknown,
-.hl-players__vote--waiting {
+.hl-players__vote--platform-unknown {
+  background: #777;
+}
+
+.hl-players__vote--waiting:not(.hl-players__vote--platform-twitch):not(.hl-players__vote--platform-youtube):not(.hl-players__vote--platform-kick) {
   background: #777;
 }
 
