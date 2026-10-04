@@ -12,10 +12,21 @@
   settings.className = 'hl-dev__settings';
   const settingsApi = RTSHigherLowerSettings.render(settings);
   section.appendChild(settings);
-  if (settingsApi?.elementStyles) {
-    settingsApi.elementStyles.querySelectorAll(':scope > *').forEach(child => settings.appendChild(child));
-    settingsApi.elementStyles.remove();
-  }
+
+  const expandSection = title => {
+    const target = Array.from(settings.querySelectorAll('.rts-ui-section')).find(node => {
+      const button = node.querySelector(':scope > .rts-ui-collapse-title');
+      return button?.textContent.trim() === title;
+    });
+    if (!target) return;
+    target.classList.remove('is-collapsed');
+    target.querySelector(':scope > .rts-ui-collapse-title')?.setAttribute('aria-expanded', 'true');
+  };
+  requestAnimationFrame(() => {
+    expandSection('Brand Presets');
+    expandSection('Element Styles');
+  });
+
   const gameSettings = settings.querySelector('.rts-ui-section');
   const defaultBrand = RTS.core.ui.dropdown({ options: ['default'], value: 'default' });
   const showingLayout = RTS.core.ui.dropdown({ options: ['default'], value: 'default' });
