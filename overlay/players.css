@@ -14,7 +14,7 @@
   overflow: hidden;
 }
 
-.hl-players__heading {
+.hl-players-heading {
   margin-bottom: 8px;
   font-size: 20px;
   font-weight: 700;
@@ -22,13 +22,13 @@
   text-shadow: var(--hl-players-title-shadow-x, 0px) var(--hl-players-title-shadow-y, 3px) 0 var(--hl-players-title-shadow-color, #000);
 }
 
-.hl-players__list {
+.hl-players-list {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.hl-players__player {
+.hl-players-player {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 26px 70px;
   align-items: center;
@@ -36,8 +36,8 @@
   min-height: 26px;
 }
 
-.hl-players__name,
-.hl-players__bet {
+.hl-players-name,
+.hl-players-bet {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -45,11 +45,11 @@
   font-size: 15px;
 }
 
-.hl-players__bet {
+.hl-players-bet {
   text-align: right;
 }
 
-.hl-players__vote {
+.hl-players-vote {
   position: relative;
   display: grid;
   place-items: center;
@@ -60,46 +60,42 @@
   background: #666;
 }
 
-.hl-players__vote::after {
+.hl-players-vote::after {
   content: '';
   display: block;
   width: 0;
   height: 0;
 }
 
-.hl-players__vote--higher::after {
+.hl-players-vote-higher::after {
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
   border-bottom: 7px solid #fff;
 }
 
-.hl-players__vote--lower::after {
+.hl-players-vote-lower::after {
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
   border-top: 7px solid #fff;
 }
 
-.hl-players__vote--platform-twitch {
+.hl-players-vote-platform-twitch {
   background: #9146ff;
 }
 
-.hl-players__vote--platform-youtube {
+.hl-players-vote-platform-youtube {
   background: #ff0000;
 }
 
-.hl-players__vote--platform-kick {
+.hl-players-vote-platform-kick {
   background: #53fc18;
 }
 
-.hl-players__vote--platform-unknown {
+.hl-players-vote-platform-unknown {
   background: #777;
 }
 
-.hl-players__vote--waiting:not(.hl-players__vote--platform-twitch):not(.hl-players__vote--platform-youtube):not(.hl-players__vote--platform-kick) {
-  background: #777;
-}
-
-.hl-players__count {
+.hl-players-count {
   margin-left: 6px;
   font-size: 14px;
   font-weight: normal;

@@ -124,8 +124,7 @@ public class CPHInline
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "start");
         CPH.SetArgument("rtsOverlayData", game.Value<int?>("rounds") ?? 10);
-        CPH.TriggerEvent(EventName, true);
-        return true;
+        return CPH.RunAction("RTS - Higher Lower Game - Connector", true);
     }
 
     public bool Reset()
