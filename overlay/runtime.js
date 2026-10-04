@@ -35,7 +35,6 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(value));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
-    if (game.state === 'registration') void startRegistration(extension, game.registrationStartedAt || Date.now());
   }
   async function startRegistration(extension, startedAt) {
     const configuration = extension.state.configuration || {};
