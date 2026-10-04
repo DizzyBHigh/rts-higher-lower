@@ -63,7 +63,7 @@
 
 .hl-board__deck {
   border-radius: 14px;
-  background: url("../assets/images/card Images/Deck1/green_back.png") center / contain no-repeat;
+  background: url("assets/images/card Images/Deck1/green_back.png") center / contain no-repeat;
 }
 
 .hl-card {
@@ -121,7 +121,7 @@
   font-size: var(--hl-pot-total-label-size, 24px);
   color: var(--hl-pot-total-label-color, #30291f);
   text-align: var(--hl-pot-total-label-align, right);
-  text-shadow: var(--hl-pot-total-label-shadow-x, 3px) var(--hl-pot-total-label-shadow-y, 0) 2px var(--hl-pot-total-label-shadow-color, #000000);
+  text-shadow: var(--hl-pot-total-label-shadow-x, 3px) var(--hl-pot-total-shadow-y, 0) 2px var(--hl-pot-total-label-shadow-color, #000000);
 }
 
 .hl-board__pot-total-value {
@@ -174,6 +174,7 @@
   border: 2px solid #0384CB;
   border-radius: 50%;
   box-shadow: 0 -14px 0 -8px #0384CB, 0 14px 0 -8px #0384CB, -14px 0 0 -8px #0384CB, 14px 0 0 -8px #0384CB;
+  pointer-events: none;
 }
 
 .hl-dev {
