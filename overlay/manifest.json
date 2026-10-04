@@ -30,6 +30,7 @@
     ],
     "dev": {
       "js": [
+        "dev/settings-sections.js",
         "dev/config.js",
         "dev/test.js"
       ]
