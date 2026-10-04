@@ -24,6 +24,7 @@ const RTSHigherLowerCommands = {
     if (command === 'create') {
       extension.api.createGame(data?.startedAt ?? data ?? Date.now());
     }
+    if (command === 'recover') extension.api.recover();
     if (command === 'start') extension.api.startGame(data?.rounds ?? data ?? 10);
     if (command === 'registration') {
       const startedAt = data?.startedAt ?? data ?? Date.now();
