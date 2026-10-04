@@ -62,7 +62,7 @@
     RTS.core.log?.info('Higher Lower registration timer started', { startTime, length });
     run(extension, startTime + length, () => {
       RTS.core.log?.info('Higher Lower registration ended; requesting begin');
-      RTSOverlaySocket.requestAction('RTS - Higher Lower - Core', {
+      RTSOverlaySocket.requestAction('RTS - Higher Lower Game - Core', {
         rtsHigherLowerOperation: 'begin'
       });
     });
