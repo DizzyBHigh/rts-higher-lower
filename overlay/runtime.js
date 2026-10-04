@@ -44,10 +44,16 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(value));
     const game = value.game || {};
-    if (game.state === 'playing' || game.state === 'registration')
+    if (game.state === 'playing') {
       RTSHigherLowerPresentation.show(extension);
-    else
+      RTSHigherLowerPlayersPresentation.show(extension);
+    } else if (game.state === 'registration') {
+      RTSHigherLowerPresentation.show(extension);
+      RTSHigherLowerPlayersPresentation.hide(extension);
+    } else {
       RTSHigherLowerPresentation.hide(extension);
+      RTSHigherLowerPlayersPresentation.hide(extension);
+    }
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(value));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
@@ -56,9 +62,6 @@ const RTSHigherLowerRuntime = (() => {
       void startRegistration(extension, game.registrationStartedAt || Date.now());
       return;
     }
-
-    if (game.state === 'registration' && game.registrationStartedAt)
-      RTSHigherLowerTimer.startRegistration(extension, game.registrationStartedAt);
   }
 
   async function startRegistration(extension, startedAt) {
@@ -68,6 +71,8 @@ const RTSHigherLowerRuntime = (() => {
 
     extension.state.layout = hiddenLayout;
     applyLayout(extension);
+    RTSHigherLowerPresentation.hide(extension);
+    RTSHigherLowerPlayersPresentation.hide(extension);
     RTS.core.log?.info('Higher Lower animating registration layout into view');
 
     if (JSON.stringify(hiddenLayout) !== JSON.stringify(showingLayout))
@@ -75,6 +80,8 @@ const RTSHigherLowerRuntime = (() => {
 
     extension.state.layout = showingLayout;
     applyLayout(extension);
+    RTSHigherLowerPresentation.show(extension);
+    RTSHigherLowerPlayersPresentation.show(extension);
     RTSHigherLowerTimer.startRegistration(extension, startedAt);
     RTS.core.log?.info('Higher Lower registration layout visible');
     return true;
@@ -96,6 +103,8 @@ const RTSHigherLowerRuntime = (() => {
 
     extension.state.layout = showingLayout;
     applyLayout(extension);
+    RTSHigherLowerPresentation.show(extension);
+    RTSHigherLowerPlayersPresentation.show(extension);
     updateBoard(extension, {
       round: 0,
       players: state.players,
@@ -114,6 +123,7 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerPresentation.resetCards(extension);
     updateBoard(extension, { round: 0, players: [], roundTotal: 0, potTotal: 0, startedPlayers: 0 });
     RTSHigherLowerPresentation.hide(extension);
+    RTSHigherLowerPlayersPresentation.hide(extension);
     return true;
   }
 
