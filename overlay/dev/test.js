@@ -38,7 +38,10 @@
     const action = event.target?.dataset?.action;
     if (!action) return;
     try {
-      if (action === 'state') extension.api.updateState(state);
+      if (action === 'state') {
+        extension.api.setLayout(extension.api.getLayout(), { show: true, instant: true });
+        extension.api.updateState(state);
+      }
       if (action === 'start') extension.api.startGame(10);
       if (action === 'draw') await extension.api.drawCard();
       if (action === 'reset') extension.api.setLayout(RTSHigherLowerLayout.create());
