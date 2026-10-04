@@ -21,6 +21,9 @@ const RTSHigherLowerCommands = {
     const rawData = args.rtsOverlayData || args.data;
     const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
     RTS.core.log?.info('Higher Lower command dispatch', { command, data });
+    if (command === 'create') {
+      extension.api.createGame(data?.startedAt ?? data ?? Date.now());
+    }
     if (command === 'start') extension.api.startGame(data?.rounds ?? data ?? 10);
     if (command === 'registration') {
       const startedAt = data?.startedAt ?? data ?? Date.now();
