@@ -16,7 +16,6 @@
       'higher-lower-players', { positions: { Center: position(extension) } }
     );
     RTSHigherLowerPlayers.build(panel);
-    extension.state.playersPanel = panel;
     applyLayout(extension);
     return panel;
   }
@@ -29,7 +28,18 @@
     panel.element.style.zIndex = String(value.z ?? 10);
     const current = position(extension);
     panel.runner.configure({ Center: current });
-    panel.show(current);
+    return panel;
+  }
+
+  function show(extension) {
+    const panel = getPanel(extension);
+    panel.show(position(extension));
+    return panel;
+  }
+
+  function hide(extension) {
+    const panel = getPanel(extension);
+    panel.hide();
     return panel;
   }
 
@@ -40,5 +50,7 @@
     return panel;
   }
 
-  window.RTSHigherLowerPlayersPresentation = { getPanel, applyLayout, update };
+  window.RTSHigherLowerPlayersPresentation = {
+    getPanel, applyLayout, show, hide, update
+  };
 })();
