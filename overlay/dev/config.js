@@ -12,6 +12,10 @@
   settings.className = 'hl-dev__settings';
   const settingsApi = RTSHigherLowerSettings.render(settings);
   section.appendChild(settings);
+  if (settingsApi?.elementStyles) {
+    settingsApi.elementStyles.querySelectorAll(':scope > *').forEach(child => settings.appendChild(child));
+    settingsApi.elementStyles.remove();
+  }
   const gameSettings = settings.querySelector('.rts-ui-section');
   const defaultBrand = RTS.core.ui.dropdown({ options: ['default'], value: 'default' });
   const showingLayout = RTS.core.ui.dropdown({ options: ['default'], value: 'default' });
