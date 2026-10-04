@@ -358,101 +358,99 @@ public class CPHInline
         var raw = CPH.GetGlobalVar<string>(Key, true);
         if (string.IsNullOrWhiteSpace(raw)) return CreateDefaults();
         try { return JObject.Parse(raw); }
-        catch { return CreateDefaults(); }
+        catch { CPH.LogWarn("RTS Higher Lower: stored configuration was invalid; using defaults."); return CreateDefaults(); }
     }
 
     private JObject CreateDefaults()
     {
         return new JObject
         {
-            ["settings"] = new JObject { ["defaultRounds"] = 10, ["roundLength"] = 30000 },
-            ["layouts"] = new JObject(),
+            ["settings"] = new JObject
+            {
+                ["defaultRounds"] = 10, ["roundLength"] = 60000,
+                ["defaultLayout"] = "default", ["defaultBrand"] = "default"
+            },
+            ["layouts"] = new JObject { ["default"] = new JObject() },
+            ["activeLayout"] = "default",
+            ["brands"] = new JObject { ["default"] = CreateDefaultBrand() },
+            ["activeBrand"] = "default",
             ["game"] = new JObject()
         };
     }
 
-    private JObject GetGame(JObject configuration)
+    private JObject CreateDefaultBrand()
     {
-        return configuration["game"] as JObject ?? new JObject();
-    }
-
-    private JArray GetPlayers(JObject game)
-    {
-        return game["players"] as JArray ?? new JArray();
-    }
-
-    private enum Platform { Twitch, YouTube, Kick, Unknown }
-
-    private string PlatformName(Platform platform)
-    {
-        switch (platform)
+        return new JObject
         {
-            case Platform.Twitch: return "twitch";
-            case Platform.YouTube: return "youtube";
-            case Platform.Kick: return "kick";
-            default: return "unknown";
-        }
+            ["fontFamily"] = "Arial",
+            ["board"] = new JObject { ["color1"] = "#d8c79e", ["color2"] = "#d8c79e", ["gradientDirection"] = 90, ["borderWidth"] = 10, ["borderColor"] = "#6f5a3c", ["cornerRadius"] = 28 },
+            ["round"] = new JObject { ["fontSize"] = 34, ["color"] = "#30291f", ["shadowColor"] = "#000000", ["shadowDirection"] = 0 },
+            ["roundTotal"] = new JObject { ["fontSize"] = 24, ["color"] = "#30291f", ["shadowColor"] = "#000000", ["shadowDirection"] = 0 },
+            ["potTotal"] = new JObject { ["fontSize"] = 24, ["color"] = "#30291f", ["shadowColor"] = "#000000", ["shadowDirection"] = 0 }
+        };
     }
+
+    private JObject GetGame(JObject configuration) => configuration["game"] as JObject ?? new JObject();
+    private JArray GetPlayers(JObject game) => game["players"] as JArray ?? new JArray();
 
     private bool ReadUser(out string id, out Platform platform)
     {
-        id = "";
-        platform = Platform.Unknown;
-        if (!CPH.TryGetArg("userId", out string value) || string.IsNullOrWhiteSpace(value)) return false;
-        id = value;
-        string source = CPH.TryGetArg("platform", out string raw) ? raw.ToLowerInvariant() : "";
-        platform = source switch
-        {
-            "twitch" => Platform.Twitch,
-            "youtube" => Platform.YouTube,
-            "kick" => Platform.Kick,
-            _ => Platform.Unknown
-        };
-        return true;
+        id = ""; platform = Platform.Twitch;
+        return CPH.TryGetArg("userId", out id) && CPH.TryGetArg("userType", out string type) && Enum.TryParse(type, true, out platform);
     }
 
     private JObject Find(JArray players, string id, Platform platform)
     {
         string name = PlatformName(platform);
         foreach (JObject player in players)
-            if (player.Value<string>("id") == id && player.Value<string>("platform") == name) return player;
+        {
+            if (player.Value<string>("id") != id) continue;
+            string stored = player.Value<string>("platform");
+            if (stored == name || (string.IsNullOrWhiteSpace(stored) && platform == Platform.Twitch))
+            {
+                player["platform"] = name;
+                return player;
+            }
+        }
         return null;
     }
 
     private (string id, Platform platform) Identity(JObject player)
     {
-        string id = player.Value<string>("id") ?? "";
-        string raw = player.Value<string>("platform") ?? "unknown";
-        Platform platform = raw switch
-        {
-            "twitch" => Platform.Twitch,
-            "youtube" => Platform.YouTube,
-            "kick" => Platform.Kick,
-            _ => Platform.Unknown
-        };
+        string id = player.Value<string>("id");
+        string name = player.Value<string>("platform") ?? "twitch";
+        Platform platform = Enum.TryParse(name, true, out Platform parsed) ? parsed : Platform.Twitch;
         return (id, platform);
     }
 
+    private string PlatformName(Platform platform) => platform.ToString().ToLowerInvariant();
+    private void Increment(string id, Platform platform, string name, int amount = 1) => SetVar(id, platform, name, GetVar(id, platform, name) + amount);
+    private void AddPoints(string id, Platform platform, int amount) => SetVar(id, platform, "points", GetVar(id, platform, "points") + amount);
+
     private int GetVar(string id, Platform platform, string name)
     {
-        string key = id + ":" + PlatformName(platform) + ":" + name;
-        return CPH.GetGlobalVar<int>(key, true);
+        switch (platform)
+        {
+            case Platform.YouTube: return CPH.GetYouTubeUserVarById<int?>(id, name, true) ?? 0;
+            case Platform.Kick: return CPH.GetKickUserVarById<int?>(id, name, true) ?? 0;
+            default: return CPH.GetTwitchUserVarById<int?>(id, name, true) ?? 0;
+        }
     }
 
     private void SetVar(string id, Platform platform, string name, int value)
     {
-        string key = id + ":" + PlatformName(platform) + ":" + name;
-        CPH.SetGlobalVar(key, value, true);
+        switch (platform)
+        {
+            case Platform.YouTube: CPH.SetYouTubeUserVarById(id, name, value, true); break;
+            case Platform.Kick: CPH.SetKickUserVarById(id, name, value, true); break;
+            default: CPH.SetTwitchUserVarById(id, name, value, true); break;
+        }
     }
+}
 
-    private void AddPoints(string id, Platform platform, int value)
-    {
-        if (value <= 0) return;
-        SetVar(id, platform, "points", GetVar(id, platform, "points") + value);
-    }
-
-    private void Increment(string id, Platform platform, string name, int amount = 1)
-    {
-        SetVar(id, platform, name, GetVar(id, platform, name) + amount);
-    }
+public enum Platform
+{
+    Twitch,
+    YouTube,
+    Kick
 }
