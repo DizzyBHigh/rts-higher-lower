@@ -19,7 +19,7 @@
       extension.api.startRegistration = startedAt => RTSHigherLowerRuntime.startRegistration(extension, startedAt);
       extension.api.startGame = rounds => RTSHigherLowerRuntime.startGame(extension, rounds);
       extension.api.updateState = data => RTSHigherLowerRuntime.updateBoard(extension, data);
-      extension.api.setLayout = layout => RTSHigherLowerRuntime.setLayout(extension, layout);
+      extension.api.setLayout = (layout, options) => RTSHigherLowerRuntime.setLayout(extension, layout, options);
       extension.api.getLayout = () => extension.state.layout;
       extension.api.drawCard = () => RTSHigherLowerRuntime.drawCard(extension);
       extension.api.showCard = card => RTSHigherLowerPresentation.showCard(extension, card);
