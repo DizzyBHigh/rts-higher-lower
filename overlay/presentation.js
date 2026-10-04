@@ -14,27 +14,19 @@
     panel.show();
   }
 
-  function hide(extension) {
-    const panel = getPanel(extension);
-    panel.hide();
-  }
-
   function reset(extension) {
     RTSHigherLowerTimer.stop(extension);
     RTSHigherLowerCardsPresentation.resetCards(extension);
     extension.state.card = null;
-    hide(extension);
   }
 
   function updatePlayers(extension) {
-    if (!RTSHigherLowerPlayersPresentation) return;
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
   }
 
   window.RTSHigherLowerPresentation = {
     getPanel,
     show,
-    hide,
     reset,
     showCard: (extension, card) => RTSHigherLowerCardsPresentation.showCard(extension, card),
     restoreCard: (extension, card, position, previous) => RTSHigherLowerCardsPresentation.restoreCard(extension, card, position, previous),
