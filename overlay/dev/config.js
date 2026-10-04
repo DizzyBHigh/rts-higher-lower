@@ -151,10 +151,10 @@
     id,
     label: targetLabels[id],
     get: () => getValue(current, id),
-    set: patch => {
+    set: (patch, options = {}) => {
       const next = RTSHigherLowerLayout.create(current);
       Object.assign(getValue(next, id), patch);
-      current = extension.api.setLayout(next);
+      current = extension.api.setLayout(next, options);
     }
   }));
 
