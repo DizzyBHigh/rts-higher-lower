@@ -156,7 +156,7 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerCardsPresentation.applyLayout(extension);
   }
 
-  function setLayout(extension, value) {
+  function setLayout(extension, value, options = {}) {
     let layoutName = null;
     let layoutValue = value;
     if (typeof value === 'string') {
@@ -167,7 +167,13 @@ const RTSHigherLowerRuntime = (() => {
     const from = RTSHigherLowerLayout.clone(extension.state.layout);
     const to = RTSHigherLowerLayout.create(RTSHigherLowerLayout.merge(extension.state.layout, layoutValue));
     extension.state.layout = to;
+
     if (layoutName && extension.state.configuration) extension.state.configuration.activeLayout = layoutName;
+    if (options.transient) {
+      applyLayout(extension);
+      return to;
+    }
+
     RTSHigherLowerLayout.transition(extension, from, to, () => applyLayout(extension));
     if (isGameVisible(extension)) RTSHigherLowerPlayersPresentation.show(extension, from);
     return to;
