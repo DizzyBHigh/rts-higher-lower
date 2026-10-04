@@ -11,8 +11,11 @@ Commands: !bank
 RTS - Higher Lower Game - Join : Execute Method(RTS - Higher Lower Game - Core, Join)
 Commands: !join
 
-RTS - Higher Lower Game - Start : Execute Method(RTS - Higher Lower Game - Core, Start Game)
-Commands: !start
+RTS - Higher Lower Game - Create Game : Execute Method(RTS - Higher Lower Game - Core, CreateGame)
+Commands: !createGame
+
+RTS - Higher Lower Game - Start Game : Execute Method(RTS - Higher Lower Game - Core, StartGame)
+Internal: registration timer completion
 
 RTS - Higher Lower Game - Reset : Execute Method(RTS - Higher Lower Game - Core, Reset)
 Commands: !rts-hl-reset
