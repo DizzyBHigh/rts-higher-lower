@@ -1,9 +1,13 @@
 RTS Higher Lower Game
 Streamer Bot Mappings
 
+Naming convention:
+Streamer.bot Action names and their Execute Code or Execute Method action names use the same name.
+Overlay requestAction calls always target the Streamer.bot Action name.
+
 RTS - Higher Lower Game - Connector : Custom Trigger(RTS - Higher Lower Game)
 
-RTS - Higher Lower Game - Core : Execute Code (RTS - Higher Lower Game - Core) - streamerbot\RTSHigherLowerGame.cs
+RTS - Higher Lower Game - Core : Execute Code(RTS - Higher Lower Game - Core) - streamerbot\RTSHigherLowerGame.cs
 
 RTS - Higher Lower Game - Bank : Execute Method(RTS - Higher Lower Game - Core, Bank)
 Commands: !bank
