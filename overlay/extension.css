@@ -196,6 +196,12 @@
 
 .hl-dev__settings .rts-ui-button {
   margin-top: 4px;
+  margin-right: 8px;
+  margin-bottom: 4px;
+}
+
+.hl-dev__settings .rts-ui-button:last-child {
+  margin-right: 0;
 }
 
 .hl-dev__status {
