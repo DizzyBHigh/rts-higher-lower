@@ -121,7 +121,7 @@
   font-size: var(--hl-pot-total-label-size, 24px);
   color: var(--hl-pot-total-label-color, #30291f);
   text-align: var(--hl-pot-total-label-align, right);
-  text-shadow: var(--hl-pot-total-label-shadow-x, 3px) var(--hl-pot-total-shadow-y, 0) 2px var(--hl-pot-total-label-shadow-color, #000000);
+  text-shadow: var(--hl-pot-total-label-shadow-x, 3px) var(--hl-pot-total-label-shadow-y, 0) 2px var(--hl-pot-total-label-shadow-color, #000000);
 }
 
 .hl-board__pot-total-value {
