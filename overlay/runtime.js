@@ -148,14 +148,19 @@ const RTSHigherLowerRuntime = (() => {
   }
 
   function setLayout(extension, value) {
-    let layoutValue = value;
     if (typeof value === 'string') {
       const layoutName = value.trim();
-      layoutValue = extension.state.configuration?.layouts?.[layoutName];
+      const layoutValue = extension.state.configuration?.layouts?.[layoutName];
       if (!layoutValue) return extension.state.layout;
+      const from = RTSHigherLowerLayout.clone(extension.state.layout);
+      const to = RTSHigherLowerLayout.create(layoutValue);
+      extension.state.layout = to;
+      RTSHigherLowerLayout.transition(extension, from, to, () => applyLayout(extension));
+      return to;
     }
+
     const from = RTSHigherLowerLayout.clone(extension.state.layout);
-    const to = RTSHigherLowerLayout.create(RTSHigherLowerLayout.merge(extension.state.layout, layoutValue));
+    const to = RTSHigherLowerLayout.create(RTSHigherLowerLayout.merge(extension.state.layout, value));
     extension.state.layout = to;
     RTSHigherLowerLayout.transition(extension, from, to, () => applyLayout(extension));
     return to;
