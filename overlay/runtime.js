@@ -50,20 +50,22 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerTimer.startRegistration(extension, startedAt);
     return true;
   }
-  async function startGame(extension, rounds) {
+  async function startGame(extension) {
     const configuration = extension.state.configuration || {};
-    const hiddenLayout = getConfiguredLayout(configuration, configuration.settings?.hiddenLayout);
-    const showingLayout = getConfiguredLayout(configuration, configuration.settings?.showingLayout);
-    const state = extension.state.game.start(rounds, configuration.game?.players || [], configuration.game?.bonusPot || 0);
+    const settings = configuration.settings || {};
+    const state = extension.state.game.start(
+      settings.defaultRounds,
+      configuration.game?.players || [],
+      configuration.game?.bonusPot || 0
+    );
     configuration.game = state;
     extension.state.configuration = configuration;
-    if (configuration.settings?.showingLayout && configuration.layouts?.[configuration.settings.showingLayout]) configuration.activeLayout = configuration.settings.showingLayout;
+    if (configuration.settings?.showingLayout && configuration.layouts?.[configuration.settings.showingLayout]) {
+      configuration.activeLayout = configuration.settings.showingLayout;
+    }
     RTSHigherLowerTimer.stop(extension);
     RTSHigherLowerPresentation.resetCards(extension);
-    extension.state.layout = hiddenLayout;
-    applyLayout(extension);
-    await RTSHigherLowerLayout.transition(extension, hiddenLayout, showingLayout);
-    extension.state.layout = showingLayout;
+    extension.state.layout = getConfiguredLayout(configuration, configuration.settings?.showingLayout);
     applyLayout(extension);
     updateBoard(extension, { round: 0, players: state.players, startedPlayers: state.startedPlayers });
     await drawCard(extension);
@@ -91,9 +93,11 @@ const RTSHigherLowerRuntime = (() => {
     if (!result.card) { RTSHigherLowerTimer.stop(extension); return result; }
     updateBoard(extension, { round: result.round });
     await RTSHigherLowerPresentation.presentDraw(extension, result);
-    RTSHigherLowerTimer.start(extension);
-    RTSHigherLowerPersistence.save(extension.state.game);
     if (result.type !== 'first-card') RTSHigherLowerCommands.reportResult(extension, result);
+    RTSHigherLowerPersistence.save(extension.state.game);
+    const complete = result.type === 'round-result' && result.round >= result.state.rounds;
+    if (complete) RTSHigherLowerTimer.stop(extension);
+    else RTSHigherLowerTimer.start(extension, () => drawCard(extension));
     return result;
   }
   function applyLayout(extension) {
