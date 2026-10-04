@@ -53,12 +53,16 @@ const RTSHigherLowerRuntime = (() => {
   async function startGame(extension, rounds) {
     const configuration = extension.state.configuration || {};
     const showingLayout = getConfiguredLayout(configuration, configuration.settings?.showingLayout);
+    const from = RTSHigherLowerLayout.clone(extension.state.layout);
     const state = extension.state.game.start(rounds, configuration.game?.players || [], configuration.game?.bonusPot || 0);
     configuration.game = state;
     extension.state.configuration = configuration;
     if (configuration.settings?.showingLayout && configuration.layouts?.[configuration.settings.showingLayout]) configuration.activeLayout = configuration.settings.showingLayout;
     RTSHigherLowerTimer.stop(extension);
     RTSHigherLowerPresentation.resetCards(extension);
+    extension.state.layout = from;
+    applyLayout(extension);
+    await RTSHigherLowerLayout.transition(extension, from, showingLayout);
     extension.state.layout = showingLayout;
     applyLayout(extension);
     updateBoard(extension, { round: 0, players: state.players, startedPlayers: state.startedPlayers });
