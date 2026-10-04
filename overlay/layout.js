@@ -37,8 +37,7 @@
 
   function merge(base, value) {
     return create({
-      ...(base || {}),
-      ...(value || {}),
+      ...(base || {}), ...(value || {}),
       cards: { ...(base?.cards || {}), ...(value?.cards || {}) },
       elements: { ...(base?.elements || {}), ...(value?.elements || {}) }
     });
@@ -52,7 +51,6 @@
 
   function targets(extension) {
     const panel = extension.state.panel?.element;
-    const players = extension.state.playersPanel?.element;
     const result = {};
     if (panel) {
       result.board = panel.querySelector('.hl-board');
@@ -71,20 +69,22 @@
         deck: panel.querySelector('.hl-board__deck')
       };
     }
-    result.players = players;
     return result;
   }
 
-  function flattenTargets(value, path, result) {
-    if (!value || typeof value !== 'object') return;
-    Object.keys(value).forEach(key => {
-      const nextPath = path ? path + '.' + key : key;
+  function flattenTargets(value) {
+    const result = {};
+    Object.keys(value || {}).forEach(key => {
       const item = value[key];
-      if (item && typeof item === 'object' && !Array.isArray(item)) {
-        if (item.nodeType) result[nextPath] = item;
-        else flattenTargets(item, nextPath, result);
+      if (!item) return;
+      if (item.nodeType) result[key] = item;
+      else if (typeof item === 'object') {
+        Object.keys(item).forEach(child => {
+          if (item[child]) result[key + '.' + child] = item[child];
+        });
       }
     });
+    return result;
   }
 
   function applyValue(element, value, path) {
@@ -97,16 +97,6 @@
       element.style.zIndex = String(value.z ?? 0);
       element.style.transform = 'scale(' + ((Number(value.scale) || 100) / 100) + ')';
       element.style.transformOrigin = 'top left';
-      return;
-    }
-    if (path === 'players') {
-      element.style.width = value.width + 'px';
-      element.style.height = value.height + 'px';
-      element.style.zIndex = String(value.z ?? 10);
-      RTS.core.positioning.apply(element, {
-        x: value.x, y: value.y, z: value.z,
-        scaleX: value.scale, scaleY: value.scale
-      });
       return;
     }
     element.style.left = (value.x || 0) + 'px';
@@ -125,7 +115,9 @@
     transition(extension, from, to, complete) {
       const settings = RTSHigherLowerConfiguration.current?.settings || {};
       const options = settings.cardAnimation || {};
-      const runner = RTS.core.layoutAnimation.createRunner(flattenedTargets(extension), applyValue);
+      const runner = RTS.core.layoutAnimation.createRunner(
+        flattenTargets(targets(extension)), applyValue
+      );
       return new Promise(resolve => {
         runner.animate(from, to, {
           duration: Math.max(0, Number(options.duration) || 500),
@@ -137,23 +129,4 @@
       });
     }
   };
-
-  function flattenedTargets(extension) {
-    return flattenTargetGroups(targets(extension));
-  }
-
-  function flattenTargetGroups(value) {
-    const result = {};
-    Object.keys(value || {}).forEach(key => {
-      const item = value[key];
-      if (!item) return;
-      if (item.nodeType) result[key] = item;
-      else if (typeof item === 'object') {
-        Object.keys(item).forEach(child => {
-          if (item[child]) result[key + '.' + child] = item[child];
-        });
-      }
-    });
-    return result;
-  }
 })();
