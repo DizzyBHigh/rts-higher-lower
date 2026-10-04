@@ -49,6 +49,14 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(value));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
   }
+  async function recover(extension) {
+    const configuration = extension.state.configuration || {};
+    const game = RTSHigherLowerRecovery.apply(extension, configuration);
+    const layoutName = isGameVisible(configuration.game) ? configuration.settings?.showingLayout : configuration.settings?.hiddenLayout;
+    extension.state.layout = getConfiguredLayout(configuration, layoutName);
+    applyLayout(extension);
+    return game;
+  }
   async function startRegistration(extension, startedAt) {
     const configuration = extension.state.configuration || {};
     const hiddenLayout = getConfiguredLayout(configuration, configuration.settings?.hiddenLayout);
@@ -140,5 +148,5 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(extension.state.configuration));
   }
-  return { configure, startRegistration, startGame, resetGame, drawCard, setLayout, updateBoard };
+  return { configure, recover, startRegistration, startGame, resetGame, drawCard, setLayout, updateBoard };
 })();
