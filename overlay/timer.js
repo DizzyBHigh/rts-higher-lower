@@ -61,10 +61,8 @@
     const startTime = Number(startedAt) || Date.now();
     RTS.core.log?.info('Higher Lower registration timer started', { startTime, length });
     run(extension, startTime + length, () => {
-      RTS.core.log?.info('Higher Lower registration ended; requesting StartGame');
-      RTSOverlaySocket.requestAction('RTS - Higher Lower Game - Core', {
-        rtsHigherLowerOperation: 'start'
-      });
+      RTS.core.log?.info('Higher Lower registration ended; requesting Start Game action');
+      RTSOverlaySocket.requestAction('RTS - Higher Lower Game - Start Game');
     });
   }
 
