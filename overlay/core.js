@@ -17,6 +17,7 @@
       extension.state.board = { round: 0, players: [], roundTotal: 0, potTotal: 0 };
       extension.configure = configuration => RTSHigherLowerRuntime.configure(extension, configuration);
       extension.api.createGame = startedAt => RTSHigherLowerRuntime.startRegistration(extension, startedAt);
+      extension.api.recover = () => RTSHigherLowerRuntime.recover(extension);
       extension.api.startGame = () => RTSHigherLowerRuntime.startGame(extension);
       extension.api.updateState = data => RTSHigherLowerRuntime.updateBoard(extension, data);
       extension.api.setLayout = (layout, options) => RTSHigherLowerRuntime.setLayout(extension, layout, options);
