@@ -51,7 +51,7 @@
 
   function targets(extension) {
     const panel = extension.state.panel?.element;
-    const result = {};
+    const result = { players: null };
     if (panel) {
       result.board = panel.querySelector('.hl-board');
       result.elements = {
@@ -69,6 +69,8 @@
         deck: panel.querySelector('.hl-board__deck')
       };
     }
+    if (typeof RTSHigherLowerPlayersPresentation !== 'undefined')
+      result.players = RTSHigherLowerPlayersPresentation.getPanel(extension).element;
     return result;
   }
 
@@ -78,17 +80,22 @@
       const item = value[key];
       if (!item) return;
       if (item.nodeType) result[key] = item;
-      else if (typeof item === 'object') {
-        Object.keys(item).forEach(child => {
-          if (item[child]) result[key + '.' + child] = item[child];
-        });
-      }
+      else if (typeof item === 'object') Object.keys(item).forEach(child => {
+        if (item[child]) result[key + '.' + child] = item[child];
+      });
     });
     return result;
   }
 
   function applyValue(element, value, path) {
     if (!element || !value) return;
+    if (path === 'players') {
+      element.style.width = value.width + 'px';
+      element.style.height = value.height + 'px';
+      element.style.zIndex = String(value.z ?? 10);
+      RTS.core.positioning.apply(element, value);
+      return;
+    }
     if (path === 'board') {
       element.style.left = (value.x || 0) + 'px';
       element.style.top = (value.y || 0) + 'px';
