@@ -116,7 +116,7 @@ public class CPHInline
         game["state"] = "playing";
         game["active"] = true;
         game.Remove("registrationStartedAt");
-        Save(configuration);
+        SaveSilently(configuration);
         SetCreateGameCommandEnabled(false);
         SetJoinCommandEnabled(false);
         SetVoteCommandEnabled(true);
@@ -321,6 +321,13 @@ public class CPHInline
     private void SetBankCommandEnabled(bool enabled) => SetCommandEnabled("bank", enabled);
 
     private void Save(JObject configuration) { SaveConfiguration(configuration, false); }
+
+    private void SaveSilently(JObject configuration)
+    {
+        string raw = configuration.ToString(Newtonsoft.Json.Formatting.None);
+        CPH.SetGlobalVar(Key, raw, true);
+        CPH.SetArgument("rtsHigherLowerConfiguration", raw);
+    }
 
     private bool GetConfiguration()
     {
