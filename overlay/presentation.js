@@ -16,7 +16,7 @@
 
   function hide(extension) {
     const panel = getPanel(extension);
-    if (panel.element) panel.element.style.display = 'none';
+    panel.hide();
   }
 
   function reset(extension) {
