@@ -12,8 +12,8 @@ public class CPHInline
         switch (operation.ToLowerInvariant())
         {
             case "join": return Join();
+            case "create": return CreateGame();
             case "start": return StartGame();
-            case "begin": return BeginGame();
             case "reset": return Reset();
             case "vote": return Vote();
             case "bank": return Bank();
@@ -66,13 +66,12 @@ public class CPHInline
         return true;
     }
 
-    public bool StartGame()
+    public bool CreateGame()
     {
         var configuration = ReadConfiguration();
         var existing = GetGame(configuration);
         if (existing.Value<string>("state") == "registration" || existing.Value<string>("state") == "playing") return false;
         int rounds = configuration["settings"]?.Value<int?>("defaultRounds") ?? 10;
-        if (CPH.TryGetArg("rtsHigherLowerRounds", out int requestedRounds)) rounds = requestedRounds;
         if (rounds < 1) return false;
         var game = new JObject
         {
@@ -86,16 +85,18 @@ public class CPHInline
         };
         configuration["game"] = game;
         Save(configuration);
-        SetStartCommandEnabled(false);
+        SetCreateGameCommandEnabled(false);
+        SetJoinCommandEnabled(true);
+        SetVoteCommandEnabled(false);
+        SetBankCommandEnabled(false);
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
-        CPH.SetArgument("rtsOverlayCommand", "registration");
+        CPH.SetArgument("rtsOverlayCommand", "create");
         CPH.SetArgument("rtsOverlayData", game.Value<long>("registrationStartedAt"));
-
         CPH.TriggerEvent(EventName, true);
         return true;
     }
 
-    private bool BeginGame()
+    public bool StartGame()
     {
         var configuration = ReadConfiguration();
         var game = GetGame(configuration);
@@ -105,7 +106,10 @@ public class CPHInline
         {
             configuration["game"] = new JObject();
             Save(configuration);
-            SetStartCommandEnabled(true);
+            SetCreateGameCommandEnabled(true);
+            SetJoinCommandEnabled(false);
+            SetVoteCommandEnabled(false);
+            SetBankCommandEnabled(false);
             ResetOverlay();
             return false;
         }
@@ -113,6 +117,10 @@ public class CPHInline
         game["active"] = true;
         game.Remove("registrationStartedAt");
         Save(configuration);
+        SetCreateGameCommandEnabled(false);
+        SetJoinCommandEnabled(false);
+        SetVoteCommandEnabled(true);
+        SetBankCommandEnabled(true);
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "start");
         CPH.SetArgument("rtsOverlayData", game.Value<int?>("rounds") ?? 10);
@@ -124,7 +132,10 @@ public class CPHInline
         var configuration = ReadConfiguration();
         configuration["game"] = new JObject();
         Save(configuration);
-        SetStartCommandEnabled(true);
+        SetCreateGameCommandEnabled(true);
+        SetJoinCommandEnabled(false);
+        SetVoteCommandEnabled(false);
+        SetBankCommandEnabled(false);
         ResetOverlay();
         return true;
     }
@@ -287,18 +298,26 @@ public class CPHInline
         game["active"] = false;
         game["state"] = "completed";
         game["players"] = new JArray();
-        SetStartCommandEnabled(true);
+        SetCreateGameCommandEnabled(true);
+        SetJoinCommandEnabled(false);
+        SetVoteCommandEnabled(false);
+        SetBankCommandEnabled(false);
     }
 
-    private void SetStartCommandEnabled(bool enabled)
+    private void SetCommandEnabled(string name, bool enabled)
     {
         foreach (var command in CPH.GetCommands())
         {
-            if (!string.Equals(command.Name?.TrimStart('!'), "start", StringComparison.OrdinalIgnoreCase)) continue;
+            if (!string.Equals(command.Name?.TrimStart('!'), name, StringComparison.OrdinalIgnoreCase)) continue;
             if (enabled) CPH.EnableCommand(command.Id.ToString());
             else CPH.DisableCommand(command.Id.ToString());
         }
     }
+
+    private void SetCreateGameCommandEnabled(bool enabled) => SetCommandEnabled("createGame", enabled);
+    private void SetJoinCommandEnabled(bool enabled) => SetCommandEnabled("join", enabled);
+    private void SetVoteCommandEnabled(bool enabled) => SetCommandEnabled("vote", enabled);
+    private void SetBankCommandEnabled(bool enabled) => SetCommandEnabled("bank", enabled);
 
     private void Save(JObject configuration) { SaveConfiguration(configuration, false); }
 
