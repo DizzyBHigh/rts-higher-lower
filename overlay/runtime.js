@@ -152,13 +152,17 @@ const RTSHigherLowerRuntime = (() => {
     let layoutValue = value;
     if (typeof value === 'string') {
       layoutName = value.trim();
-      layoutValue = extension.state.configuration?.layouts?.[layoutName];
+      layoutValue = extension.state.configuration?.layouts?.[layoutName]
+        || RTSHigherLowerConfiguration.current?.layouts?.[layoutName];
       if (!layoutValue) return extension.state.layout;
     }
     const from = RTSHigherLowerLayout.clone(extension.state.layout);
     const to = RTSHigherLowerLayout.create(RTSHigherLowerLayout.merge(extension.state.layout, layoutValue));
     extension.state.layout = to;
-    if (layoutName && extension.state.configuration) extension.state.configuration.activeLayout = layoutName;
+    if (layoutName) {
+      if (extension.state.configuration) extension.state.configuration.activeLayout = layoutName;
+      if (RTSHigherLowerConfiguration.current) RTSHigherLowerConfiguration.current.activeLayout = layoutName;
+    }
     RTSHigherLowerLayout.transition(extension, from, to, () => applyLayout(extension));
     return to;
   }
