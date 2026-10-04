@@ -5,6 +5,11 @@ const RTSHigherLowerRuntime = (() => {
     return brands[name] || configuration?.appearance || {};
   };
 
+  const isGameActive = extension => Boolean(extension.state.game?.state?.().active);
+
+  const isPresentationActive = extension =>
+    isGameActive(extension) || extension.state.configuration?.game?.state === 'registration';
+
   function getGameLayoutName(configuration) {
     const value = configuration || {};
     const settings = value.settings || {};
@@ -44,7 +49,7 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(value));
     const game = value.game || {};
-    if (game.state === 'playing' || game.state === 'registration')
+    if (game.state === 'playing' || game.state === 'registration' || isGameActive(extension))
       RTSHigherLowerPresentation.show(extension);
     else
       RTSHigherLowerPresentation.hide(extension);
@@ -136,7 +141,7 @@ const RTSHigherLowerRuntime = (() => {
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
-    if (extension.state.configuration?.game?.state === 'playing' || extension.state.configuration?.game?.state === 'registration')
+    if (isPresentationActive(extension))
       RTSHigherLowerPresentation.show(extension);
     else
       RTSHigherLowerPresentation.hide(extension);
@@ -165,7 +170,7 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerBoard.update(panel, extension.state.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
-    if (extension.state.configuration?.game?.state === 'playing' || extension.state.configuration?.game?.state === 'registration')
+    if (isPresentationActive(extension))
       RTSHigherLowerPresentation.show(extension);
     else
       RTSHigherLowerPresentation.hide(extension);
