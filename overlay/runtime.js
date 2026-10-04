@@ -22,13 +22,26 @@ const RTSHigherLowerRuntime = (() => {
     if (settings.defaultBrand && brands[settings.defaultBrand]) value.activeBrand = settings.defaultBrand;
     return value;
   }
+  function updateConfigurationState(extension, game) {
+    const players = Array.isArray(game?.players) ? game.players : [];
+    const roundTotal = players.reduce((total, player) => total + (Number(player.bet) || 0), 0);
+    const potTotal = players.reduce((total, player) => total + (Number(player.pot) || 0), 0);
+    updateBoard(extension, {
+      round: Number(game?.round) || 0,
+      players,
+      roundTotal,
+      potTotal
+    });
+  }
   function configure(extension, configuration) {
+    const previous = extension.state.configuration;
     const value = applyDefaults(configuration || {});
+    const initial = !previous;
+    const layoutChanged = previous?.activeLayout !== value.activeLayout;
     extension.state.configuration = value;
-    RTSHigherLowerTimer.stop(extension);
-    const game = value.game || {};
-    extension.state.layout = getConfiguredLayout(value, game.state === 'registration' ? value.settings?.hiddenLayout : getGameLayoutName(value));
-    RTSHigherLowerRecovery.apply(extension, value);
+    if (initial || layoutChanged)
+      extension.state.layout = getConfiguredLayout(value, value.activeLayout);
+    updateConfigurationState(extension, value.game || {});
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(value));
