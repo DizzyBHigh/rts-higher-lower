@@ -32,6 +32,22 @@ const RTSHigherLowerRuntime = (() => {
     return value;
   }
 
+  function isGameVisible(extension) {
+    const state = extension.state.game?.state?.();
+    const configured = extension.state.configuration?.game?.state;
+    return state?.active || configured === 'playing' || configured === 'registration';
+  }
+
+  function showGameLayout(extension, fromLayout = null) {
+    RTSHigherLowerPresentation.show(extension);
+    RTSHigherLowerPlayersPresentation.show(extension, fromLayout);
+  }
+
+  function hideGameLayout(extension) {
+    RTSHigherLowerPresentation.hide(extension);
+    RTSHigherLowerPlayersPresentation.hide(extension);
+  }
+
   function configure(extension, configuration) {
     const value = applyDefaults(configuration || {});
     RTS.core.log?.info('Higher Lower configure', { state: value.game?.state, activeLayout: value.activeLayout });
@@ -44,16 +60,10 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(value));
     const game = value.game || {};
-    if (game.state === 'playing') {
-      RTSHigherLowerPresentation.show(extension);
-      RTSHigherLowerPlayersPresentation.show(extension);
-    } else if (game.state === 'registration') {
-      RTSHigherLowerPresentation.show(extension);
-      RTSHigherLowerPlayersPresentation.hide(extension);
-    } else {
-      RTSHigherLowerPresentation.hide(extension);
-      RTSHigherLowerPlayersPresentation.hide(extension);
-    }
+    if (game.state === 'playing' || game.state === 'registration')
+      showGameLayout(extension);
+    else
+      hideGameLayout(extension);
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(value));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
@@ -71,8 +81,10 @@ const RTSHigherLowerRuntime = (() => {
 
     extension.state.layout = hiddenLayout;
     applyLayout(extension);
-    RTSHigherLowerPresentation.hide(extension);
-    RTSHigherLowerPlayersPresentation.hide(extension);
+    showGameLayout(extension);
+    extension.state.layout = showingLayout;
+    RTSHigherLowerPresentation.show(extension);
+    RTSHigherLowerPlayersPresentation.show(extension, hiddenLayout);
     RTS.core.log?.info('Higher Lower animating registration layout into view');
 
     if (JSON.stringify(hiddenLayout) !== JSON.stringify(showingLayout))
@@ -80,8 +92,6 @@ const RTSHigherLowerRuntime = (() => {
 
     extension.state.layout = showingLayout;
     applyLayout(extension);
-    RTSHigherLowerPresentation.show(extension);
-    RTSHigherLowerPlayersPresentation.show(extension);
     RTSHigherLowerTimer.startRegistration(extension, startedAt);
     RTS.core.log?.info('Higher Lower registration layout visible');
     return true;
@@ -103,8 +113,7 @@ const RTSHigherLowerRuntime = (() => {
 
     extension.state.layout = showingLayout;
     applyLayout(extension);
-    RTSHigherLowerPresentation.show(extension);
-    RTSHigherLowerPlayersPresentation.show(extension);
+    showGameLayout(extension);
     updateBoard(extension, {
       round: 0,
       players: state.players,
@@ -122,8 +131,7 @@ const RTSHigherLowerRuntime = (() => {
     extension.state.card = null;
     RTSHigherLowerPresentation.resetCards(extension);
     updateBoard(extension, { round: 0, players: [], roundTotal: 0, potTotal: 0, startedPlayers: 0 });
-    RTSHigherLowerPresentation.hide(extension);
-    RTSHigherLowerPlayersPresentation.hide(extension);
+    hideGameLayout(extension);
     return true;
   }
 
@@ -143,10 +151,6 @@ const RTSHigherLowerRuntime = (() => {
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
-    if (extension.state.configuration?.game?.state === 'playing' || extension.state.configuration?.game?.state === 'registration')
-      RTSHigherLowerPresentation.show(extension);
-    else
-      RTSHigherLowerPresentation.hide(extension);
     RTSHigherLowerPlayersPresentation.applyLayout(extension);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(extension.state.configuration));
     RTSHigherLowerCardsPresentation.applyLayout(extension);
@@ -165,6 +169,7 @@ const RTSHigherLowerRuntime = (() => {
     extension.state.layout = to;
     if (layoutName && extension.state.configuration) extension.state.configuration.activeLayout = layoutName;
     RTSHigherLowerLayout.transition(extension, from, to, () => applyLayout(extension));
+    if (isGameVisible(extension)) RTSHigherLowerPlayersPresentation.show(extension, from);
     return to;
   }
 
@@ -174,10 +179,6 @@ const RTSHigherLowerRuntime = (() => {
     RTSHigherLowerBoard.update(panel, extension.state.board);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(extension.state.configuration));
-    if (extension.state.configuration?.game?.state === 'playing' || extension.state.configuration?.game?.state === 'registration')
-      RTSHigherLowerPresentation.show(extension);
-    else
-      RTSHigherLowerPresentation.hide(extension);
     RTSHigherLowerPlayersPresentation.update(extension, extension.state.board);
     RTSHigherLowerPlayers.applyAppearance(RTSHigherLowerPlayersPresentation.getPanel(extension), getBrand(extension.state.configuration));
   }
