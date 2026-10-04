@@ -163,6 +163,11 @@ const RTSHigherLowerRuntime = (() => {
     const to = RTSHigherLowerLayout.create(RTSHigherLowerLayout.merge(extension.state.layout, layoutValue));
     extension.state.layout = to;
     if (layoutName && extension.state.configuration) extension.state.configuration.activeLayout = layoutName;
+    if (options.instant) {
+      applyLayout(extension);
+      if (options.show) RTSHigherLowerPresentation.show(extension);
+      return to;
+    }
     RTSHigherLowerLayout.transition(extension, from, to, () => {
       applyLayout(extension);
       if (options.show) RTSHigherLowerPresentation.show(extension);
