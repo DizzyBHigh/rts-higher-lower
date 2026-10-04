@@ -121,6 +121,10 @@ public class CPHInline
         SetJoinCommandEnabled(false);
         SetVoteCommandEnabled(true);
         SetBankCommandEnabled(true);
+        CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
+        CPH.SetArgument("rtsOverlayCommand", "start");
+        CPH.SetArgument("rtsOverlayData", game.Value<int?>("rounds") ?? 10);
+        CPH.TriggerEvent(EventName, true);
         return true;
     }
 
