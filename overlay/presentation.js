@@ -8,7 +8,10 @@
   }
 
   function show(extension) {
-    getPanel(extension).show();
+    const panel = getPanel(extension);
+    const board = extension.state.layout?.board;
+    if (board) panel.element.style.zIndex = String(board.z ?? 0);
+    panel.show();
   }
 
   function hide(extension) {
