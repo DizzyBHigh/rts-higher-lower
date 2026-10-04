@@ -26,9 +26,16 @@
       extension.api.flipCard = () => RTSHigherLowerPresentation.flipCard(extension);
       extension.api.moveCard = position => RTSHigherLowerPresentation.moveCard(extension, position);
       extension.api.resetGame = () => RTSHigherLowerRuntime.resetGame(extension);
-      RTS.core.events?.on('RTS - Higher Lower Game', message =>
-        RTSHigherLowerCommands.handleCommand(extension, message)
-      );
+      RTS.core.events?.on('RTS - Higher Lower Game', message => {
+        const args = message?.data?.args || message?.args || {};
+        if (args.rtsOverlayExtension === 'rts-higher-lower') {
+          const command = args.rtsOverlayCommand || args.command;
+          const rawData = args.rtsOverlayData || args.data;
+          const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+          if (command === 'create') extension.api.createGame(data?.startedAt ?? data ?? Date.now());
+        }
+        RTSHigherLowerCommands.handleCommand(extension, message);
+      });
     }
   };
 
