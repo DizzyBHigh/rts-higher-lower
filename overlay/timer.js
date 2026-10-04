@@ -44,13 +44,13 @@
     if (deadline) interval = setInterval(tick, 100);
   }
 
-  function start(extension) {
+  function start(extension, onComplete) {
     const length = Math.max(
       1000,
       Number(extension?.state?.configuration?.settings?.roundLength) || DEFAULT_LENGTH
     );
     RTS.core.log?.info('Higher Lower round timer started', { length });
-    run(extension, Date.now() + length);
+    run(extension, Date.now() + length, onComplete);
   }
 
   function startRegistration(extension, startedAt) {
@@ -61,9 +61,9 @@
     const startTime = Number(startedAt) || Date.now();
     RTS.core.log?.info('Higher Lower registration timer started', { startTime, length });
     run(extension, startTime + length, () => {
-      RTS.core.log?.info('Higher Lower registration ended; requesting begin');
+      RTS.core.log?.info('Higher Lower registration ended; requesting StartGame');
       RTSOverlaySocket.requestAction('RTS - Higher Lower Game - Core', {
-        rtsHigherLowerOperation: 'begin'
+        rtsHigherLowerOperation: 'start'
       });
     });
   }
