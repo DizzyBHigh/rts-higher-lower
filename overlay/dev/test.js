@@ -24,14 +24,16 @@
   const actions = document.createElement('div');
   actions.className = 'hl-dev__actions';
   const testStateButton = RTS.core.ui.button('Show Test State', { variant: 'blue' });
+  const createButton = RTS.core.ui.button('Create Game', { variant: 'blue' });
   const startButton = RTS.core.ui.button('Start Game', { variant: 'blue' });
   const drawButton = RTS.core.ui.button('Draw Card', { variant: 'blue' });
   const resetButton = RTS.core.ui.button('Reset Layout', { variant: 'blue' });
   testStateButton.dataset.action = 'state';
+  createButton.dataset.action = 'create';
   startButton.dataset.action = 'start';
   drawButton.dataset.action = 'draw';
   resetButton.dataset.action = 'reset';
-  actions.append(testStateButton, startButton, drawButton, resetButton);
+  actions.append(testStateButton, createButton, startButton, drawButton, resetButton);
   section.appendChild(actions);
 
   section.addEventListener('click', async event => {
@@ -42,7 +44,8 @@
         extension.api.setLayout(extension.api.getLayout(), { show: true, instant: true });
         extension.api.updateState(state);
       }
-      if (action === 'start') extension.api.startGame();
+      if (action === 'create') await extension.api.createGame(Date.now());
+      if (action === 'start') await extension.api.startGame();
       if (action === 'draw') await extension.api.drawCard();
       if (action === 'reset') extension.api.setLayout(RTSHigherLowerLayout.create());
     } catch (error) {
