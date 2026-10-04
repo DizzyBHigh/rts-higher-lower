@@ -114,6 +114,10 @@
     stage.style.setProperty('--hl-board-radius', radius + 'px');
 
     if (boardElement) {
+      boardElement.style.display = 'block';
+      boardElement.style.visibility = 'visible';
+      boardElement.style.opacity = '1';
+      boardElement.style.backgroundColor = color1;
       boardElement.style.background = 'linear-gradient(' + gradientAngle + 'deg, ' + color1 + ', ' + color2 + ')';
       boardElement.style.borderWidth = borderWidth + 'px';
       boardElement.style.borderColor = borderColor;
