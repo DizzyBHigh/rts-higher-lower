@@ -91,6 +91,11 @@ const RTSHigherLowerRuntime = (() => {
     );
     RTS.core.log?.info('Higher Lower game state started', state);
 
+    configuration.game = state;
+    extension.state.configuration = configuration;
+    if (configuration.settings?.showingLayout && configuration.layouts?.[configuration.settings.showingLayout])
+      configuration.activeLayout = configuration.settings.showingLayout;
+
     RTSHigherLowerTimer.stop(extension);
     RTSHigherLowerPresentation.resetCards(extension);
 
