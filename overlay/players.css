@@ -95,10 +95,6 @@
   background: #777;
 }
 
-.hl-players__vote--waiting:not(.hl-players__vote--platform-twitch):not(.hl-players__vote--platform-youtube):not(.hl-players__vote--platform-kick) {
-  background: #777;
-}
-
 .hl-players__count {
   margin-left: 6px;
   font-size: 14px;
