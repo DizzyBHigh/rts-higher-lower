@@ -1,6 +1,6 @@
 (() => {
-  function position(extension) {
-    const value = extension.state.layout.players;
+  function position(layout) {
+    const value = layout?.players || {};
     return {
       x: Number(value.x) || 0,
       y: Number(value.y) || 0,
@@ -13,7 +13,7 @@
   function getPanel(extension) {
     if (extension.state.playersPanel) return extension.state.playersPanel;
     const panel = RTS.core.panels.create(
-      'higher-lower-players', { positions: { Center: position(extension) } }
+      'higher-lower-players', { positions: { Center: position(extension.state.layout) } }
     );
     RTSHigherLowerPlayers.build(panel);
     applyLayout(extension);
@@ -26,14 +26,22 @@
     panel.element.style.width = value.width + 'px';
     panel.element.style.height = value.height + 'px';
     panel.element.style.zIndex = String(value.z ?? 10);
-    const current = position(extension);
-    panel.runner.configure({ Center: current });
+    panel.runner.configure({ Center: position(extension.state.layout) });
     return panel;
   }
 
-  function show(extension) {
+  function show(extension, fromLayout = null) {
     const panel = getPanel(extension);
-    panel.show(position(extension));
+    const from = position(fromLayout || extension.state.layout);
+    const target = position(extension.state.layout);
+    const settings = extension.state.configuration?.settings || {};
+    const animation = settings.panelAnimation || settings.cardAnimation || {};
+    const duration = Math.max(0, Number(animation.duration) || 500);
+    const easing = animation.easing || 'ease-in-out';
+
+    panel.show(from);
+    if (JSON.stringify(from) === JSON.stringify(target)) return panel;
+    panel.runner.transition(from, target, duration, easing);
     return panel;
   }
 
