@@ -31,7 +31,7 @@
         state.rounds = Math.max(1, Number(rounds) || 10);
         state.bonusPot = Math.max(0, Number(bonusPot) || 0);
         state.players = Array.isArray(players)
-          ? players.map(player => ({ ...player, vote: null, bet: 0 }))
+          ? players.map(player => ({ ...player, status: player.status || 'active', vote: null, bet: 0 }))
           : [];
         state.startedPlayers = state.players.length;
         state.deck = RTS.core.higherLowerDeck.shuffle(
@@ -55,7 +55,7 @@
           (Array.isArray(saved.players) ? saved.players.length : 0);
         state.bonusPot = Math.max(0, Number(saved.bonusPot) || 0);
         state.players = Array.isArray(saved.players)
-          ? saved.players.slice()
+          ? saved.players.map(player => ({ ...player, status: player.status || 'active' }))
           : [];
         state.roundHistory = Array.isArray(saved.roundHistory)
           ? saved.roundHistory.slice()
@@ -67,9 +67,13 @@
         return snapshot();
       };
 
+      const hasActivePlayers = () => state.players.some(player => (player.status || 'active') === 'active');
+
       const draw = () => {
         if (!state.started)
           throw new Error('Higher Lower game has not started.');
+        if (!hasActivePlayers())
+          return { type: 'game-complete', state: snapshot() };
         if (state.round >= state.rounds && state.currentCard)
           return { type: 'game-complete', state: snapshot() };
 
