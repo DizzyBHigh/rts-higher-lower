@@ -59,7 +59,7 @@ public class CPHInline
         players.Add(new JObject
         {
             ["id"] = id, ["platform"] = PlatformName(platform), ["name"] = name,
-            ["vote"] = null, ["bet"] = 0, ["pot"] = 0
+            ["status"] = "active", ["vote"] = null, ["bet"] = 0, ["pot"] = 0, ["bankedAmount"] = 0
         });
         game["players"] = players;
         Save(configuration);
@@ -152,7 +152,8 @@ public class CPHInline
     private bool Draw()
     {
         var configuration = ReadConfiguration();
-        if (GetGame(configuration).Value<string>("state") != "playing") return false;
+        var game = GetGame(configuration);
+        if (game.Value<string>("state") != "playing" || CountActivePlayers(GetPlayers(game)) == 0) return false;
         CPH.SetArgument("rtsOverlayExtension", "rts-higher-lower");
         CPH.SetArgument("rtsOverlayCommand", "draw");
         return CPH.RunAction("RTS - Higher Lower Game - Connector", true);
@@ -165,7 +166,7 @@ public class CPHInline
         var game = GetGame(configuration);
         if (game.Value<string>("state") != "playing") return false;
         var player = Find(GetPlayers(game), id, platform);
-        if (player == null || player["vote"]?.Type != JTokenType.Null) return false;
+        if (player == null || Status(player) != "active" || player["vote"]?.Type != JTokenType.Null) return false;
         string raw = CPH.TryGetArg("rawInput", out string input) ? input.Trim() : "";
         string[] parts = raw.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 2) return false;
@@ -196,12 +197,17 @@ public class CPHInline
         if (game.Value<string>("state") != "playing") return false;
         var players = GetPlayers(game);
         var player = Find(players, id, platform);
-        if (player == null || player["vote"]?.Type != JTokenType.Null) return false;
+        if (player == null || Status(player) != "active" || player["vote"]?.Type != JTokenType.Null) return false;
         int pot = player.Value<int?>("pot") ?? 0;
         AddPoints(id, platform, pot);
         Increment(id, platform, "pointsBanked", pot);
-        players.Remove(player);
+        player["status"] = "banked";
+        player["bankedAmount"] = pot;
+        player["pot"] = 0;
+        player["bet"] = 0;
+        player["vote"] = null;
         game["players"] = players;
+        if (CountActivePlayers(players) == 0) FinishGame(game);
         Save(configuration);
         return true;
     }
@@ -241,33 +247,40 @@ public class CPHInline
         for (int i = players.Count - 1; i >= 0; i--)
         {
             var player = (JObject)players[i];
+            if (Status(player) != "active") continue;
             string vote = player.Value<string>("vote");
+            var identity = Identity(player);
             if (string.IsNullOrWhiteSpace(vote))
             {
                 int forfeitedPot = player.Value<int?>("pot") ?? 0;
-                var identity = Identity(player);
                 bonusDelta += forfeitedPot;
                 if (forfeitedPot > 0) Increment(identity.id, identity.platform, "pointsLost", forfeitedPot);
-                players.RemoveAt(i);
+                player["status"] = "eliminated";
+                player["pot"] = 0;
+                player["bet"] = 0;
+                player["vote"] = null;
                 continue;
             }
             bool wins = outcome == "equal" || vote.ToLowerInvariant() == outcome;
             int bet = player.Value<int?>("bet") ?? 0;
             int pot = player.Value<int?>("pot") ?? 0;
-            var user = Identity(player);
             if (wins)
             {
                 player["pot"] = pot + (bet * 2);
                 player["bet"] = 0;
-                Increment(user.id, user.platform, "correct");
-                Increment(user.id, user.platform, "pointsWon", bet * 2);
+                player["vote"] = null;
+                Increment(identity.id, identity.platform, "correct");
+                Increment(identity.id, identity.platform, "pointsWon", bet * 2);
             }
             else
             {
                 bonusDelta += bet + pot;
-                Increment(user.id, user.platform, "wrong");
-                Increment(user.id, user.platform, "pointsLost", bet + pot);
-                players.RemoveAt(i);
+                Increment(identity.id, identity.platform, "wrong");
+                Increment(identity.id, identity.platform, "pointsLost", bet + pot);
+                player["status"] = "eliminated";
+                player["pot"] = 0;
+                player["bet"] = 0;
+                player["vote"] = null;
             }
         }
         game["players"] = players;
@@ -275,7 +288,8 @@ public class CPHInline
         game["round"] = result.Value<int?>("round") ?? game.Value<int?>("round") ?? 0;
         game["currentCard"] = result["currentCard"] ?? game["currentCard"];
         int rounds = game.Value<int?>("rounds") ?? 10;
-        if ((game.Value<int?>("round") ?? 0) >= rounds) Complete(game, players);
+        if (CountActivePlayers(players) == 0 || (game.Value<int?>("round") ?? 0) >= rounds)
+            Complete(game, players);
         CPH.SetArgument("rtsHigherLowerBonusPotDelta", bonusDelta);
         CPH.SetArgument("rtsOverlayData", raw);
         Save(configuration);
@@ -285,25 +299,48 @@ public class CPHInline
     private void Complete(JObject game, JArray players)
     {
         int bonusPot = game.Value<int?>("bonusPot") ?? 0;
-        int share = players.Count > 0 ? bonusPot / players.Count : 0;
+        int activeCount = CountActivePlayers(players);
+        int share = activeCount > 0 ? bonusPot / activeCount : 0;
         foreach (JObject player in players)
         {
+            if (Status(player) != "active") continue;
             int pot = player.Value<int?>("pot") ?? 0;
             var user = Identity(player);
             int payout = pot + share;
             if (payout > 0) AddPoints(user.id, user.platform, payout);
             if (share > 0) Increment(user.id, user.platform, "pointsWon", share);
             Increment(user.id, user.platform, "fullSweeps");
+            player["status"] = "banked";
+            player["bankedAmount"] = payout;
+            player["pot"] = 0;
+            player["bet"] = 0;
+            player["vote"] = null;
         }
-        game["bonusPot"] = players.Count > 0 ? bonusPot % players.Count : bonusPot;
+        game["bonusPot"] = activeCount > 0 ? bonusPot % activeCount : bonusPot;
+        FinishGame(game);
+    }
+
+    private void FinishGame(JObject game)
+    {
         game["active"] = false;
         game["state"] = "completed";
-        game["players"] = new JArray();
         SetCreateGameCommandEnabled(true);
         SetJoinCommandEnabled(false);
         SetVoteCommandEnabled(false);
         SetBankCommandEnabled(false);
     }
+
+    private int CountActivePlayers(JArray players)
+    {
+        int count = 0;
+        foreach (JObject player in players)
+        {
+            if (Status(player) == "active") count++;
+        }
+        return count;
+    }
+
+    private string Status(JObject player) => player.Value<string>("status") ?? "active";
 
     private void SetCommandEnabled(string name, bool enabled)
     {
