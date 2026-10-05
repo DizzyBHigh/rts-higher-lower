@@ -106,6 +106,14 @@ const RTSHigherLowerRuntime = (() => {
     });
     return true;
   }
+  function hasActivePlayersAfterResult(result) {
+    const players = Array.isArray(result?.state?.players) ? result.state.players : [];
+    return players.some(player => {
+      if ((player.status || 'active') !== 'active') return false;
+      const vote = String(player.vote || '').toLowerCase();
+      return vote === String(result.result || '').toLowerCase() || result.result === 'equal';
+    });
+  }
   async function drawCard(extension) {
     const result = extension.state.game.draw();
     extension.state.card = result.card || null;
@@ -114,11 +122,12 @@ const RTSHigherLowerRuntime = (() => {
     await RTSHigherLowerPresentation.presentDraw(extension, result);
     if (result.type !== 'first-card') {
       RTSHigherLowerCommands.reportResult(extension, result);
+      if (!hasActivePlayersAfterResult(result)) RTSHigherLowerTimer.stop(extension);
     } else {
       RTSHigherLowerPersistence.save(extension.state.game);
     }
     const complete = result.type === 'round-result' && result.round >= result.state.rounds;
-    if (complete) RTSHigherLowerTimer.stop(extension);
+    if (complete || (result.type === 'round-result' && !hasActivePlayersAfterResult(result))) RTSHigherLowerTimer.stop(extension);
     else RTSHigherLowerTimer.start(extension, () => drawCard(extension));
     return result;
   }
