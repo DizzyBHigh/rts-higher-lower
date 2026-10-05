@@ -42,6 +42,7 @@ const RTSHigherLowerRuntime = (() => {
     if (initial || layoutChanged)
       extension.state.layout = getConfiguredLayout(value, value.activeLayout);
     updateConfigurationState(extension, value.game || {});
+    if (!isGameVisible(value.game || {})) RTSHigherLowerTimer.stop(extension);
     const panel = RTSHigherLowerPresentation.getPanel(extension);
     RTSHigherLowerBoard.applyLayout(panel, extension.state.layout);
     RTSHigherLowerBoard.applyAppearance(panel, getBrand(value));
