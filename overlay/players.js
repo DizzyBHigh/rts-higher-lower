@@ -1,7 +1,25 @@
 (() => {
   const money = value => { if (String(value || '').toUpperCase() === 'BANK') return 'BANK'; const amount = Number(value); return Number.isFinite(amount) ? amount.toLocaleString('en-US') : '0'; };
   const platformName = value => { const name = String(value || 'unknown').toLowerCase(); return ['twitch', 'youtube', 'kick'].includes(name) ? name : 'unknown'; };
-  function playerRow(player) { const row = document.createElement('div'); row.className = 'hl-players-player'; const name = document.createElement('span'); name.className = 'hl-players-name'; name.textContent = player.name || ''; const vote = String(player.vote || '').toLowerCase(); const platform = platformName(player.platform); const icon = document.createElement('span'); icon.className = 'hl-players-vote hl-players-vote-platform-' + platform + (vote === 'higher' || vote === 'lower' ? ' hl-players-vote-' + vote : ''); icon.title = vote === 'higher' ? 'Higher' : vote === 'lower' ? 'Lower' : 'Waiting'; const bet = document.createElement('span'); bet.className = 'hl-players-bet'; bet.textContent = vote ? money(player.bet) : 'Waiting'; row.append(name, icon, bet); return row; }
+  const statusName = value => { const status = String(value || 'active').toLowerCase(); return ['active', 'banked', 'eliminated'].includes(status) ? status : 'active'; };
+  function playerRow(player) {
+    const row = document.createElement('div');
+    const status = statusName(player.status);
+    row.className = 'hl-players-player hl-players-player-' + status;
+    const name = document.createElement('span');
+    name.className = 'hl-players-name';
+    name.textContent = player.name || '';
+    const vote = String(player.vote || '').toLowerCase();
+    const platform = platformName(player.platform);
+    const icon = document.createElement('span');
+    icon.className = 'hl-players-vote hl-players-vote-platform-' + platform + (vote === 'higher' || vote === 'lower' ? ' hl-players-vote-' + vote : '') + ' hl-players-vote-status-' + status;
+    icon.title = status === 'banked' ? 'Banked' : status === 'eliminated' ? 'Eliminated' : vote === 'higher' ? 'Higher' : vote === 'lower' ? 'Lower' : 'Waiting';
+    const bet = document.createElement('span');
+    bet.className = 'hl-players-bet';
+    bet.textContent = status === 'banked' ? money(player.bankedAmount) : vote ? money(player.bet) : 'Waiting';
+    row.append(name, icon, bet);
+    return row;
+  }
   function build(panel) { panel.setContent('<section class="hl-players"><div class="hl-players-heading"><span>Players</span><span class="hl-players-count">0/0</span></div><div class="hl-players-list"></div></section>'); return panel.element.querySelector('.hl-players'); }
   function applyAppearance(panel, appearance = {}) {
     const root = panel.element.querySelector('.hl-players') || build(panel), value = appearance.players || {};
