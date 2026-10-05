@@ -95,6 +95,34 @@
   background: #777;
 }
 
+.hl-players-vote-status-banked {
+  background: #666;
+}
+
+.hl-players-vote-status-banked::after {
+  content: '$';
+  width: auto;
+  height: auto;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+}
+
+.hl-players-vote-status-eliminated {
+  background: #d22;
+}
+
+.hl-players-vote-status-eliminated::after {
+  content: 'X';
+  width: auto;
+  height: auto;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+}
+
 .hl-players-count {
   margin-left: 6px;
   font-size: 14px;
